@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel Admin — Dra. Fernanda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --w50:#FAF8F4;--w100:#F0E9DC;--w200:#DDD0BC;
+      --w400:#C4956A;--w600:#9B7146;--w800:#6B4F2E;
+      --g50:#F8F9FA;--g100:#F1F3F4;--g200:#E8EAED;
+      --g400:#9AA0A6;--g600:#5F6368;--g800:#3C4043;--g900:#202124;
+      --white:#fff;--r:10px;--sh:0 2px 12px rgba(0,0,0,0.08);
+    }
+    body{font-family:'Inter',sans-serif;background:var(--g50);color:var(--g900);min-height:100vh}
+
+    /* NAV */
+    .topbar{background:var(--w800);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+    .topbar-logo{font-size:14px;font-weight:600;color:var(--white)}
+    .topbar-logo span{font-weight:300;color:var(--w200)}
+    .topbar-right{display:flex;align-items:center;gap:12px}
+    .topbar-user{font-size:13px;color:var(--w200)}
+    .btn-logout{padding:7px 14px;background:rgba(255,255,255,.12);border:none;border-radius:6px;font-size:12px;font-weight:500;color:var(--white);cursor:pointer;font-family:'Inter',sans-serif;transition:background .15s}
+    .btn-logout:hover{background:rgba(255,255,255,.2)}
+
+    /* LAYOUT */
+    .layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 60px)}
+
+    /* SIDEBAR */
+    .sidebar{background:var(--white);border-right:1px solid var(--g200);padding:20px 0}
+    .sidebar-section{padding:0 16px;margin-bottom:4px}
+    .sidebar-label{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--g400);text-transform:uppercase;padding:12px 8px 6px}
+    .sidebar-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:none;border-radius:8px;background:none;font-size:13px;font-weight:500;color:var(--g600);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;text-align:left;margin-bottom:2px}
+    .sidebar-btn:hover{background:var(--w50);color:var(--w600)}
+    .sidebar-btn.active{background:var(--w50);color:var(--w600)}
+    .sidebar-btn svg{width:16px;height:16px;flex-shrink:0}
+    .patient-list{padding:0 8px}
+    .patient-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:background .12s;margin-bottom:2px}
+    .patient-item:hover{background:var(--g50)}
+    .patient-item.active{background:var(--w50)}
+    .patient-avatar{width:32px;height:32px;border-radius:50%;background:var(--w100);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--w800);flex-shrink:0}
+    .patient-info strong{display:block;font-size:13px;font-weight:500;color:var(--g900)}
+    .patient-info span{font-size:11px;color:var(--g400)}
+
+    /* MAIN */
+    .main{padding:28px;overflow-y:auto}
+    .page{display:none}
+    .page.active{display:block}
+
+    /* CARDS */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+    .stat-card{background:var(--white);border:1px solid var(--g200);border-radius:12px;padding:18px;border-left:3px solid var(--w400)}
+    .stat-card .n{font-size:26px;font-weight:700;color:var(--g900);letter-spacing:-.02em}
+    .stat-card .l{font-size:12px;color:var(--g400);margin-top:4px}
+
+    /* SECTION HEADER */
+    .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .sh h2{font-size:18px;font-weight:600}
+    .btn{padding:9px 18px;background:var(--w400);color:var(--white);border:none;border-radius:var(--r);font-size:13px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;transition:background .15s;display:inline-flex;align-items:center;gap:6px}
+    .btn:hover{background:var(--w600)}
+    .btn-sm{padding:6px 12px;font-size:12px}
+    .btn-outline{background:var(--white);color:var(--g600);border:1.5px solid var(--g200)}
+    .btn-outline:hover{border-color:var(--w400);color:var(--w600);background:var(--w50)}
+    .btn-danger{background:#FEF2F2;color:#B91C1C;border:1px solid #FCA5A5}
+    .btn-danger:hover{background:#FEE2E2}
+
+    /* TABLE */
+    .table-wrap{background:var(--white);border:1px solid var(--g200);border-radius:12px;overflow:hidden}
+    table{width:100%;border-collapse:collapse}
+    th{padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.05em;background:var(--g50);border-bottom:1px solid var(--g200)}
+    td{padding:13px 16px;font-size:13px;border-bottom:1px solid var(--g100)}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:var(--g50)}
+    .badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+    .badge-active{background:#DCFCE7;color:#15803D}
+    .badge-inactive{background:var(--g100);color:var(--g400)}
+
+    /* MODAL */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+    .overlay.hidden{display:none}
+    .modal{background:var(--white);border-radius:16px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+    .modal h3{font-size:17px;font-weight:600;margin-bottom:22px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .fg{margin-bottom:16px}
+    .fg label{display:block;font-size:12px;font-weight:500;color:var(--g600);margin-bottom:5px}
+    .fg input,.fg select,.fg textarea{width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;color:var(--g900);outline:none;transition:border-color .15s}
+    .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--w400)}
+    .fg textarea{resize:vertical;min-height:80px}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
+
+    /* PATIENT DETAIL */
+    .detail-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--g200)}
+    .detail-avatar{width:56px;height:56px;border-radius:50%;background:var(--w100);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--w800);flex-shrink:0}
+    .detail-name h2{font-size:20px;font-weight:600}
+    .detail-name p{font-size:13px;color:var(--g400);margin-top:3px}
+    .tabs{display:flex;gap:0;border-bottom:2px solid var(--g200);margin-bottom:22px}
+    .tab{padding:10px 18px;font-size:13px;font-weight:500;color:var(--g400);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
+    .tab.active{color:var(--w600);border-bottom-color:var(--w400)}
+    .tab:hover:not(.active){color:var(--g800)}
+
+    /* SCORE INPUT */
+    .score-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    .score-group label{display:block;font-size:11px;font-weight:500;color:var(--g600);margin-bottom:6px}
+    .score-group input[type=range]{width:100%;accent-color:var(--w400)}
+    .score-group .score-val{font-size:15px;font-weight:700;color:var(--w800);text-align:center;margin-top:4px}
+
+    /* DOC list */
+    .doc-item{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--g200);border-radius:8px;margin-bottom:8px}
+    .doc-icon{width:36px;height:36px;border-radius:6px;background:var(--w50);display:flex;align-items:center;justify-content:center;color:var(--w600);flex-shrink:0}
+    .doc-info strong{font-size:13px;display:block}
+    .doc-info span{font-size:11px;color:var(--g400)}
+
+    /* CHART */
+    .chart-box{background:var(--white);border:1px solid var(--g200);border-radius:12px;padding:20px;margin-bottom:20px}
+    .chart-box h4{font-size:13px;font-weight:600;color:var(--g600);margin-bottom:14px}
+
+    /* EVOLUTION ITEM */
+    .evo-item{border:1px solid var(--g200);border-radius:10px;padding:16px;margin-bottom:10px;background:var(--white)}
+    .evo-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .evo-date{font-size:13px;font-weight:600;color:var(--g900)}
+    .evo-session{font-size:11px;color:var(--g400)}
+    .evo-scores{display:flex;gap:10px;margin-bottom:10px}
+    .score-pill{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+    .score-pill.mobility{background:#EFF6FF;color:#1D4ED8}
+    .score-pill.pain{background:#FFF7ED;color:#C2410C}
+    .score-pill.func{background:#F0FDF4;color:#15803D}
+    .evo-notes{font-size:13px;color:var(--g600);line-height:1.6}
+
+    .empty{text-align:center;padding:40px;color:var(--g400);font-size:14px}
+    @media(max-width:768px){
+      .layout{grid-template-columns:1fr}
+      .sidebar{display:none}
+      .stats-row{grid-template-columns:1fr 1fr}
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">Dra. Fernanda <span>· Painel Administrativo</span></div>
+  <div class="topbar-right">
+    <span class="topbar-user" id="user-email"></span>
+    <button class="btn-logout" onclick="logout()">Sair</button>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Menu</div>
+      <button class="sidebar-btn active" onclick="showPage('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </button>
+      <button class="sidebar-btn" onclick="showPage('pacientes')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Pacientes
+      </button>
+    </div>
+    <div class="sidebar-section" style="margin-top:8px">
+      <div class="sidebar-label">Pacientes recentes</div>
+      <div class="patient-list" id="sidebar-patients"></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+      <div class="sh"><h2>Visão geral</h2><span id="today-date" style="font-size:13px;color:var(--g400)"></span></div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="n" id="stat-total">—</div><div class="l">Pacientes ativos</div></div>
+        <div class="stat-card"><div class="n" id="stat-sessions">—</div><div class="l">Sessões registradas</div></div>
+        <div class="stat-card"><div class="n" id="stat-docs">—</div><div class="l">Documentos enviados</div></div>
+        <div class="stat-card"><div class="n" id="stat-recent">—</div><div class="l">Últimas 24h</div></div>
+      </div>
+      <div class="sh" style="margin-top:8px"><h2>Últimas evoluções</h2></div>
+      <div class="table-wrap" id="recent-evolutions"></div>
+    </div>
+
+    <!-- PACIENTES -->
+    <div id="page-pacientes" class="page">
+      <div class="sh">
+        <h2>Pacientes</h2>
+        <button class="btn" onclick="openModal('novo-paciente')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo paciente
+        </button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nome</th><th>Diagnóstico</th><th>Início</th><th>Status</th><th></th></tr></thead>
+          <tbody id="patients-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DETALHE DO PACIENTE -->
+    <div id="page-detalhe" class="page">
+      <button class="btn btn-outline btn-sm" onclick="showPage('pacientes')" style="margin-bottom:20px">
+        ← Voltar
+      </button>
+      <div class="detail-header">
+        <div class="detail-avatar" id="detail-avatar"></div>
+        <div class="detail-name">
+          <h2 id="detail-name"></h2>
+          <p id="detail-diag"></p>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button class="btn btn-sm" onclick="openEvoModal()">+ Registrar evolução</button>
+          <button class="btn btn-outline btn-sm" onclick="openDocModal()">+ Documento</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="setDetailTab('evolucoes')">Evoluções</button>
+        <button class="tab" onclick="setDetailTab('grafico')">Gráfico</button>
+        <button class="tab" onclick="setDetailTab('documentos')">Documentos</button>
+        <button class="tab" onclick="setDetailTab('familia')">Família</button>
+      </div>
+
+      <div id="detail-evolucoes"></div>
+      <div id="detail-grafico" style="display:none"><div class="chart-box"><h4>Evolução clínica ao longo do tempo</h4><canvas id="evo-chart" height="120"></canvas></div></div>
+      <div id="detail-documentos" style="display:none"></div>
+      <div id="detail-familia" style="display:none"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL: Novo paciente -->
+<div class="overlay hidden" id="modal-novo-paciente">
+  <div class="modal">
+    <h3>Novo paciente</h3>
+    <div class="form-row">
+      <div class="fg"><label>Nome completo *</label><input id="np-name" type="text" placeholder="Ex: João da Silva"/></div>
+      <div class="fg"><label>E-mail</label><input id="np-email" type="email" placeholder="paciente@email.com"/></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Telefone</label><input id="np-phone" type="tel" placeholder="(00) 00000-0000"/></div>
+      <div class="fg"><label>Data de nascimento</label><input id="np-birth" type="date"/></div>
+    </div>
+    <div class="fg"><label>Diagnóstico / condição</label><input id="np-diagnosis" type="text" placeholder="Ex: Pós-AVC, paralisia cerebral..."/></div>
+    <div class="fg"><label>Observações iniciais</label><textarea id="np-notes" placeholder="Informações relevantes sobre o caso..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('novo-paciente')">Cancelar</button>
+      <button class="btn" onclick="savePatient()">Salvar paciente</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Nova evolução -->
+<div class="overlay hidden" id="modal-evolucao">
+  <div class="modal">
+    <h3>Registrar evolução</h3>
+    <div class="form-row">
+      <div class="fg"><label>Data da sessão</label><input id="evo-date" type="date"/></div>
+      <div class="fg"><label>Nº da sessão</label><input id="evo-num" type="number" min="1" placeholder="Ex: 5"/></div>
+    </div>
+    <div class="fg" style="margin-bottom:20px">
+      <label style="margin-bottom:12px;display:block">Escalas de avaliação (0 = pior · 10 = melhor)</label>
+      <div class="score-row">
+        <div class="score-group">
+          <label>Mobilidade</label>
+          <input type="range" id="sc-mobility" min="0" max="10" value="5" oninput="updateScore('mobility',this.value)">
+          <div class="score-val" id="val-mobility">5</div>
+        </div>
+        <div class="score-group">
+          <label>Dor (inv.)</label>
+          <input type="range" id="sc-pain" min="0" max="10" value="5" oninput="updateScore('pain',this.value)">
+          <div class="score-val" id="val-pain">5</div>
+        </div>
+        <div class="score-group">
+          <label>Funcionalidade</label>
+          <input type="range" id="sc-func" min="0" max="10" value="5" oninput="updateScore('func',this.value)">
+          <div class="score-val" id="val-func">5</div>
+        </div>
+      </div>
+    </div>
+    <div class="fg"><label>Observações da sessão</label><textarea id="evo-notes" placeholder="Descreva o que foi trabalhado, reações do paciente..."></textarea></div>
+    <div class="fg"><label>Metas alcançadas</label><input id="evo-goals" type="text" placeholder="Ex: Conseguiu sentar sem apoio"/></div>
+    <div class="fg"><label>Próximas metas</label><input id="evo-next" type="text" placeholder="Ex: Treinar equilíbrio em pé"/></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('evolucao')">Cancelar</button>
+      <button class="btn" onclick="saveEvolution()">Salvar evolução</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Documento -->
+<div class="overlay hidden" id="modal-documento">
+  <div class="modal">
+    <h3>Adicionar documento</h3>
+    <div class="fg"><label>Nome do documento</label><input id="doc-name" type="text" placeholder="Ex: Laudo médico maio 2026"/></div>
+    <div class="fg">
+      <label>Tipo</label>
+      <select id="doc-type">
+        <option value="laudo">Laudo médico</option>
+        <option value="relatorio">Relatório de evolução</option>
+        <option value="receita">Receita / prescrição</option>
+        <option value="exame">Exame</option>
+        <option value="outro">Outro</option>
+      </select>
+    </div>
+    <div class="fg"><label>Arquivo (PDF, imagem)</label><input id="doc-file" type="file" accept=".pdf,.jpg,.jpeg,.png"/></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('documento')">Cancelar</button>
+      <button class="btn" onclick="saveDocument()">Enviar documento</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script>
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentPatientId = null;
+let evoChart = null;
+let allPatients = [];
+
+// ── AUTH ──
+async function init() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
+  if (session.user.email !== ADMIN_EMAIL) { window.location.href = 'paciente.html'; return; }
+  document.getElementById('user-email').textContent = session.user.email;
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  loadDashboard();
+  loadPatients();
+}
+
+async function logout() {
+  await db.auth.signOut();
+  window.location.href = 'login.html';
+}
+
+// ── NAVIGATION ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const btn = document.querySelector(`.sidebar-btn[onclick*="${id}"]`);
+  if (btn) btn.classList.add('active');
+}
+
+function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); }
+
+// ── DASHBOARD ──
+async function loadDashboard() {
+  const [{ count: total }, { count: sessions }, { count: docs }] = await Promise.all([
+    db.from('patients').select('*', { count: 'exact', head: true }).eq('active', true),
+    db.from('evolutions').select('*', { count: 'exact', head: true }),
+    db.from('documents').select('*', { count: 'exact', head: true }),
+  ]);
+  document.getElementById('stat-total').textContent = total ?? 0;
+  document.getElementById('stat-sessions').textContent = sessions ?? 0;
+  document.getElementById('stat-docs').textContent = docs ?? 0;
+
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  const { count: recent } = await db.from('evolutions')
+    .select('*', { count: 'exact', head: true })
+    .gte('created_at', yesterday.toISOString());
+  document.getElementById('stat-recent').textContent = recent ?? 0;
+
+  const { data: evos } = await db.from('evolutions')
+    .select('*, patients(name)')
+    .order('created_at', { ascending: false })
+    .limit(8);
+
+  const tbody = (evos || []).map(e => `
+    <tr>
+      <td><strong>${e.patients?.name || '—'}</strong></td>
+      <td>${new Date(e.session_date).toLocaleDateString('pt-BR')}</td>
+      <td>Sessão ${e.session_number || '?'}</td>
+      <td><span class="badge badge-active">Registrada</span></td>
+    </tr>
+  `).join('') || '<tr><td colspan="4" class="empty">Nenhuma evolução registrada ainda</td></tr>';
+
+  document.getElementById('recent-evolutions').innerHTML = `
+    <table><thead><tr><th>Paciente</th><th>Data</th><th>Sessão</th><th>Status</th></tr></thead>
+    <tbody>${tbody}</tbody></table>`;
+}
+
+// ── PATIENTS ──
+async function loadPatients() {
+  const { data } = await db.from('patients').select('*').order('name');
+  allPatients = data || [];
+  renderPatientsTable();
+  renderSidebarPatients();
+}
+
+function renderPatientsTable() {
+  const rows = allPatients.map(p => `
+    <tr style="cursor:pointer" onclick="openPatient('${p.id}')">
+      <td><strong>${p.name}</strong></td>
+      <td>${p.diagnosis || '—'}</td>
+      <td>${p.start_date ? new Date(p.start_date).toLocaleDateString('pt-BR') : '—'}</td>
+      <td><span class="badge ${p.active ? 'badge-active' : 'badge-inactive'}">${p.active ? 'Ativo' : 'Inativo'}</span></td>
+      <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openPatient('${p.id}')">Ver</button></td>
+    </tr>`).join('') || '<tr><td colspan="5" class="empty">Nenhum paciente cadastrado</td></tr>';
+  document.getElementById('patients-tbody').innerHTML = rows;
+}
+
+function renderSidebarPatients() {
+  document.getElementById('sidebar-patients').innerHTML = allPatients.slice(0,8).map(p => `
+    <div class="patient-item" onclick="openPatient('${p.id}')">
+      <div class="patient-avatar">${p.name.charAt(0).toUpperCase()}</div>
+      <div class="patient-info"><strong>${p.name}</strong><span>${p.diagnosis || '—'}</span></div>
+    </div>`).join('');
+}
+
+async function savePatient() {
+  const name = document.getElementById('np-name').value.trim();
+  if (!name) return alert('Nome é obrigatório');
+  const payload = {
+    name,
+    email: document.getElementById('np-email').value.trim() || null,
+    phone: document.getElementById('np-phone').value.trim() || null,
+    birth_date: document.getElementById('np-birth').value || null,
+    diagnosis: document.getElementById('np-diagnosis').value.trim() || null,
+    notes: document.getElementById('np-notes').value.trim() || null,
+  };
+  const { error } = await db.from('patients').insert(payload);
+  if (error) { alert('Erro ao salvar: ' + error.message); return; }
+  closeModal('novo-paciente');
+  ['np-name','np-email','np-phone','np-birth','np-diagnosis','np-notes'].forEach(id => document.getElementById(id).value = '');
+  loadPatients();
+  loadDashboard();
+}
+
+// ── PATIENT DETAIL ──
+async function openPatient(id) {
+  currentPatientId = id;
+  const p = allPatients.find(x => x.id === id) || (await db.from('patients').select('*').eq('id', id).single()).data;
+  document.getElementById('detail-avatar').textContent = p.name.charAt(0).toUpperCase();
+  document.getElementById('detail-name').textContent = p.name;
+  document.getElementById('detail-diag').textContent = (p.diagnosis || '—') + (p.phone ? ' · ' + p.phone : '');
+  showPage('detalhe');
+  setDetailTab('evolucoes');
+}
+
+function setDetailTab(tab) {
+  ['evolucoes','grafico','documentos','familia'].forEach(t => {
+    document.getElementById('detail-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('active', ['evolucoes','grafico','documentos','familia'][i] === tab));
+  if (tab === 'evolucoes') loadEvolutions();
+  if (tab === 'grafico')   loadChart();
+  if (tab === 'documentos') loadDocuments();
+  if (tab === 'familia')    loadFamily();
+}
+
+// ── EVOLUTIONS ──
+function openEvoModal() {
+  document.getElementById('evo-date').value = new Date().toISOString().split('T')[0];
+  openModal('evolucao');
+}
+
+function updateScore(type, val) {
+  document.getElementById('val-' + type).textContent = val;
+}
+
+async function saveEvolution() {
+  const payload = {
+    patient_id: currentPatientId,
+    session_date: document.getElementById('evo-date').value,
+    session_number: parseInt(document.getElementById('evo-num').value) || null,
+    mobility_score: parseInt(document.getElementById('sc-mobility').value),
+    pain_score: parseInt(document.getElementById('sc-pain').value),
+    function_score: parseInt(document.getElementById('sc-func').value),
+    notes: document.getElementById('evo-notes').value.trim() || null,
+    goals_met: document.getElementById('evo-goals').value.trim() || null,
+    next_goals: document.getElementById('evo-next').value.trim() || null,
+  };
+  const { error } = await db.from('evolutions').insert(payload);
+  if (error) { alert('Erro: ' + error.message); return; }
+  closeModal('evolucao');
+  loadEvolutions();
+  loadDashboard();
+}
+
+async function loadEvolutions() {
+  const { data } = await db.from('evolutions')
+    .select('*').eq('patient_id', currentPatientId)
+    .order('session_date', { ascending: false });
+  const container = document.getElementById('detail-evolucoes');
+  if (!data || !data.length) { container.innerHTML = '<div class="empty">Nenhuma evolução registrada ainda.<br>Clique em "+ Registrar evolução" para começar.</div>'; return; }
+  container.innerHTML = data.map(e => `
+    <div class="evo-item">
+      <div class="evo-header">
+        <span class="evo-date">${new Date(e.session_date).toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'})}</span>
+        <span class="evo-session">Sessão ${e.session_number || '—'}</span>
+      </div>
+      <div class="evo-scores">
+        <span class="score-pill mobility">Mobilidade: ${e.mobility_score ?? '—'}/10</span>
+        <span class="score-pill pain">Dor: ${e.pain_score ?? '—'}/10</span>
+        <span class="score-pill func">Funcionalidade: ${e.function_score ?? '—'}/10</span>
+      </div>
+      ${e.notes ? `<div class="evo-notes">${e.notes}</div>` : ''}
+      ${e.goals_met ? `<div style="margin-top:8px;font-size:12px;color:#15803D">✓ ${e.goals_met}</div>` : ''}
+      ${e.next_goals ? `<div style="font-size:12px;color:var(--g400)">→ Próximo: ${e.next_goals}</div>` : ''}
+    </div>`).join('');
+}
+
+async function loadChart() {
+  const { data } = await db.from('evolutions')
+    .select('session_date,mobility_score,pain_score,function_score,session_number')
+    .eq('patient_id', currentPatientId)
+    .order('session_date');
+  if (!data || !data.length) { document.getElementById('detail-grafico').innerHTML = '<div class="empty">Sem dados suficientes para o gráfico.</div>'; return; }
+  const labels = data.map(e => `Sessão ${e.session_number || new Date(e.session_date).toLocaleDateString('pt-BR')}`);
+  const ctx = document.getElementById('evo-chart');
+  if (evoChart) evoChart.destroy();
+  evoChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Mobilidade', data: data.map(e => e.mobility_score), borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,.08)', tension: .4, pointRadius: 4 },
+        { label: 'Dor (invertida)', data: data.map(e => e.pain_score), borderColor: '#F97316', backgroundColor: 'rgba(249,115,22,.08)', tension: .4, pointRadius: 4 },
+        { label: 'Funcionalidade', data: data.map(e => e.function_score), borderColor: '#22C55E', backgroundColor: 'rgba(34,197,94,.08)', tension: .4, pointRadius: 4 },
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { min: 0, max: 10, ticks: { stepSize: 2 } } } }
+  });
+}
+
+// ── DOCUMENTS ──
+function openDocModal() { openModal('documento'); }
+
+async function saveDocument() {
+  const name = document.getElementById('doc-name').value.trim();
+  const type = document.getElementById('doc-type').value;
+  const file = document.getElementById('doc-file').files[0];
+  if (!name) return alert('Nome do documento é obrigatório');
+  let url = null, path = null;
+  if (file) {
+    path = `${currentPatientId}/${Date.now()}_${file.name}`;
+    const { error: upErr } = await db.storage.from('documents').upload(path, file);
+    if (upErr) { alert('Erro no upload: ' + upErr.message); return; }
+    const { data: urlData } = db.storage.from('documents').getPublicUrl(path);
+    url = urlData?.publicUrl;
+  }
+  await db.from('documents').insert({ patient_id: currentPatientId, name, type, storage_path: path, url });
+  closeModal('documento');
+  loadDocuments();
+}
+
+async function loadDocuments() {
+  const { data } = await db.from('documents').select('*').eq('patient_id', currentPatientId).order('created_at', { ascending: false });
+  const c = document.getElementById('detail-documentos');
+  if (!data || !data.length) { c.innerHTML = '<div class="empty">Nenhum documento enviado ainda.</div>'; return; }
+  const icons = { laudo:'📋', relatorio:'📊', receita:'💊', exame:'🔬', outro:'📄' };
+  c.innerHTML = data.map(d => `
+    <div class="doc-item">
+      <div class="doc-icon">${icons[d.type] || '📄'}</div>
+      <div class="doc-info"><strong>${d.name}</strong><span>${d.type} · ${new Date(d.created_at).toLocaleDateString('pt-BR')}</span></div>
+      ${d.url ? `<a href="${d.url}" target="_blank" class="btn btn-outline btn-sm" style="margin-left:auto">Baixar</a>` : ''}
+    </div>`).join('');
+}
+
+// ── FAMILY ──
+async function loadFamily() {
+  const { data } = await db.from('family_access').select('*').eq('patient_id', currentPatientId);
+  const c = document.getElementById('detail-familia');
+  c.innerHTML = `
+    <div style="display:flex;gap:10px;margin-bottom:18px">
+      <input id="fam-name" type="text" placeholder="Nome do familiar" style="flex:1;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+      <input id="fam-email" type="email" placeholder="email@familiar.com" style="flex:1;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+      <button class="btn btn-sm" onclick="addFamily()">Adicionar</button>
+    </div>
+    ${(data || []).length ? data.map(f => `
+      <div class="doc-item">
+        <div class="doc-icon">👤</div>
+        <div class="doc-info"><strong>${f.name || f.email}</strong><span>${f.email}</span></div>
+        <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="removeFamily('${f.id}')">Remover</button>
+      </div>`).join('') : '<div class="empty">Nenhum familiar com acesso.</div>'}`;
+}
+
+async function addFamily() {
+  const name = document.getElementById('fam-name').value.trim();
+  const email = document.getElementById('fam-email').value.trim();
+  if (!email) return alert('E-mail é obrigatório');
+  await db.from('family_access').insert({ patient_id: currentPatientId, name, email });
+  loadFamily();
+}
+
+async function removeFamily(id) {
+  if (!confirm('Remover acesso deste familiar?')) return;
+  await db.from('family_access').delete().eq('id', id);
+  loadFamily();
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/app/login",    "destination": "/app/login.html" },
+    { "source": "/app/admin",    "destination": "/app/admin.html" },
+    { "source": "/app/paciente", "destination": "/app/paciente.html" }
+  ]
+}

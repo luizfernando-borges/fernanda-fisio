@@ -1,0 +1,2252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dra. Fernanda Rodrigues — Fisioterapeuta Neurológica</title>
+  <meta name="description" content="Dra. Fernanda Rodrigues, fisioterapeuta especialista em neurologia, geriatria, pediatria e reabilitação pós-AVC. Agende sua avaliação.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --warm-50:  #FAF8F4;
+      --warm-100: #F0E9DC;
+      --warm-200: #DDD0BC;
+      --warm-400: #C4956A;
+      --warm-600: #9B7146;
+      --warm-800: #6B4F2E;
+      --warm-900: #3D2E1A;
+      --gray-50:  #F8F9FA;
+      --gray-100: #F1F3F4;
+      --gray-200: #E8EAED;
+      --gray-400: #9AA0A6;
+      --gray-600: #5F6368;
+      --gray-800: #3C4043;
+      --gray-900: #202124;
+      --white: #FFFFFF;
+      --nav-h: 68px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      color: var(--gray-900);
+      background: var(--white);
+      line-height: 1.6;
+    }
+
+    /* ───── NAVBAR ───── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--gray-200);
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      padding: 0 5%;
+    }
+    .nav-inner {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--warm-600);
+      letter-spacing: -0.02em;
+      text-decoration: none;
+    }
+    .nav-logo span { font-weight: 300; color: var(--gray-600); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-600);
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      transition: color 0.15s, background 0.15s;
+    }
+    .nav-links a:hover { color: var(--warm-600); background: #FAF8F4; }
+    .nav-links a.active { color: var(--warm-600); background: #FAF8F4; }
+    .nav-cta {
+      background: var(--warm-400);
+      color: var(--white) !important;
+      border-radius: var(--radius-sm);
+      padding: 8px 18px !important;
+      transition: background 0.15s !important;
+    }
+    .nav-cta:hover { background: var(--warm-600) !important; color: var(--white) !important; }
+    .nav-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      color: var(--gray-800);
+    }
+    .nav-menu-btn svg { display: block; }
+
+    /* ───── PAGES ───── */
+    .page { display: none; padding-top: var(--nav-h); }
+    .page.active { display: block; }
+
+    /* ───── CONTAINER ───── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 5%;
+    }
+
+    /* ───── SECTION SPACING ───── */
+    section { padding: 80px 0; }
+    section:nth-child(even) { background: var(--gray-50); }
+
+    /* ───── TAGS ───── */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--warm-600);
+      background: #FAF8F4;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    /* ───── HEADINGS ───── */
+    h1 { font-size: clamp(28px, 4vw, 44px); font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; color: var(--gray-900); }
+    h2 { font-size: clamp(22px, 3vw, 32px); font-weight: 600; line-height: 1.25; letter-spacing: -0.02em; color: var(--gray-900); }
+    h3 { font-size: 18px; font-weight: 600; color: var(--gray-900); }
+    h4 { font-size: 15px; font-weight: 600; color: var(--gray-900); }
+    p { color: var(--gray-600); }
+
+    /* ───── BUTTONS ───── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: all 0.15s;
+    }
+    .btn-primary {
+      background: var(--warm-400);
+      color: var(--white);
+    }
+    .btn-primary:hover { background: var(--warm-600); }
+    .btn-outline {
+      background: transparent;
+      color: var(--warm-400);
+      border: 1.5px solid var(--warm-400);
+    }
+    .btn-outline:hover { background: #FAF8F4; }
+    .btn-ghost {
+      background: transparent;
+      color: var(--gray-600);
+      border: 1.5px solid var(--gray-200);
+    }
+    .btn-ghost:hover { border-color: var(--warm-200); color: var(--warm-600); }
+    .btn-lg { padding: 15px 30px; font-size: 16px; }
+    .btn-sm { padding: 8px 16px; font-size: 13px; }
+
+    /* ──────────────────────────────
+       HOME — HERO
+    ────────────────────────────── */
+    .hero {
+      min-height: calc(100vh - var(--nav-h));
+      display: flex;
+      align-items: center;
+      padding: 80px 0;
+      background: linear-gradient(135deg, var(--white) 55%, #FAF8F4 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -120px; right: -80px;
+      width: 480px; height: 480px;
+      border-radius: 50%;
+      background: #FAF8F4;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 64px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #FAF8F4;
+      border: 1px solid #F0E9DC;
+      color: var(--warm-600);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--warm-400);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .hero h1 { margin-bottom: 20px; }
+    .hero h1 em { font-style: normal; color: var(--warm-400); }
+    .hero-sub {
+      font-size: 17px;
+      color: var(--gray-600);
+      margin-bottom: 36px;
+      max-width: 480px;
+      line-height: 1.7;
+    }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 48px; }
+    .hero-stats {
+      display: flex;
+      gap: 36px;
+    }
+    .stat-item .stat-n {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--gray-900);
+      letter-spacing: -0.03em;
+    }
+    .stat-item .stat-n em { font-style: normal; color: var(--warm-400); }
+    .stat-item .stat-label { font-size: 13px; color: var(--gray-400); margin-top: 2px; }
+    .hero-photo-wrap {
+      position: relative;
+    }
+    .hero-photo {
+      width: 100%;
+      aspect-ratio: 4/5;
+      border-radius: var(--radius-lg);
+      background: var(--warm-100);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      color: var(--warm-600);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+    .hero-photo-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: var(--warm-600);
+    }
+    .hero-photo-placeholder svg { width: 64px; height: 64px; opacity: 0.6; }
+    .hero-photo-placeholder span { font-size: 14px; font-weight: 500; opacity: 0.7; }
+    .hero-card {
+      position: absolute;
+      bottom: -20px;
+      left: -24px;
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 200px;
+    }
+    .hero-card-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: #FAF8F4;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--warm-600);
+    }
+    .hero-card-icon svg { width: 20px; height: 20px; }
+    .hero-card-text strong { font-size: 14px; font-weight: 600; display: block; }
+    .hero-card-text span { font-size: 12px; color: var(--gray-400); }
+
+    /* ──────────────────────────────
+       HOME — ESPECIALIDADES
+    ────────────────────────────── */
+    .section-header { text-align: center; margin-bottom: 56px; }
+    .section-header p { font-size: 17px; max-width: 540px; margin: 16px auto 0; }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .spec-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      padding: 28px;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .spec-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--warm-400);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .spec-card:hover { border-color: var(--warm-200); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .spec-card:hover::before { opacity: 1; }
+    .spec-card.featured { border-color: var(--warm-200); }
+    .spec-card.featured::before { opacity: 1; }
+    .spec-icon-wrap {
+      width: 52px; height: 52px;
+      border-radius: var(--radius-sm);
+      background: #FAF8F4;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 18px;
+      color: var(--warm-600);
+    }
+    .spec-icon-wrap svg { width: 26px; height: 26px; }
+    .spec-card h3 { font-size: 17px; margin-bottom: 10px; }
+    .spec-card p { font-size: 14px; line-height: 1.65; }
+    .spec-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--warm-600);
+      background: #FAF8F4;
+      padding: 2px 9px;
+      border-radius: 20px;
+      margin-top: 14px;
+      letter-spacing: 0.04em;
+    }
+    .spec-list {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .spec-list li {
+      list-style: none;
+      font-size: 13px;
+      color: var(--gray-600);
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+    }
+    .spec-list li::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--warm-400);
+      margin-top: 7px;
+      flex-shrink: 0;
+    }
+
+    /* ──────────────────────────────
+       HOME — SOBRE
+    ────────────────────────────── */
+    .sobre-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .sobre-photo {
+      aspect-ratio: 1;
+      border-radius: var(--radius-lg);
+      background: #FAF8F4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      color: var(--warm-200);
+      overflow: hidden;
+    }
+    .sobre-text .tag { margin-bottom: 16px; }
+    .sobre-text h2 { margin-bottom: 20px; }
+    .sobre-text p { margin-bottom: 16px; line-height: 1.75; }
+    .sobre-pos {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 28px 0;
+    }
+    .pos-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--warm-400);
+    }
+    .pos-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; color: var(--warm-600); }
+    .pos-icon svg { width: 18px; height: 18px; }
+    .pos-info strong { font-size: 14px; font-weight: 600; display: block; }
+    .pos-info span { font-size: 12px; color: var(--gray-400); }
+
+    /* ──────────────────────────────
+       HOME — DEPOIMENTOS
+    ────────────────────────────── */
+    .depo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .depo-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      padding: 24px;
+    }
+    .depo-stars { color: var(--warm-400); font-size: 14px; margin-bottom: 14px; }
+    .depo-text {
+      font-size: 14px;
+      color: var(--gray-600);
+      line-height: 1.7;
+      font-style: italic;
+      margin-bottom: 20px;
+    }
+    .depo-author { display: flex; align-items: center; gap: 10px; }
+    .depo-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--warm-100);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #6B4F2E;
+      flex-shrink: 0;
+    }
+    .depo-name { font-size: 13px; font-weight: 600; color: var(--gray-900); }
+    .depo-role { font-size: 12px; color: var(--gray-400); }
+
+    /* ──────────────────────────────
+       HOME — CTA FINAL
+    ────────────────────────────── */
+    .cta-section {
+      background: #6B4F2E !important;
+      text-align: center;
+    }
+    .cta-section h2 { color: var(--white); }
+    .cta-section p { color: #F0E9DC; font-size: 17px; margin: 16px auto 36px; max-width: 500px; }
+    .cta-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 56px; }
+    .btn-white {
+      background: var(--white);
+      color: #6B4F2E;
+    }
+    .btn-white:hover { background: #FAF8F4; }
+    .btn-outline-white {
+      background: transparent;
+      color: var(--white);
+      border: 1.5px solid rgba(255,255,255,0.4);
+    }
+    .btn-outline-white:hover { background: rgba(255,255,255,0.1); border-color: white; }
+    .contato-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: rgba(255,255,255,0.15);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .contato-item {
+      background: rgba(255,255,255,0.08);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .contato-item svg { width: 20px; height: 20px; color: var(--warm-200); }
+    .contato-item strong { font-size: 13px; color: var(--white); font-weight: 500; }
+    .contato-item span { font-size: 12px; color: rgba(255,255,255,0.55); text-align: center; }
+
+    /* ──────────────────────────────
+       SERVIÇOS
+    ────────────────────────────── */
+    .servicos-header {
+      background: #6B4F2E;
+      padding: 80px 0;
+      text-align: center;
+    }
+    .servicos-header .tag { background: rgba(255,255,255,0.12); color: #F0E9DC; border: none; }
+    .servicos-header h1 { color: var(--white); margin-bottom: 16px; }
+    .servicos-header p { color: #F0E9DC; font-size: 17px; max-width: 540px; margin: 0 auto; }
+
+    .programas-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .programa-card {
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--white);
+    }
+    .programa-head {
+      background: #FAF8F4;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--warm-100);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .programa-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--radius-sm);
+      background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--warm-600);
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+    .programa-icon svg { width: 22px; height: 22px; }
+    .programa-head h3 { font-size: 15px; margin-bottom: 2px; }
+    .programa-head span { font-size: 12px; color: var(--warm-600); font-weight: 500; }
+    .programa-body { padding: 20px 24px; }
+    .programa-body p { font-size: 14px; line-height: 1.7; margin-bottom: 14px; }
+    .programa-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .prog-tag {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: var(--gray-100);
+      color: var(--gray-600);
+    }
+
+    .processo-section { background: var(--gray-50) !important; }
+    .processo-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      position: relative;
+    }
+    .processo-steps::before {
+      content: '';
+      position: absolute;
+      top: 28px;
+      left: 12.5%;
+      right: 12.5%;
+      height: 2px;
+      background: var(--warm-100);
+      z-index: 0;
+    }
+    .passo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .passo-num {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--warm-400);
+      color: var(--white);
+      font-size: 20px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+      box-shadow: 0 0 0 6px var(--gray-50);
+    }
+    .passo h4 { font-size: 15px; margin-bottom: 8px; }
+    .passo p { font-size: 13px; }
+
+    .evolucao-section { }
+    .evolucao-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 700px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .evolucao-timeline::before {
+      content: '';
+      position: absolute;
+      left: 23px;
+      top: 12px;
+      bottom: 12px;
+      width: 2px;
+      background: var(--warm-100);
+    }
+    .etapa {
+      display: flex;
+      gap: 20px;
+      padding-bottom: 36px;
+      position: relative;
+    }
+    .etapa:last-child { padding-bottom: 0; }
+    .etapa-dot {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: #FAF8F4;
+      border: 2px solid var(--warm-400);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--warm-600);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+    .etapa-dot svg { width: 20px; height: 20px; }
+    .etapa-content {
+      padding-top: 10px;
+    }
+    .etapa-content h4 { margin-bottom: 6px; }
+    .etapa-content p { font-size: 14px; line-height: 1.65; }
+    .etapa-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--warm-600);
+      background: #FAF8F4;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-bottom: 6px;
+    }
+
+    /* ──────────────────────────────
+       TRATAMENTOS
+    ────────────────────────────── */
+    .tratamentos-hero {
+      background: linear-gradient(135deg, #FAF8F4 0%, var(--white) 60%);
+      padding: 80px 0;
+    }
+    .tratamentos-hero .container { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+    .tratamentos-hero h1 { margin-bottom: 20px; }
+    .tratamentos-hero p { font-size: 16px; line-height: 1.75; }
+
+    .trat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .trat-card {
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      background: var(--white);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .trat-card:hover { border-color: var(--warm-200); box-shadow: var(--shadow-sm); }
+    .trat-icon {
+      width: 48px; height: 48px;
+      border-radius: var(--radius-sm);
+      background: #FAF8F4;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--warm-600);
+      margin-bottom: 16px;
+    }
+    .trat-icon svg { width: 24px; height: 24px; }
+    .trat-card h3 { font-size: 15px; margin-bottom: 10px; }
+    .trat-card p { font-size: 13px; line-height: 1.65; }
+    .trat-list {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .trat-list li {
+      list-style: none;
+      font-size: 12px;
+      color: var(--gray-500);
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .trat-list li::before {
+      content: '';
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--warm-400);
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+
+    /* ──────────────────────────────
+       CURRÍCULO
+    ────────────────────────────── */
+    .curriculo-hero {
+      background: var(--gray-50);
+      padding: 80px 0;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .curriculo-profile {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+    .curriculo-avatar {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: var(--warm-100);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      font-weight: 700;
+      color: #6B4F2E;
+      flex-shrink: 0;
+      border: 4px solid var(--white);
+      box-shadow: var(--shadow-md);
+    }
+    .curriculo-info h1 { margin-bottom: 6px; }
+    .curriculo-info .subtitle { font-size: 16px; color: var(--warm-600); font-weight: 500; margin-bottom: 10px; }
+    .curriculo-info .crefito { font-size: 13px; color: var(--gray-400); }
+    .curriculo-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+    .curriculo-tag {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      color: var(--gray-600);
+    }
+
+    .curriculo-content {
+      padding: 64px 0;
+    }
+    .curriculo-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 56px;
+    }
+    .curric-section { margin-bottom: 44px; }
+    .curric-section:last-child { margin-bottom: 0; }
+    .curric-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--warm-600);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--warm-100);
+    }
+    .curric-item-card {
+      padding: 18px 0;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .curric-item-card:last-child { border-bottom: none; }
+    .curric-item-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .curric-item-head h4 { font-size: 15px; }
+    .curric-item-head .year {
+      font-size: 12px;
+      color: var(--warm-600);
+      font-weight: 600;
+      white-space: nowrap;
+      background: #FAF8F4;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    .curric-item-card .inst { font-size: 13px; color: var(--gray-600); }
+    .curric-item-card .desc { font-size: 13px; color: var(--gray-500); margin-top: 4px; line-height: 1.6; }
+
+    .skills-box {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .skills-box h4 { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 16px; }
+    .skills-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .skill-tag {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      color: var(--gray-700);
+    }
+
+    /* ──────────────────────────────
+       AGENDA
+    ────────────────────────────── */
+    .agenda-page {
+      padding-top: var(--nav-h);
+      min-height: 100vh;
+    }
+    .agenda-header-section {
+      background: #6B4F2E;
+      padding: 60px 0;
+      text-align: center;
+    }
+    .agenda-header-section h1 { color: var(--white); margin-bottom: 12px; }
+    .agenda-header-section p { color: #F0E9DC; }
+    .agenda-wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 56px 5%;
+    }
+    .agenda-card {
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+    }
+    .agenda-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-200);
+      background: var(--white);
+    }
+    .agenda-nav h3 { font-size: 16px; }
+    .agenda-nav-btns { display: flex; gap: 8px; }
+    .agenda-nav-btn {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--gray-200);
+      background: var(--white);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gray-600);
+      transition: all 0.15s;
+      font-size: 16px;
+    }
+    .agenda-nav-btn:hover { border-color: var(--warm-400); color: var(--warm-600); }
+    .agenda-days-header {
+      display: grid;
+      grid-template-columns: 70px repeat(6, 1fr);
+      border-bottom: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    .agenda-day-label {
+      padding: 10px 8px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-400);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .agenda-day-label.today { color: var(--warm-600); }
+    .agenda-time-col { border-right: 1px solid var(--gray-200); }
+    .agenda-body {
+      display: grid;
+      grid-template-columns: 70px repeat(6, 1fr);
+    }
+    .time-label {
+      padding: 0 12px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      font-size: 11px;
+      color: var(--gray-400);
+      border-bottom: 1px solid var(--gray-200);
+      border-right: 1px solid var(--gray-200);
+    }
+    .agenda-slot {
+      height: 52px;
+      border-bottom: 1px solid var(--gray-200);
+      border-right: 1px solid var(--gray-200);
+      padding: 4px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .agenda-slot:last-child { border-right: none; }
+    .agenda-slot:hover { background: #FAF8F4; }
+    .agenda-slot.ocupado {
+      background: #FAF8F4;
+      cursor: default;
+    }
+    .agenda-slot.ocupado:hover { background: #FAF8F4; }
+    .slot-event {
+      background: var(--warm-400);
+      color: var(--white);
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 11px;
+      font-weight: 500;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+    .agenda-google-banner {
+      padding: 14px 20px;
+      background: var(--gray-50);
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .google-info { font-size: 13px; color: var(--gray-600); display: flex; align-items: center; gap: 8px; }
+    .google-info strong { color: var(--gray-800); font-weight: 600; }
+    .google-sync-btn {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 500;
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--gray-200);
+      background: var(--white);
+      cursor: pointer;
+      color: var(--gray-700);
+      transition: all 0.15s;
+    }
+    .google-sync-btn:hover { border-color: #DDD0BC; color: var(--warm-600); }
+    .google-dot { width: 8px; height: 8px; border-radius: 50%; background: #C4956A; }
+
+    /* ──────────────────────────────
+       ÁREA DO CLIENTE
+    ────────────────────────────── */
+    .cliente-page {
+      padding-top: var(--nav-h);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--gray-50);
+    }
+    .cliente-box {
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+    }
+    .cliente-lock {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: #FAF8F4;
+      border: 2px solid var(--warm-100);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 28px;
+      color: var(--warm-600);
+    }
+    .cliente-lock svg { width: 32px; height: 32px; }
+    .cliente-box h2 { margin-bottom: 12px; }
+    .cliente-box p { font-size: 15px; color: var(--gray-600); line-height: 1.7; margin-bottom: 28px; }
+    .cliente-features {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+    .cliente-feat {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+    }
+    .feat-icon { color: var(--warm-400); }
+    .feat-icon svg { width: 18px; height: 18px; display: block; }
+    .feat-text strong { font-size: 13px; font-weight: 600; display: block; }
+    .feat-text span { font-size: 12px; color: var(--gray-400); }
+    .cliente-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 16px;
+      border-radius: 20px;
+      background: var(--gray-100);
+      color: var(--gray-500);
+      border: 1px dashed var(--gray-300);
+    }
+
+    /* ──────────────────────────────
+       CLINICA BG SECTION
+    ────────────────────────────── */
+    .clinica-bg-section {
+      position: relative;
+      overflow: hidden;
+      padding: 120px 0;
+    }
+    .clinica-bg-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 30%;
+      filter: blur(1px) brightness(0.60);
+      transform: scale(1.02);
+    }
+    .clinica-bg-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(61,46,26,0.55) 0%, rgba(155,113,70,0.30) 100%);
+    }
+    .clinica-bg-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 5%;
+    }
+    .clinica-bg-content .tag {
+      background: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.9);
+      border: none;
+    }
+    .clinica-bg-content h2 { color: var(--white); margin-bottom: 16px; }
+    .clinica-bg-content p { color: rgba(255,255,255,0.8); font-size: 17px; margin-bottom: 36px; }
+    .clinica-stats {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 1px;
+      background: rgba(255,255,255,0.15);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-top: 48px;
+    }
+    .clinica-stat {
+      background: rgba(255,255,255,0.08);
+      padding: 24px 16px;
+      backdrop-filter: blur(4px);
+    }
+    .clinica-stat .n { font-size: 32px; font-weight: 700; color: var(--white); letter-spacing: -0.03em; }
+    .clinica-stat .n em { font-style:normal; color: #F0E9DC; }
+    .clinica-stat .l { font-size: 13px; color: rgba(255,255,255,0.65); margin-top: 4px; }
+
+    /* ──────────────────────────────
+       FOOTER
+    ────────────────────────────── */
+    footer {
+      background: var(--gray-900);
+      padding: 40px 0;
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .footer-logo {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--white);
+    }
+    .footer-logo span { font-weight: 300; color: var(--gray-400); }
+    .footer-copy { font-size: 13px; color: var(--gray-400); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 13px; color: var(--gray-400); text-decoration: none; }
+    .footer-links a:hover { color: var(--warm-200); }
+
+    /* ──────────────────────────────
+       MOBILE
+    ────────────────────────────── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: var(--nav-h);
+        left: 0; right: 0;
+        background: var(--white);
+        border-bottom: 1px solid var(--gray-200);
+        padding: 12px 5%;
+        box-shadow: var(--shadow-md);
+        gap: 2px;
+        z-index: 99;
+      }
+      .nav-links.open a { width: 100%; }
+      .nav-menu-btn { display: flex; }
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-photo-wrap { order: -1; max-width: 260px; margin: 0 auto; }
+      .hero-card { display: none; }
+      .specs-grid { grid-template-columns: 1fr; }
+      .sobre-grid { grid-template-columns: 1fr; }
+      .sobre-photo { max-width: 220px; }
+      .depo-grid { grid-template-columns: 1fr; }
+      .contato-grid { grid-template-columns: 1fr; }
+      .programas-grid { grid-template-columns: 1fr; }
+      .processo-steps { grid-template-columns: 1fr 1fr; gap: 24px; }
+      .processo-steps::before { display: none; }
+      .trat-grid { grid-template-columns: 1fr; }
+      .curriculo-grid { grid-template-columns: 1fr; }
+      .tratamentos-hero .container { grid-template-columns: 1fr; }
+      .agenda-days-header { grid-template-columns: 50px repeat(6, 1fr); }
+      .agenda-body { grid-template-columns: 50px repeat(6, 1fr); }
+      .time-label { font-size: 10px; padding: 0 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ──────────────────────────────────
+     NAVBAR
+────────────────────────────────── -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo" onclick="showPage('home'); return false;">
+      Dra. Fernanda <span>· Domiciliar</span>
+    </a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#" onclick="showPage('home'); return false;" id="nav-home" class="active">Home</a></li>
+      <li><a href="#" onclick="showPage('servicos'); return false;" id="nav-servicos">Serviços</a></li>
+      <li><a href="#" onclick="showPage('tratamentos'); return false;" id="nav-tratamentos">Tratamentos</a></li>
+      <li><a href="#" onclick="showPage('curriculo'); return false;" id="nav-curriculo">Currículo</a></li>
+      <li><a href="#" onclick="showPage('agenda'); return false;" id="nav-agenda">Agenda</a></li>
+      <li><a href="#" onclick="showPage('cliente'); return false;" id="nav-cliente" class="nav-cta">Área do cliente</a></li>
+    </ul>
+    <button class="nav-menu-btn" id="menu-btn" onclick="toggleMenu()" aria-label="Menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════
+     PAGE: HOME
+══════════════════════════════════ -->
+<main id="page-home" class="page active">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-inner">
+        <div class="hero-text">
+          <div class="hero-badge">Atendimento domiciliar · CREFITO</div>
+          <h1>Reabilitação neurológica <em>no conforto da sua casa</em></h1>
+          <p class="hero-sub">
+            A Dra. Fernanda vai até você. Atendimento domiciliar especializado em neurologia, geriatria, pediatria e reabilitação pós-AVC — com o mesmo nível técnico do consultório, sem você sair de casa.
+          </p>
+          <div class="hero-actions">
+            <a href="#" class="btn btn-primary btn-lg" onclick="showPage('agenda'); return false;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Agendar em domicílio
+            </a>
+            <a href="#" class="btn btn-outline btn-lg" onclick="showPage('servicos'); return false;">Ver serviços</a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <div class="stat-n">3<em>+</em></div>
+              <div class="stat-label">Pós-graduações</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-n">5<em>+</em></div>
+              <div class="stat-label">Anos de experiência</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-n">100<em>+</em></div>
+              <div class="stat-label">Pacientes atendidos</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-photo-wrap">
+          <div class="hero-photo">
+            <img src="foto-hero.jpg.png" alt="Dra. Fernanda Rodrigues — Fisioterapeuta Neurológica"
+              style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+            <div class="hero-photo-placeholder" style="display:none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="8" r="4"/><path d="M6 20c0-3.314 2.686-6 6-6s6 2.686 6 6"/>
+              </svg>
+              <span>Adicionar foto-hero.jpg</span>
+            </div>
+          </div>
+          <div class="hero-card">
+            <div class="hero-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </div>
+            <div class="hero-card-text">
+              <strong>Atendimento em domicílio</strong>
+              <span>A profissional vai até você</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- CLÍNICA BG -->
+  <section class="clinica-bg-section">
+    <img src="clinica-fisio-jpg.png" alt="Consultório da Dra. Fernanda Rodrigues" class="clinica-bg-img">
+    <div class="clinica-bg-overlay"></div>
+    <div class="clinica-bg-content">
+      <div class="tag">Nosso espaço</div>
+      <h2>A recuperação começa no lugar mais confortável: a sua casa</h2>
+      <p>Levo tudo que sua recuperação precisa: faixas elásticas, bolas, cones, equipamentos de liberação miofascial e muscular. O único item que não está na mala é a maca — tudo o mais chega com a Dra. Fernanda na sua porta.</p>
+      <a href="#" class="btn btn-white btn-lg" onclick="showPage('agenda'); return false;">Agendar atendimento em casa</a>
+      <div class="clinica-stats">
+        <div class="clinica-stat">
+          <div class="n">3<em>+</em></div>
+          <div class="l">Pós-graduações</div>
+        </div>
+        <div class="clinica-stat">
+          <div class="n">5<em>+</em></div>
+          <div class="l">Anos de experiência</div>
+        </div>
+        <div class="clinica-stat">
+          <div class="n">100<em>+</em></div>
+          <div class="l">Pacientes atendidos</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+    <!-- ESPECIALIDADES -->
+  <section>
+    <div class="container">
+      <div class="section-header">
+        <div class="tag">Especialidades</div>
+        <h2>Áreas de atuação</h2>
+        <p>Formação sólida nas especialidades que mais exigem precisão e cuidado individualizado</p>
+      </div>
+      <div class="specs-grid">
+        <div class="spec-card featured">
+          <div class="spec-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 8v4l3 3"/>
+            </svg>
+          </div>
+          <h3>Fisioterapia Neurológica</h3>
+          <p>Especialidade principal. Reabilitação de pacientes com lesões e disfunções do sistema nervoso central e periférico, com técnicas validadas cientificamente.</p>
+          <ul class="spec-list">
+            <li>Reabilitação pós-AVC (acidente vascular cerebral)</li>
+            <li>TCE (traumatismo cranioencefálico)</li>
+            <li>Doenças neurodegenerativas (Parkinson, ELA)</li>
+            <li>Lesão medular e periférica</li>
+          </ul>
+          <span class="spec-badge">Especialização completa</span>
+        </div>
+        <div class="spec-card featured">
+          <div class="spec-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><circle cx="12" cy="16" r="1"/>
+            </svg>
+          </div>
+          <h3>Pós-AVC e Pós-Cirúrgico</h3>
+          <p>Foco total na recuperação funcional. Trabalho de reaprendizagem motora, controle postural, marcha e independência para atividades da vida diária.</p>
+          <ul class="spec-list">
+            <li>Reabilitação motora e sensitiva pós-AVC</li>
+            <li>Pós-operatório ortopédico e neurológico</li>
+            <li>Recuperação de mobilidade e força</li>
+            <li>Retorno à independência funcional</li>
+          </ul>
+          <span class="spec-badge">Área de alta expertise</span>
+        </div>
+        <div class="spec-card">
+          <div class="spec-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <h3>Fisioterapia Geriátrica</h3>
+          <p>Cuidado integral para o idoso: mobilidade, equilíbrio, prevenção de quedas e manutenção da autonomia com qualidade de vida.</p>
+          <ul class="spec-list">
+            <li>Prevenção e reabilitação de quedas</li>
+            <li>Osteoporose e artrites</li>
+            <li>Equilíbrio e marcha no idoso</li>
+            <li>Manutenção da independência funcional</li>
+          </ul>
+          <span class="spec-badge">Pós-graduação</span>
+        </div>
+        <div class="spec-card">
+          <div class="spec-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M8 12h8M12 8v8"/>
+            </svg>
+          </div>
+          <h3>Fisioterapia Pediátrica</h3>
+          <p>Desenvolvimento neuromotor da criança desde os primeiros meses, com estimulação precoce e tratamento de condições neurológicas infantis.</p>
+          <ul class="spec-list">
+            <li>Estimulação precoce e DNPM</li>
+            <li>Paralisia cerebral</li>
+            <li>Síndromes genéticas</li>
+            <li>Atraso motor e cognitivo</li>
+          </ul>
+          <span class="spec-badge">Pós-graduação</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOBRE -->
+  <section>
+    <div class="container">
+      <div class="sobre-grid">
+        <div class="sobre-photo" style="overflow:hidden; background: #FAF8F4;">
+          <img src="foto-sobre.jpg.png" alt="Dra. Fernanda Rodrigues no consultório"
+            style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+          <svg style="display:none;" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="8" r="5"/><path d="M5 20c0-4 3.134-7 7-7s7 3 7 7"/></svg>
+        </div>
+        <div class="sobre-text">
+          <div class="tag">Sobre a Dra. Fernanda</div>
+          <h2>Formação que faz a diferença no tratamento</h2>
+          <p>Sou a Dra. Fernanda Rodrigues, fisioterapeuta especialista em Neurologia, Geriatria e Pediatria. Escolhi o atendimento domiciliar porque acredito que a recuperação acontece melhor em casa — no ambiente familiar, com segurança e conforto, longe do estresse de deslocamentos.</p>
+          <p>Cada paciente tem um ritmo e uma história. Chego até você com tudo que preciso: faixas elásticas, bolas terapêuticas, cones, equipamentos de liberação miofascial e muscular, entre outros recursos. Monto um plano personalizado com metas claras e acompanhamento constante — tudo no conforto da sua casa.</p>
+          <div class="sobre-pos">
+            <div class="pos-item">
+              <div class="pos-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <div class="pos-info">
+                <strong>Pós-graduação em Fisioterapia Neurológica</strong>
+                <span>Especialização completa · Neuro adulto e pediátrico</span>
+              </div>
+            </div>
+            <div class="pos-item">
+              <div class="pos-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <div class="pos-info">
+                <strong>Pós-graduação em Fisioterapia Geriátrica</strong>
+                <span>Especialização em saúde do idoso e prevenção de quedas</span>
+              </div>
+            </div>
+            <div class="pos-item">
+              <div class="pos-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <div class="pos-info">
+                <strong>Pós-graduação em Fisioterapia Pediátrica</strong>
+                <span>Desenvolvimento neuromotor e estimulação precoce</span>
+              </div>
+            </div>
+          </div>
+          <a href="#" class="btn btn-outline" onclick="showPage('curriculo'); return false;">Ver currículo completo</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEPOIMENTOS -->
+  <section>
+    <div class="container">
+      <div class="section-header">
+        <div class="tag">Depoimentos</div>
+        <h2>O que dizem os pacientes</h2>
+        <p>Relatos reais de pacientes e familiares (com autorização)</p>
+      </div>
+      <div class="depo-grid">
+        <div class="depo-card">
+          <div class="depo-stars">★★★★★</div>
+          <p class="depo-text">"Minha mãe teve um AVC em março e começou o acompanhamento em abril. Em três meses ela já voltou a andar com apoio. O cuidado e a dedicação fazem toda a diferença."</p>
+          <div class="depo-author">
+            <div class="depo-avatar">MR</div>
+            <div>
+              <div class="depo-name">Maria R.</div>
+              <div class="depo-role">Familiar de paciente pós-AVC</div>
+            </div>
+          </div>
+        </div>
+        <div class="depo-card">
+          <div class="depo-stars">★★★★★</div>
+          <p class="depo-text">"Meu filho tem paralisia cerebral e nunca encontrei uma profissional tão comprometida com a evolução dele. Ela explica tudo, envolve a família e celebra cada conquista."</p>
+          <div class="depo-author">
+            <div class="depo-avatar">CA</div>
+            <div>
+              <div class="depo-name">Carlos A.</div>
+              <div class="depo-role">Pai de paciente pediátrico</div>
+            </div>
+          </div>
+        </div>
+        <div class="depo-card">
+          <div class="depo-stars">★★★★★</div>
+          <p class="depo-text">"Operei o joelho e a recuperação foi incrível. Voltei a fazer minhas atividades em tempo recorde. Profissional excelente, explica cada etapa do tratamento."</p>
+          <div class="depo-author">
+            <div class="depo-avatar">JS</div>
+            <div>
+              <div class="depo-name">João S.</div>
+              <div class="depo-role">Paciente pós-cirúrgico</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="tag">Agende agora</div>
+      <h2>Pronto para começar a recuperação em casa?</h2>
+      <p>A primeira avaliação acontece na sua casa. Vamos entender sua história e montar um plano de tratamento real, pensado para sua rotina.</p>
+      <div class="cta-actions">
+        <a href="#" class="btn btn-white btn-lg" onclick="showPage('agenda'); return false;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Agendar avaliação
+        </a>
+        <a href="https://wa.me/5500000000000" class="btn btn-outline-white btn-lg" target="_blank">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Falar no WhatsApp
+        </a>
+      </div>
+      <div class="contato-grid">
+        <div class="contato-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <strong>Atendimento domiciliar</strong>
+          <span>[Cidade] e região</span>
+        </div>
+        <div class="contato-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <strong>Seg a Sex</strong>
+          <span>08h às 18h · Sáb 08h às 12h</span>
+        </div>
+        <div class="contato-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <strong>(00) 00000-0000</strong>
+          <span>WhatsApp disponível</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-logo">Dra. Fernanda Rodrigues <span>· Atendimento Domiciliar</span></div>
+        <div class="footer-copy">© 2026 · Todos os direitos reservados</div>
+        <div class="footer-links">
+          <a href="#" onclick="showPage('home'); return false;">Home</a>
+          <a href="#" onclick="showPage('servicos'); return false;">Serviços</a>
+          <a href="#" onclick="showPage('agenda'); return false;">Agenda</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</main>
+
+<!-- ══════════════════════════════════
+     PAGE: SERVIÇOS
+══════════════════════════════════ -->
+<main id="page-servicos" class="page">
+
+  <div class="servicos-header">
+    <div class="container">
+      <div class="tag">Programas de tratamento</div>
+      <h1>Serviços especializados</h1>
+      <p>Atendimento especializado na sua casa — mesma qualidade técnica, sem você precisar sair.</p>
+    </div>
+  </div>
+
+  <!-- PROGRAMAS -->
+  <section>
+    <div class="container">
+      <div class="section-header">
+        <h2>Programas de reabilitação</h2>
+        <p>Cada programa começa com uma avaliação detalhada e termina com metas de evolução documentadas</p>
+      </div>
+      <div class="programas-grid">
+        <div class="programa-card">
+          <div class="programa-head">
+            <div class="programa-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            </div>
+            <div>
+              <h3>Reabilitação Neurológica</h3>
+              <span>Neuro adulto · Pós-AVC · TCE</span>
+            </div>
+          </div>
+          <div class="programa-body">
+            <p>Programa completo de reabilitação para pacientes com lesões neurológicas. Trabalhamos a reaprendizagem motora, o controle postural e a independência funcional com técnicas de neuroplasticidade.</p>
+            <div class="programa-tags">
+              <span class="prog-tag">Avaliação neurológica</span>
+              <span class="prog-tag">Conceito Bobath</span>
+              <span class="prog-tag">FNP</span>
+              <span class="prog-tag">Marcha e equilíbrio</span>
+            </div>
+          </div>
+        </div>
+        <div class="programa-card">
+          <div class="programa-head">
+            <div class="programa-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </div>
+            <div>
+              <h3>Pós-cirúrgico</h3>
+              <span>Ortopédico · Neurológico · Cardiorrespiratório</span>
+            </div>
+          </div>
+          <div class="programa-body">
+            <p>Recuperação pós-operatória focada em analgesia, mobilidade progressiva, fortalecimento muscular e retorno funcional seguro. Seguimos o protocolo indicado pelo médico responsável.</p>
+            <div class="programa-tags">
+              <span class="prog-tag">Analgesia</span>
+              <span class="prog-tag">Mobilização precoce</span>
+              <span class="prog-tag">Fortalecimento</span>
+              <span class="prog-tag">Retorno funcional</span>
+            </div>
+          </div>
+        </div>
+        <div class="programa-card">
+          <div class="programa-head">
+            <div class="programa-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div>
+              <h3>Programa Geriátrico</h3>
+              <span>Mobilidade · Equilíbrio · Autonomia</span>
+            </div>
+          </div>
+          <div class="programa-body">
+            <p>Fisioterapia especializada para o idoso. Trabalhamos a prevenção de quedas, manutenção da mobilidade, fortalecimento muscular e qualidade de vida com protocolos validados para a terceira idade.</p>
+            <div class="programa-tags">
+              <span class="prog-tag">Prevenção de quedas</span>
+              <span class="prog-tag">Treino de equilíbrio</span>
+              <span class="prog-tag">Fortalecimento</span>
+              <span class="prog-tag">Qualidade de vida</span>
+            </div>
+          </div>
+        </div>
+        <div class="programa-card">
+          <div class="programa-head">
+            <div class="programa-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </div>
+            <div>
+              <h3>Programa Pediátrico</h3>
+              <span>Estimulação precoce · DNPM · Neuro infantil</span>
+            </div>
+          </div>
+          <div class="programa-body">
+            <p>Desenvolvimento neuromotor para bebês e crianças. Estimulação precoce, tratamento de paralisia cerebral, síndromes e atrasos motores. Abordagem lúdica que envolve a família no processo.</p>
+            <div class="programa-tags">
+              <span class="prog-tag">Estimulação precoce</span>
+              <span class="prog-tag">DNPM</span>
+              <span class="prog-tag">Paralisia cerebral</span>
+              <span class="prog-tag">Família no tratamento</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section class="processo-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="tag">Como funciona</div>
+        <h2>Do primeiro contato à alta</h2>
+        <p>Processo estruturado para garantir a melhor evolução possível</p>
+      </div>
+      <div class="processo-steps">
+        <div class="passo">
+          <div class="passo-num">1</div>
+          <h4>Primeiro contato</h4>
+          <p>Você entra em contato e contamos tudo sobre como funciona o atendimento domiciliar</p>
+        </div>
+        <div class="passo">
+          <div class="passo-num">2</div>
+          <h4>Visita de avaliação</h4>
+          <p>A Dra. Fernanda vai até sua casa para avaliar a condição clínica e montar o plano ideal</p>
+        </div>
+        <div class="passo">
+          <div class="passo-num">3</div>
+          <h4>Sessões em domicílio</h4>
+          <p>Atendimentos regulares na sua casa, com todos os equipamentos e técnicas necessárias</p>
+        </div>
+        <div class="passo">
+          <div class="passo-num">4</div>
+          <h4>Evolução e alta</h4>
+          <p>Acompanhamento contínuo, registro de evolução e planejamento da alta — tudo documentado</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EVOLUÇÃO DO PACIENTE -->
+  <section class="evolucao-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="tag">Evolução</div>
+        <h2>O caminho da recuperação</h2>
+        <p>Cada etapa é documentada e compartilhada com o paciente e familiares</p>
+      </div>
+      <div class="evolucao-timeline">
+        <div class="etapa">
+          <div class="etapa-dot">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </div>
+          <div class="etapa-content">
+            <span class="etapa-tag">Semana 1–2</span>
+            <h4>Avaliação e diagnóstico funcional</h4>
+            <p>Entendimento completo da condição atual, definição de metas funcionais e início do plano de tratamento personalizado.</p>
+          </div>
+        </div>
+        <div class="etapa">
+          <div class="etapa-dot">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <div class="etapa-content">
+            <span class="etapa-tag">Fase inicial</span>
+            <h4>Ativação e mobilização</h4>
+            <p>Primeiros exercícios terapêuticos, controle da dor, mobilização articular e ativação muscular com técnicas manuais.</p>
+          </div>
+        </div>
+        <div class="etapa">
+          <div class="etapa-dot">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="etapa-content">
+            <span class="etapa-tag">Fase de progressão</span>
+            <h4>Ganho funcional</h4>
+            <p>Progressão dos exercícios, treino de marcha e equilíbrio, tarefas funcionais e reavaliação de metas com registro documentado.</p>
+          </div>
+        </div>
+        <div class="etapa">
+          <div class="etapa-dot">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="etapa-content">
+            <span class="etapa-tag">Alta funcional</span>
+            <h4>Independência e continuidade</h4>
+            <p>Alcance das metas estabelecidas, programa de exercícios domiciliares e orientações para manutenção dos resultados.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA SERVIÇOS -->
+  <section class="cta-section">
+    <div class="container">
+      <h2>Agende sua avaliação</h2>
+      <p>O primeiro passo é uma ligação ou mensagem. A Dra. Fernanda agenda a visita e vai até você.</p>
+      <div class="cta-actions">
+        <a href="#" class="btn btn-white btn-lg" onclick="showPage('agenda'); return false;">Agendar visita domiciliar</a>
+        <a href="https://wa.me/5500000000000" class="btn btn-outline-white btn-lg" target="_blank">WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-logo">Dra. Fernanda Rodrigues <span>· Atendimento Domiciliar</span></div>
+        <div class="footer-copy">© 2026 · Todos os direitos reservados</div>
+        <div class="footer-links">
+          <a href="#" onclick="showPage('home'); return false;">Home</a>
+          <a href="#" onclick="showPage('tratamentos'); return false;">Tratamentos</a>
+          <a href="#" onclick="showPage('agenda'); return false;">Agenda</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</main>
+
+<!-- ══════════════════════════════════
+     PAGE: TRATAMENTOS
+══════════════════════════════════ -->
+<main id="page-tratamentos" class="page">
+
+  <div class="tratamentos-hero">
+    <div class="container">
+      <div>
+        <div class="tag">Técnicas e recursos</div>
+        <h1>Tratamentos disponíveis</h1>
+        <p>Técnicas validadas cientificamente aplicadas na sua casa. A Dra. Fernanda chega com faixas elásticas, bolas terapêuticas, cones, equipamentos de liberação miofascial e muscular — tudo pronto para cada sessão, sem você sair de onde se sente melhor.</p>
+      </div>
+      <div style="background: #FAF8F4; border-radius: var(--radius-lg); border: 1px solid #F0E9DC; padding: 32px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="font-size: 13px; font-weight: 600; color: var(--warm-600); text-transform: uppercase; letter-spacing: 0.05em;">Especialidades</div>
+        <div style="font-size: 14px; color: var(--gray-700); line-height: 1.6;">Neurologia · Geriatria · Pediatria</div>
+        <div style="width: 100%; height: 1px; background: var(--warm-100);"></div>
+        <div style="font-size: 13px; font-weight: 600; color: var(--warm-600); text-transform: uppercase; letter-spacing: 0.05em;">Pós-graduações</div>
+        <div style="font-size: 14px; color: var(--gray-700); line-height: 1.6;">3 especializações completas</div>
+        <div style="width: 100%; height: 1px; background: var(--warm-100);"></div>
+        <div style="font-size: 13px; font-weight: 600; color: var(--warm-600); text-transform: uppercase; letter-spacing: 0.05em;">Atendimentos</div>
+        <div style="font-size: 14px; color: var(--gray-700);">Domiciliar · [Cidade] e região</div>
+      </div>
+      <div style="width: 100%; height: 1px; background: var(--warm-100);"></div>
+      <div style="font-size: 13px; font-weight: 600; color: var(--warm-600); text-transform: uppercase; letter-spacing: 0.05em;">Equipamentos levados</div>
+      <div style="font-size: 13px; color: var(--gray-700); line-height: 1.8;">Faixas elásticas · Bolas terapêuticas · Cones · Liberação miofascial · Liberação muscular · e mais</div>
+      <div
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <div class="container">
+      <div class="section-header">
+        <div class="tag">Técnicas terapêuticas</div>
+        <h2>O que utilizamos no tratamento</h2>
+        <p>Combinação de técnicas manuais, exercícios terapêuticos e recursos especializados</p>
+      </div>
+      <div class="trat-grid">
+        <div class="trat-card">
+          <div class="trat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          </div>
+          <h3>Fisioterapia neurofuncional</h3>
+          <p>Abordagem especializada para disfunções do sistema nervoso central e periférico.</p>
+          <ul class="trat-list">
+            <li>Conceito Bobath (adulto e pediátrico)</li>
+            <li>Facilitação Neuromuscular Proprioceptiva (FNP)</li>
+            <li>Estimulação sensório-motora</li>
+            <li>Controle motor e neuroplasticidade</li>
+          </ul>
+        </div>
+        <div class="trat-card">
+          <div class="trat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <h3>Reabilitação pós-AVC</h3>
+          <p>Protocolo específico para recuperação funcional após acidente vascular cerebral.</p>
+          <ul class="trat-list">
+            <li>Reaprendizagem motora</li>
+            <li>Treino de marcha e equilíbrio</li>
+            <li>Controle postural e transferências</li>
+            <li>Estimulação da função dos membros</li>
+          </ul>
+        </div>
+        <div class="trat-card">
+          <div class="trat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <h3>Reabilitação pós-cirúrgica</h3>
+          <p>Recuperação segura e progressiva após procedimentos cirúrgicos de diferentes especialidades.</p>
+          <ul class="trat-list">
+            <li>Analgesia e controle de edema</li>
+            <li>Mobilização articular precoce</li>
+            <li>Fortalecimento progressivo</li>
+            <li>Retorno às atividades funcionais</li>
+          </ul>
+        </div>
+        <div class="trat-card">
+          <div class="trat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Fisioterapia geriátrica</h3>
+          <p>Cuidado especializado para manutenção da funcionalidade e qualidade de vida do idoso.</p>
+          <ul class="trat-list">
+            <li>Treino de equilíbrio e propriocepção</li>
+            <li>Prevenção e reabilitação de quedas</li>
+            <li>Fortalecimento muscular adaptado</li>
+            <li>Reeducação de marcha</li>
+          </ul>
+        </div>
+        <div class="trat-card">
+          <div class="trat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          </div>
+          <h3>Fisioterapia pediátrica</h3>
+          <p>Estimulação do desenvolvimento neuromotor com abordagem lúdica e familiar.</p>
+          <ul class="trat-list">
+            <li>Estimulação precoce (0 a 3 anos)</li>
+            <li>Desenvolvimento neuropsicomotor (DNPM)</li>
+            <li>Paralisia cerebral e síndromes</li>
+            <li>Orientação de pais e cuidadores</li>
+          </ul>
+        </div>
+        <div class="trat-card">
+          <div class="trat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h3>Fisioterapia geral</h3>
+          <p>Tratamento de condições ortopédicas, posturais e musculoesqueléticas do cotidiano.</p>
+          <ul class="trat-list">
+            <li>Dores musculares e articulares</li>
+            <li>Correção postural</li>
+            <li>Lesões esportivas e ocupacionais</li>
+            <li>Exercício terapêutico</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="container">
+      <h2>Não sabe por onde começar?</h2>
+      <p>A avaliação inicial acontece na sua casa. A Dra. Fernanda vai até você, avalia e define o melhor plano.</p>
+      <div class="cta-actions">
+        <a href="#" class="btn btn-white btn-lg" onclick="showPage('agenda'); return false;">Agendar avaliação</a>
+        <a href="https://wa.me/5500000000000" class="btn btn-outline-white btn-lg" target="_blank">Falar no WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-logo">Dra. Fernanda Rodrigues <span>· Atendimento Domiciliar</span></div>
+        <div class="footer-copy">© 2026 · Todos os direitos reservados</div>
+        <div class="footer-links">
+          <a href="#" onclick="showPage('home'); return false;">Home</a>
+          <a href="#" onclick="showPage('servicos'); return false;">Serviços</a>
+          <a href="#" onclick="showPage('agenda'); return false;">Agenda</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</main>
+
+<!-- ══════════════════════════════════
+     PAGE: CURRÍCULO
+══════════════════════════════════ -->
+<main id="page-curriculo" class="page">
+
+  <div class="curriculo-hero">
+    <div class="container">
+      <div class="curriculo-profile">
+        <div class="curriculo-avatar">FR</div>
+        <div class="curriculo-info">
+          <h1>Dra. Fernanda Rodrigues</h1>
+          <div class="subtitle">Fisioterapeuta · Atendimento Domiciliar</div>
+          <div class="crefito">CREFITO · [número do registro]</div>
+          <div class="curriculo-tags">
+            <span class="curriculo-tag">Neurologia</span>
+            <span class="curriculo-tag">Geriatria</span>
+            <span class="curriculo-tag">Pediatria</span>
+            <span class="curriculo-tag">Pós-AVC</span>
+            <span class="curriculo-tag">Pós-cirúrgico</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="curriculo-content">
+    <div class="container">
+      <div class="curriculo-grid">
+        <div class="curriculo-main">
+
+          <div class="curric-section">
+            <div class="curric-section-title">Pós-graduações</div>
+            <div class="curric-item-card">
+              <div class="curric-item-head">
+                <h4>Especialização em Fisioterapia Neurológica</h4>
+                <span class="year">[Ano]</span>
+              </div>
+              <div class="inst">[Instituição]</div>
+              <div class="desc">Neuro adulto, neuro pediátrico, reabilitação pós-AVC, TCE e doenças neurodegenerativas.</div>
+            </div>
+            <div class="curric-item-card">
+              <div class="curric-item-head">
+                <h4>Pós-graduação em Fisioterapia Geriátrica</h4>
+                <span class="year">[Ano]</span>
+              </div>
+              <div class="inst">[Instituição]</div>
+              <div class="desc">Saúde do idoso, prevenção de quedas, equilíbrio, marcha e qualidade de vida na terceira idade.</div>
+            </div>
+            <div class="curric-item-card">
+              <div class="curric-item-head">
+                <h4>Pós-graduação em Fisioterapia Pediátrica</h4>
+                <span class="year">[Ano]</span>
+              </div>
+              <div class="inst">[Instituição]</div>
+              <div class="desc">Desenvolvimento neuromotor, estimulação precoce, paralisia cerebral e síndromes genéticas.</div>
+            </div>
+          </div>
+
+          <div class="curric-section">
+            <div class="curric-section-title">Formação acadêmica</div>
+            <div class="curric-item-card">
+              <div class="curric-item-head">
+                <h4>Bacharelado em Fisioterapia</h4>
+                <span class="year">[Ano]</span>
+              </div>
+              <div class="inst">[Universidade]</div>
+              <div class="desc">Graduação com ênfase em reabilitação neurológica e funcional.</div>
+            </div>
+          </div>
+
+          <div class="curric-section">
+            <div class="curric-section-title">Cursos e certificações</div>
+            <div class="curric-item-card">
+              <div class="curric-item-head">
+                <h4>Conceito Bobath — Nível avançado</h4>
+                <span class="year">[Ano]</span>
+              </div>
+              <div class="inst">[Instituição]</div>
+            </div>
+            <div class="curric-item-card">
+              <div class="curric-item-head">
+                <h4>Facilitação Neuromuscular Proprioceptiva (FNP)</h4>
+                <span class="year">[Ano]</span>
+              </div>
+              <div class="inst">[Instituição]</div>
+            </div>
+            <div class="curric-item-card">
+              <div class="curric-item-head">
+                <h4>[Adicionar outros cursos]</h4>
+                <span class="year">[Ano]</span>
+              </div>
+              <div class="inst">[Instituição]</div>
+            </div>
+          </div>
+
+          <div class="curric-section">
+            <div class="curric-section-title">Experiência profissional</div>
+            <div class="curric-item-card">
+              <div class="curric-item-head">
+                <h4>Fisioterapeuta clínica autônoma</h4>
+                <span class="year">[Ano] – atual</span>
+              </div>
+              <div class="inst">[Cidade, UF]</div>
+              <div class="desc">Atendimento especializado em neurologia, geriatria e pediatria. Reabilitação pós-AVC e pós-cirúrgica.</div>
+            </div>
+            <div class="curric-item-card">
+              <div class="curric-item-head">
+                <h4>[Experiência anterior]</h4>
+                <span class="year">[Período]</span>
+              </div>
+              <div class="inst">[Local]</div>
+              <div class="desc">[Descrição das atividades]</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="curriculo-sidebar">
+          <div class="skills-box">
+            <h4>Especialidades</h4>
+            <div class="skills-tags">
+              <span class="skill-tag">Neuro adulto</span>
+              <span class="skill-tag">Neuro pediátrico</span>
+              <span class="skill-tag">Pós-AVC</span>
+              <span class="skill-tag">Geriatria</span>
+              <span class="skill-tag">Pediatria</span>
+              <span class="skill-tag">Pós-cirúrgico</span>
+            </div>
+          </div>
+          <div class="skills-box">
+            <h4>Técnicas</h4>
+            <div class="skills-tags">
+              <span class="skill-tag">Conceito Bobath</span>
+              <span class="skill-tag">FNP</span>
+              <span class="skill-tag">Treino de marcha</span>
+              <span class="skill-tag">Estimulação precoce</span>
+              <span class="skill-tag">Controle postural</span>
+            </div>
+          </div>
+          <div class="skills-box">
+            <h4>Contato</h4>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 4px;">
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-600);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                (00) 00000-0000
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-600);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                [Cidade, UF]
+              </div>
+            </div>
+          </div>
+          <a href="#" class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="showPage('agenda'); return false;">Agendar avaliação</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-logo">Dra. Fernanda Rodrigues <span>· Atendimento Domiciliar</span></div>
+        <div class="footer-copy">© 2026 · Todos os direitos reservados</div>
+        <div class="footer-links">
+          <a href="#" onclick="showPage('home'); return false;">Home</a>
+          <a href="#" onclick="showPage('servicos'); return false;">Serviços</a>
+          <a href="#" onclick="showPage('agenda'); return false;">Agenda</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</main>
+
+<!-- ══════════════════════════════════
+     PAGE: AGENDA
+══════════════════════════════════ -->
+<main id="page-agenda" class="page agenda-page">
+
+  <div class="agenda-header-section">
+    <div class="container">
+      <h1>Agendar atendimento domiciliar</h1>
+      <p>Escolha o melhor horário — a Dra. Fernanda vai até você</p>
+    </div>
+  </div>
+
+  <div class="agenda-wrapper">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <h2 style="font-size: 20px; margin-bottom: 4px;">Horários disponíveis</h2>
+        <p style="font-size: 14px;">Clique em um horário livre para agendar</p>
+      </div>
+      <a href="https://wa.me/5500000000000" class="btn btn-outline" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        Agendar via WhatsApp
+      </a>
+    </div>
+    <div class="agenda-card">
+      <div class="agenda-nav">
+        <h3 id="agenda-month">Julho 2026</h3>
+        <div class="agenda-nav-btns">
+          <button class="agenda-nav-btn" onclick="changeWeek(-1)">&#8249;</button>
+          <button class="agenda-nav-btn" onclick="changeWeek(1)">&#8250;</button>
+        </div>
+      </div>
+      <div class="agenda-days-header">
+        <div class="agenda-time-col"></div>
+        <div class="agenda-day-label" id="d0">SEG</div>
+        <div class="agenda-day-label" id="d1">TER</div>
+        <div class="agenda-day-label" id="d2">QUA</div>
+        <div class="agenda-day-label" id="d3">QUI</div>
+        <div class="agenda-day-label" id="d4">SEX</div>
+        <div class="agenda-day-label" id="d5">SÁB</div>
+      </div>
+      <div class="agenda-body" id="agenda-body">
+      </div>
+      <div class="agenda-google-banner">
+        <div class="google-info">
+          <div class="google-dot"></div>
+          <div><strong>Integração com Google Calendar</strong> — disponível em breve</div>
+        </div>
+        <button class="google-sync-btn" disabled style="opacity:0.5; cursor:not-allowed;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Sincronizar com Google
+        </button>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px; padding: 20px; background: #FAF8F4; border: 1px solid #F0E9DC; border-radius: var(--radius-md);">
+      <h3 style="font-size: 15px; margin-bottom: 8px;">Prefere agendar por WhatsApp?</h3>
+      <p style="font-size: 14px; color: var(--gray-600);">Manda uma mensagem no WhatsApp com seu endereço e disponibilidade de horário — a Dra. Fernanda confirma a visita rapidinho.</p>
+      <div style="display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap;">
+        <a href="https://wa.me/5500000000000" class="btn btn-primary btn-sm" target="_blank">WhatsApp</a>
+        <a href="tel:+5500000000000" class="btn btn-ghost btn-sm">(00) 00000-0000</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-logo">Dra. Fernanda Rodrigues <span>· Atendimento Domiciliar</span></div>
+        <div class="footer-copy">© 2026 · Todos os direitos reservados</div>
+        <div class="footer-links">
+          <a href="#" onclick="showPage('home'); return false;">Home</a>
+          <a href="#" onclick="showPage('servicos'); return false;">Serviços</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</main>
+
+<!-- ══════════════════════════════════
+     PAGE: ÁREA DO CLIENTE
+══════════════════════════════════ -->
+<main id="page-cliente" class="page cliente-page">
+  <div class="cliente-box">
+    <div class="cliente-lock">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <h2>Área do paciente</h2>
+    <p>Acompanhe sua evolução, acesse documentos e gráficos de progresso. Esta funcionalidade estará disponível em breve.</p>
+    <div class="cliente-features">
+      <div class="cliente-feat">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="feat-text">
+          <strong>Gráficos de evolução</strong>
+          <span>Visualize seu progresso ao longo do tratamento</span>
+        </div>
+      </div>
+      <div class="cliente-feat">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="feat-text">
+          <strong>Documentos e laudos</strong>
+          <span>Acesse relatórios, prescrições e registros de sessão</span>
+        </div>
+      </div>
+      <div class="cliente-feat">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="feat-text">
+          <strong>Acesso para familiares</strong>
+          <span>Compartilhe sua evolução com quem cuida de você</span>
+        </div>
+      </div>
+    </div>
+    <span class="cliente-badge">Em desenvolvimento · Em breve disponível</span>
+    <div style="margin-top: 20px;">
+      <a href="#" class="btn btn-outline btn-sm" onclick="showPage('home'); return false;">Voltar para o início</a>
+    </div>
+  </div>
+</main>
+
+<!-- ──────────────────────────────────
+     JAVASCRIPT
+────────────────────────────────── -->
+<script>
+  // ── Navegação entre páginas ──
+  const pages = ['home','servicos','tratamentos','curriculo','agenda','cliente'];
+
+  function showPage(id) {
+    pages.forEach(p => {
+      document.getElementById('page-' + p).classList.remove('active');
+      const navEl = document.getElementById('nav-' + p);
+      if (navEl) navEl.classList.remove('active');
+    });
+    document.getElementById('page-' + id).classList.add('active');
+    const navActive = document.getElementById('nav-' + id);
+    if (navActive) navActive.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    closeMenu();
+  }
+
+  // ── Menu mobile ──
+  function toggleMenu() {
+    document.getElementById('nav-links').classList.toggle('open');
+  }
+  function closeMenu() {
+    document.getElementById('nav-links').classList.remove('open');
+  }
+
+  // ── Agenda ──
+  const hours = ['08:00','09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00'];
+  // Simulação de slots ocupados: [coluna(0-5), horario]
+  const occupied = [
+    [0,0],[0,1],[0,3],[1,1],[1,2],[1,4],[2,0],[2,3],[3,2],[3,5],[4,0],[4,1],[4,4],[5,2]
+  ];
+
+  let weekOffset = 0;
+
+  function getWeekDates(offset) {
+    const now = new Date();
+    const day = now.getDay();
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(now.setDate(diff + offset * 7));
+    const days = [];
+    for (let i = 0; i < 6; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      days.push(d);
+    }
+    return days;
+  }
+
+  function isOccupied(col, hIdx) {
+    return occupied.some(([c, h]) => c === col && h === hIdx);
+  }
+
+  function buildAgenda() {
+    const days = getWeekDates(weekOffset);
+    const dayNames = ['SEG','TER','QUA','QUI','SEX','SÁB'];
+    const today = new Date();
+
+    days.forEach((d, i) => {
+      const el = document.getElementById('d' + i);
+      const isToday = d.toDateString() === today.toDateString();
+      el.innerHTML = `<span>${dayNames[i]}</span><br><strong style="font-size:14px;">${d.getDate()}</strong>`;
+      el.style.color = isToday ? 'var(--warm-600)' : '';
+    });
+
+    const month = days[0].toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    document.getElementById('agenda-month').textContent = month.charAt(0).toUpperCase() + month.slice(1);
+
+    const body = document.getElementById('agenda-body');
+    body.innerHTML = '';
+
+    hours.forEach((h, hIdx) => {
+      const timeCell = document.createElement('div');
+      timeCell.className = 'time-label';
+      timeCell.textContent = h;
+      body.appendChild(timeCell);
+
+      for (let col = 0; col < 6; col++) {
+        const slot = document.createElement('div');
+        if (isOccupied(col, hIdx)) {
+          slot.className = 'agenda-slot ocupado';
+          const ev = document.createElement('div');
+          ev.className = 'slot-event';
+          ev.textContent = 'Agendado';
+          slot.appendChild(ev);
+        } else {
+          slot.className = 'agenda-slot';
+          slot.title = `Disponível — ${dayNames[col]} ${days[col].getDate()} às ${h}`;
+          slot.onclick = () => bookSlot(days[col], h);
+        }
+        body.appendChild(slot);
+      }
+    });
+  }
+
+  function changeWeek(dir) {
+    weekOffset += dir;
+    buildAgenda();
+  }
+
+  function bookSlot(date, hour) {
+    const dateStr = date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+    const msg = `Olá! Gostaria de agendar uma avaliação para ${dateStr} às ${hour}.`;
+    window.open('https://wa.me/5500000000000?text=' + encodeURIComponent(msg), '_blank');
+  }
+
+  buildAgenda();
+</script>
+
+</body>
+</html>
