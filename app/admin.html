@@ -131,6 +131,30 @@
     .evo-notes{font-size:13px;color:var(--g600);line-height:1.6}
 
     .empty{text-align:center;padding:40px;color:var(--g400);font-size:14px}
+
+    /* EXERCISES */
+    .exer-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:4px}
+    .exer-panel{background:var(--white);border:1px solid var(--g200);border-radius:12px;padding:16px}
+    .exer-panel h4{font-size:13px;font-weight:600;color:var(--g600);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--g100)}
+    .exer-search{width:100%;padding:8px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none;margin-bottom:12px;box-sizing:border-box}
+    .exer-search:focus{border-color:var(--w400)}
+    .exer-category{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g400);padding:8px 0 4px}
+    .exer-bank-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border:1px solid var(--g200);border-radius:7px;margin-bottom:4px;font-size:12px;cursor:pointer;transition:all .12s;background:var(--white)}
+    .exer-bank-item:hover{border-color:var(--w400);background:var(--w50);color:var(--w800)}
+    .exer-add-btn{width:22px;height:22px;border-radius:50%;background:var(--w400);color:white;border:none;font-size:16px;line-height:1;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+    .exer-plan-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--g200);border-radius:7px;margin-bottom:6px;font-size:13px;background:var(--w50)}
+    .exer-rm-btn{margin-left:auto;background:none;border:none;color:var(--g400);cursor:pointer;font-size:20px;line-height:1;padding:0 4px;flex-shrink:0;transition:color .12s}
+    .exer-rm-btn:hover{color:#B91C1C}
+    .exer-num{width:20px;height:20px;border-radius:50%;background:var(--w400);color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .exer-custom{display:flex;gap:8px;margin-bottom:14px}
+    .exer-custom input{flex:1;padding:8px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none}
+    .exer-custom input:focus{border-color:var(--w400)}
+    .exer-session-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;background:var(--white);border:1px solid var(--g200);border-radius:10px;padding:12px 16px}
+    .exer-session-bar label{font-size:13px;font-weight:500;color:var(--g600);white-space:nowrap}
+    .exer-session-bar select{padding:7px 10px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none;flex:1}
+    .exer-session-bar select:focus{border-color:var(--w400)}
+    @media(max-width:900px){.exer-layout{grid-template-columns:1fr}}
+
     @media(max-width:768px){
       .layout{grid-template-columns:1fr}
       .sidebar{display:none}
@@ -220,12 +244,14 @@
 
       <div class="tabs">
         <button class="tab active" onclick="setDetailTab('evolucoes')">Evoluções</button>
+        <button class="tab" onclick="setDetailTab('exercicios')">Exercícios</button>
         <button class="tab" onclick="setDetailTab('grafico')">Gráfico</button>
         <button class="tab" onclick="setDetailTab('documentos')">Documentos</button>
         <button class="tab" onclick="setDetailTab('familia')">Família</button>
       </div>
 
       <div id="detail-evolucoes"></div>
+      <div id="detail-exercicios" style="display:none"></div>
       <div id="detail-grafico" style="display:none"><div class="chart-box"><h4>Evolução clínica ao longo do tempo</h4><canvas id="evo-chart" height="120"></canvas></div></div>
       <div id="detail-documentos" style="display:none"></div>
       <div id="detail-familia" style="display:none"></div>
@@ -323,6 +349,7 @@ const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentPatientId = null;
+let currentEvolutionId = null;
 let evoChart = null;
 let allPatients = [];
 
@@ -440,6 +467,7 @@ async function savePatient() {
 // ── PATIENT DETAIL ──
 async function openPatient(id) {
   currentPatientId = id;
+  currentEvolutionId = null;
   const p = allPatients.find(x => x.id === id) || (await db.from('patients').select('*').eq('id', id).single()).data;
   document.getElementById('detail-avatar').textContent = p.name.charAt(0).toUpperCase();
   document.getElementById('detail-name').textContent = p.name;
@@ -449,12 +477,13 @@ async function openPatient(id) {
 }
 
 function setDetailTab(tab) {
-  ['evolucoes','grafico','documentos','familia'].forEach(t => {
+  ['evolucoes','exercicios','grafico','documentos','familia'].forEach(t => {
     document.getElementById('detail-' + t).style.display = t === tab ? 'block' : 'none';
   });
-  document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('active', ['evolucoes','grafico','documentos','familia'][i] === tab));
-  if (tab === 'evolucoes') loadEvolutions();
-  if (tab === 'grafico')   loadChart();
+  document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('active', ['evolucoes','exercicios','grafico','documentos','familia'][i] === tab));
+  if (tab === 'evolucoes')  loadEvolutions();
+  if (tab === 'exercicios') loadExercises();
+  if (tab === 'grafico')    loadChart();
   if (tab === 'documentos') loadDocuments();
   if (tab === 'familia')    loadFamily();
 }
@@ -598,6 +627,156 @@ async function removeFamily(id) {
   if (!confirm('Remover acesso deste familiar?')) return;
   await db.from('family_access').delete().eq('id', id);
   loadFamily();
+}
+
+// ── EXERCISES ──
+const EXERCISE_BANK = [
+  { cat: '🔄 Mobilidade', items: [
+    'Rotação cervical','Inclinação lateral cervical','Flexão/extensão cervical',
+    'Rotação de ombro (pendular)','Flexão de cotovelo','Mobilização de punho e dedos',
+    'Rotação interna de quadril','Rotação externa de quadril',
+    'Flexão de joelho','Extensão de joelho','Mobilização de tornozelo','Flexão plantar e dorsal'
+  ]},
+  { cat: '💪 Fortalecimento', items: [
+    'Abdução de quadril com faixa','Extensão de joelho (cadeira)','Agachamento assistido',
+    'Elevação lateral de braço','Rotação externa de ombro com faixa','Ponte (glúteo)',
+    'Elevação de panturrilha','Flexão de cotovelo com peso','Extensão de quadril em pé',
+    'Abdominais adaptados (deitado)','Pressão de mãos (isométrico)'
+  ]},
+  { cat: '⚖️ Equilíbrio', items: [
+    'Apoio unipodal (com apoio)','Apoio unipodal (sem apoio)','Marcha tandem',
+    'Exercício em superfície instável','Step lateral','Transferência de peso lateral',
+    'Alcance funcional anterior','Agachamento em apoio'
+  ]},
+  { cat: '🧠 Neurológico', items: [
+    'Rolamento no solo','Transferência deitado → sentado','Transferência sentado → em pé',
+    'Treino de marcha assistida','Treino de marcha com obstáculos',
+    'Coordenação mão-olho (bola)','Propriocepção MMII','Dissociação de cinturas',
+    'Estimulação sensorial MMSS','Estimulação sensorial MMII','Treino de preensão'
+  ]},
+  { cat: '🫁 Respiratório', items: [
+    'Respiração diafragmática','Inspirometria incentivada','Huffing',
+    'Drenagem postural','Expansão torácica com bastão'
+  ]},
+  { cat: '🏠 Domiciliar', items: [
+    'Subir/descer escadas','Caminhada supervisionada (5 min)','Caminhada supervisionada (10 min)',
+    'Exercícios de preensão com bolinha','Alongamento de MMII deitado',
+    'Exercícios de sentar e levantar','Elevação de braços sentado'
+  ]},
+];
+
+async function loadExercises() {
+  const c = document.getElementById('detail-exercicios');
+  const { data: evos } = await db.from('evolutions')
+    .select('id,session_date,session_number')
+    .eq('patient_id', currentPatientId)
+    .order('session_date', { ascending: false });
+
+  if (!evos || !evos.length) {
+    c.innerHTML = '<div class="empty">Registre uma sessão primeiro para gerenciar os exercícios.</div>';
+    return;
+  }
+
+  if (!currentEvolutionId || !evos.find(e => e.id === currentEvolutionId)) {
+    currentEvolutionId = evos[0].id;
+  }
+
+  const options = evos.map(e => `
+    <option value="${e.id}" ${e.id === currentEvolutionId ? 'selected' : ''}>
+      Sessão ${e.session_number || '?'} · ${new Date(e.session_date + 'T12:00:00').toLocaleDateString('pt-BR')}
+    </option>`).join('');
+
+  c.innerHTML = `
+    <div class="exer-session-bar">
+      <label>Sessão:</label>
+      <select onchange="changeEvoSession(this.value)">${options}</select>
+    </div>
+    <div class="exer-layout">
+      <div class="exer-panel">
+        <h4>Banco de exercícios — clique para adicionar</h4>
+        <input class="exer-search" id="bank-search" placeholder="🔍 Buscar exercício..." oninput="filterBank(this.value)"/>
+        <div id="exer-bank-list" style="max-height:480px;overflow-y:auto"></div>
+      </div>
+      <div class="exer-panel">
+        <h4>Plano desta sessão</h4>
+        <div class="exer-custom">
+          <input id="custom-exer" placeholder="Exercício personalizado..." onkeydown="if(event.key==='Enter')addExercise(this.value)"/>
+          <button class="btn btn-sm" onclick="addExercise(document.getElementById('custom-exer').value)">+ Add</button>
+        </div>
+        <div id="exer-plan-list"></div>
+      </div>
+    </div>`;
+
+  renderExerciseBank('');
+  await loadExercisePlan();
+}
+
+function filterBank(term) {
+  renderExerciseBank(term.toLowerCase());
+}
+
+function renderExerciseBank(filter) {
+  const container = document.getElementById('exer-bank-list');
+  if (!container) return;
+  let html = '';
+  EXERCISE_BANK.forEach(cat => {
+    const items = filter ? cat.items.filter(i => i.toLowerCase().includes(filter)) : cat.items;
+    if (!items.length) return;
+    html += `<div class="exer-category">${cat.cat}</div>`;
+    items.forEach(name => {
+      const safe = name.replace(/'/g, "\\'");
+      html += `<div class="exer-bank-item" onclick="addExercise('${safe}')">
+        <span>${name}</span>
+        <div class="exer-add-btn">+</div>
+      </div>`;
+    });
+  });
+  container.innerHTML = html || '<div class="empty" style="padding:20px">Nenhum exercício encontrado</div>';
+}
+
+async function loadExercisePlan() {
+  const container = document.getElementById('exer-plan-list');
+  if (!container || !currentEvolutionId) return;
+  const { data } = await db.from('session_exercises')
+    .select('*').eq('evolution_id', currentEvolutionId)
+    .order('created_at');
+
+  if (!data || !data.length) {
+    container.innerHTML = '<div class="empty" style="padding:24px;font-size:13px">Nenhum exercício no plano ainda.<br>Clique em um do banco ao lado para adicionar.</div>';
+    return;
+  }
+
+  container.innerHTML = data.map((ex, i) => `
+    <div class="exer-plan-item">
+      <div class="exer-num">${i + 1}</div>
+      <span style="flex:1">${ex.name}</span>
+      <button class="exer-rm-btn" onclick="removeExercise('${ex.id}')" title="Remover">×</button>
+    </div>`).join('');
+}
+
+async function addExercise(name) {
+  name = (name || '').trim();
+  if (!name) return;
+  if (!currentEvolutionId) return alert('Selecione uma sessão primeiro');
+  const { error } = await db.from('session_exercises').insert({
+    evolution_id: currentEvolutionId,
+    patient_id: currentPatientId,
+    name,
+  });
+  if (error) { alert('Erro: ' + error.message); return; }
+  const inp = document.getElementById('custom-exer');
+  if (inp) inp.value = '';
+  loadExercisePlan();
+}
+
+async function removeExercise(id) {
+  await db.from('session_exercises').delete().eq('id', id);
+  loadExercisePlan();
+}
+
+async function changeEvoSession(evoId) {
+  currentEvolutionId = evoId;
+  loadExercisePlan();
 }
 
 init();

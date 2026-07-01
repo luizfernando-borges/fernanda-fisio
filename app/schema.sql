@@ -116,6 +116,37 @@ create policy "family_read_documents" on documents
     )
   );
 
+-- 5. EXERCÍCIOS POR SESSÃO
+create table if not exists session_exercises (
+  id           uuid primary key default gen_random_uuid(),
+  evolution_id uuid references evolutions(id) on delete cascade,
+  patient_id   uuid references patients(id) on delete cascade,
+  name         text not null,
+  sets         text,
+  reps         text,
+  notes        text,
+  order_index  integer default 0,
+  created_at   timestamptz default now()
+);
+
+alter table session_exercises enable row level security;
+
+create policy "admin_all_exercises" on session_exercises
+  for all using (auth.jwt() ->> 'email' = 'lf.borges.lima@gmail.com');
+
+create policy "patient_own_exercises" on session_exercises
+  for select using (
+    patient_id in (select id from patients where user_id = auth.uid())
+  );
+
+create policy "family_read_exercises" on session_exercises
+  for select using (
+    patient_id in (
+      select patient_id from family_access
+      where email = auth.jwt() ->> 'email'
+    )
+  );
+
 -- ───────────────────────────────────────────────────
 --  STORAGE — bucket para documentos
 -- ───────────────────────────────────────────────────
