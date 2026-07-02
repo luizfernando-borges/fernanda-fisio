@@ -681,14 +681,14 @@ async function loadAssessment() {
 
   c.innerHTML = `
   ${a ? `<div style="margin-bottom:14px;display:flex;align-items:center;gap:10px">
-    <span class="assess-badge">✓ Avaliação salva em ${new Date(a.assessment_date+'T12:00:00').toLocaleDateString('pt-BR')}</span>
+    <span class="assess-badge">&#10003; Avaliação salva em ${new Date(a.assessment_date+'T12:00:00').toLocaleDateString('pt-BR')}</span>
   </div>` : `<div style="margin-bottom:14px;padding:12px 16px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;font-size:13px;color:#92400E">
-    ⚠️ Avaliação inicial não realizada. Preencha abaixo para liberar o plano de exercícios.
+    &#9888;&#65039; Avaliação inicial não realizada. Preencha abaixo para liberar o plano de exercícios.
   </div>`}
 
   <!-- 1. Anamnese -->
   <div class="assess-section">
-    <div class="assess-title">📋 1. Anamnese</div>
+    <div class="assess-title">1. Anamnese</div>
     <div class="assess-row" style="margin-bottom:14px">
       <div class="fg"><label>Data da avaliação</label>
         <input id="av-assessment_date" type="date" value="${v('assessment_date') || new Date().toISOString().split('T')[0]}"
@@ -710,7 +710,7 @@ async function loadAssessment() {
 
   <!-- 2. Avaliação Funcional -->
   <div class="assess-section">
-    <div class="assess-title">🚶 2. Avaliação Funcional</div>
+    <div class="assess-title">2. Avaliação Funcional</div>
     <div class="assess-row" style="margin-bottom:14px">
       ${assessSEL('Nível de independência funcional','functional_level',['— Selecione —','Independente','Assistido parcialmente','Assistido totalmente','Dependente'])}
       ${assessSEL('Auxílio de marcha','mobility_aids',['— Selecione —','Nenhum','Bengala','Andador','Muleta(s)','Cadeira de rodas','Outro'])}
@@ -720,10 +720,276 @@ async function loadAssessment() {
 
   <!-- 3. Exame Físico -->
   <div class="assess-section">
-    <div class="assess-title">🔍 3. Exame Físico</div>
+    <div class="assess-title">3. Exame Físico</div>
     <div class="assess-row" style="margin-bottom:14px">
       ${assessTA('Inspeção geral','inspection_notes','Postura, marcha, deformidades visíveis, assimetrias...')}
       ${assessTA('Amplitude de movimento (ADM)','rom_notes','Limitações de ADM por segmento...')}
     </div>
     <div class="assess-row" style="margin-bottom:14px">
-      ${assessTA('Força muscular','muscle_strength_notes','Avaliação de força por grupos musculares (escala 0
+      ${assessTA('Força muscular','muscle_strength_notes','Avaliação de força por grupos musculares (escala 0-5)...')}
+      ${assessTA('Coordenação','coordination_notes','Provas de coordenação, diadococinesia...')}
+    </div>
+    <div class="assess-row">
+      ${assessSEL('Sensibilidade','sensitivity',['— Selecione —','Normal','Hipoestesia (reduzida)','Hiperestesia (aumentada)','Anestesia (ausente)','Parestesia'])}
+      ${assessSEL('Equilíbrio','balance_level',['— Selecione —','Bom','Regular','Comprometido','Ausente'])}
+    </div>
+  </div>
+
+  <!-- 4. Escalas Iniciais -->
+  <div class="assess-section">
+    <div class="assess-title">4. Escalas de Avaliação Iniciais (0 = pior · 10 = melhor)</div>
+    <div class="score-row">
+      ${assessSLIDER('Mobilidade inicial','initial_mobility_score')}
+      ${assessSLIDER('Dor inicial (invertida)','initial_pain_score')}
+      ${assessSLIDER('Funcionalidade inicial','initial_function_score')}
+    </div>
+  </div>
+
+  <!-- 5. Diagnóstico e Plano -->
+  <div class="assess-section">
+    <div class="assess-title">5. Diagnóstico e Plano Terapêutico</div>
+    <div style="margin-bottom:14px">${assessTA('Hipótese diagnóstica fisioterapêutica','diagnostic_hypothesis','Diagnóstico cinesiológico-funcional proposto...',true)}</div>
+    <div class="assess-row" style="margin-bottom:14px">
+      ${assessTA('Objetivos a curto prazo','short_term_goals','Metas para as próximas 4-8 semanas...')}
+      ${assessTA('Objetivos a longo prazo','long_term_goals','Metas para o tratamento completo...')}
+    </div>
+    <div style="margin-bottom:14px">${assessTA('Conduta terapêutica proposta','treatment_plan','Técnicas, recursos e abordagens planejadas...',true)}</div>
+    <div class="assess-row">
+      <div class="fg"><label>Frequência das sessões</label>
+        <input id="av-session_frequency" type="text" placeholder="Ex: 3x por semana"
+          value="${v('session_frequency')}"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+      </div>
+      <div class="fg"><label>Duração estimada do tratamento</label>
+        <input id="av-estimated_duration" type="text" placeholder="Ex: 3 meses / 24 sessões"
+          value="${v('estimated_duration')}"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Observações -->
+  <div class="assess-section">
+    <div class="assess-title">6. Observações Adicionais</div>
+    ${assessTA('Observações gerais','additional_notes','Qualquer informação relevante não contemplada acima...',true)}
+  </div>
+
+  <div class="assess-actions">
+    <button class="btn" onclick="saveAssessment()">Salvar avaliação</button>
+  </div>`;
+
+  // Preenche valores salvos
+  if (a) {
+    const fields = ['assessment_date','main_complaint','disease_history','medical_history','previous_surgeries',
+      'medications','allergies','functional_level','mobility_aids','adl_notes','inspection_notes','rom_notes',
+      'muscle_strength_notes','sensitivity','balance_level','coordination_notes','diagnostic_hypothesis',
+      'short_term_goals','long_term_goals','treatment_plan','session_frequency','estimated_duration',
+      'additional_notes','coordination_notes'];
+    fields.forEach(f => {
+      const el = document.getElementById('av-' + f);
+      if (el && a[f] != null) el.value = a[f];
+    });
+    ['initial_mobility_score','initial_pain_score','initial_function_score'].forEach(f => {
+      const el = document.getElementById('av-' + f);
+      const vEl = document.getElementById('avv-' + f);
+      if (el && a[f] != null) { el.value = a[f]; if (vEl) vEl.textContent = a[f]; }
+    });
+  }
+}
+
+async function saveAssessment() {
+  const g = id => (document.getElementById('av-' + id)?.value || '').trim() || null;
+  const gi = id => { const v = parseInt(document.getElementById('av-'+id)?.value); return isNaN(v)?null:v; };
+
+  if (!g('main_complaint')) { alert('Queixa principal é obrigatória'); return; }
+
+  const payload = {
+    patient_id: currentPatientId,
+    assessment_date: g('assessment_date') || new Date().toISOString().split('T')[0],
+    main_complaint: g('main_complaint'),
+    disease_history: g('disease_history'),
+    medical_history: g('medical_history'),
+    previous_surgeries: g('previous_surgeries'),
+    medications: g('medications'),
+    allergies: g('allergies'),
+    functional_level: g('functional_level'),
+    mobility_aids: g('mobility_aids'),
+    adl_notes: g('adl_notes'),
+    inspection_notes: g('inspection_notes'),
+    rom_notes: g('rom_notes'),
+    muscle_strength_notes: g('muscle_strength_notes'),
+    sensitivity: g('sensitivity'),
+    balance_level: g('balance_level'),
+    coordination_notes: g('coordination_notes'),
+    initial_mobility_score: gi('initial_mobility_score'),
+    initial_pain_score: gi('initial_pain_score'),
+    initial_function_score: gi('initial_function_score'),
+    diagnostic_hypothesis: g('diagnostic_hypothesis'),
+    short_term_goals: g('short_term_goals'),
+    long_term_goals: g('long_term_goals'),
+    treatment_plan: g('treatment_plan'),
+    session_frequency: g('session_frequency'),
+    estimated_duration: g('estimated_duration'),
+    additional_notes: g('additional_notes'),
+    updated_at: new Date().toISOString(),
+  };
+
+  const { error } = await db.from('patient_assessments').upsert(payload, { onConflict: 'patient_id' });
+  if (error) { alert('Erro ao salvar: ' + error.message); return; }
+  loadAssessment();
+}
+
+// ── EXERCISES ──
+const EXERCISE_BANK = [
+  { cat: 'Mobilidade', items: [
+    'Rotação cervical','Inclinação lateral cervical','Flexão/extensão cervical',
+    'Rotação de ombro (pendular)','Flexão de cotovelo','Mobilização de punho e dedos',
+    'Rotação interna de quadril','Rotação externa de quadril',
+    'Flexão de joelho','Extensão de joelho','Mobilização de tornozelo','Flexão plantar e dorsal'
+  ]},
+  { cat: 'Fortalecimento', items: [
+    'Abdução de quadril com faixa','Extensão de joelho (cadeira)','Agachamento assistido',
+    'Elevação lateral de braço','Rotação externa de ombro com faixa','Ponte (glúteo)',
+    'Elevação de panturrilha','Flexão de cotovelo com peso','Extensão de quadril em pé',
+    'Abdominais adaptados (deitado)','Pressão de mãos (isométrico)'
+  ]},
+  { cat: 'Equilíbrio', items: [
+    'Apoio unipodal (com apoio)','Apoio unipodal (sem apoio)','Marcha tandem',
+    'Exercício em superfície instável','Step lateral','Transferência de peso lateral',
+    'Alcance funcional anterior','Agachamento em apoio'
+  ]},
+  { cat: 'Neurológico', items: [
+    'Rolamento no solo','Transferência deitado para sentado','Transferência sentado para em pé',
+    'Treino de marcha assistida','Treino de marcha com obstáculos',
+    'Coordenação mão-olho (bola)','Propriocepção MMII','Dissociação de cinturas',
+    'Estimulação sensorial MMSS','Estimulação sensorial MMII','Treino de preensão'
+  ]},
+  { cat: 'Respiratório', items: [
+    'Respiração diafragmática','Inspirometria incentivada','Huffing',
+    'Drenagem postural','Expansão torácica com bastão'
+  ]},
+  { cat: 'Domiciliar', items: [
+    'Subir/descer escadas','Caminhada supervisionada (5 min)','Caminhada supervisionada (10 min)',
+    'Exercícios de preensão com bolinha','Alongamento de MMII deitado',
+    'Exercícios de sentar e levantar','Elevação de braços sentado'
+  ]},
+];
+
+async function loadExercises() {
+  const c = document.getElementById('detail-exercicios');
+  const { data: evos } = await db.from('evolutions')
+    .select('id,session_date,session_number')
+    .eq('patient_id', currentPatientId)
+    .order('session_date', { ascending: false });
+
+  if (!evos || !evos.length) {
+    c.innerHTML = '<div class="empty">Registre uma sessão primeiro para gerenciar os exercícios.</div>';
+    return;
+  }
+
+  if (!currentEvolutionId || !evos.find(e => e.id === currentEvolutionId)) {
+    currentEvolutionId = evos[0].id;
+  }
+
+  const options = evos.map(e => `
+    <option value="${e.id}" ${e.id === currentEvolutionId ? 'selected' : ''}>
+      Sessão ${e.session_number || '?'} · ${new Date(e.session_date + 'T12:00:00').toLocaleDateString('pt-BR')}
+    </option>`).join('');
+
+  c.innerHTML = `
+    <div class="exer-session-bar">
+      <label>Sessão:</label>
+      <select onchange="changeEvoSession(this.value)">${options}</select>
+    </div>
+    <div class="exer-layout">
+      <div class="exer-panel">
+        <h4>Banco de exercícios — clique para adicionar</h4>
+        <input class="exer-search" id="bank-search" placeholder="Buscar exercício..." oninput="filterBank(this.value)"/>
+        <div id="exer-bank-list" style="max-height:480px;overflow-y:auto"></div>
+      </div>
+      <div class="exer-panel">
+        <h4>Plano desta sessão</h4>
+        <div class="exer-custom">
+          <input id="custom-exer" placeholder="Exercício personalizado..." onkeydown="if(event.key==='Enter')addExercise(this.value)"/>
+          <button class="btn btn-sm" onclick="addExercise(document.getElementById('custom-exer').value)">+ Add</button>
+        </div>
+        <div id="exer-plan-list"></div>
+      </div>
+    </div>`;
+
+  renderExerciseBank('');
+  await loadExercisePlan();
+}
+
+function filterBank(term) {
+  renderExerciseBank(term.toLowerCase());
+}
+
+function renderExerciseBank(filter) {
+  const container = document.getElementById('exer-bank-list');
+  if (!container) return;
+  let html = '';
+  EXERCISE_BANK.forEach(cat => {
+    const items = filter ? cat.items.filter(i => i.toLowerCase().includes(filter)) : cat.items;
+    if (!items.length) return;
+    html += `<div class="exer-category">${cat.cat}</div>`;
+    items.forEach(name => {
+      const safe = name.replace(/'/g, "\\'");
+      html += `<div class="exer-bank-item" onclick="addExercise('${safe}')">
+        <span>${name}</span>
+        <div class="exer-add-btn">+</div>
+      </div>`;
+    });
+  });
+  container.innerHTML = html || '<div class="empty" style="padding:20px">Nenhum exercício encontrado</div>';
+}
+
+async function loadExercisePlan() {
+  const container = document.getElementById('exer-plan-list');
+  if (!container || !currentEvolutionId) return;
+  const { data } = await db.from('session_exercises')
+    .select('*').eq('evolution_id', currentEvolutionId)
+    .order('created_at');
+
+  if (!data || !data.length) {
+    container.innerHTML = '<div class="empty" style="padding:24px;font-size:13px">Nenhum exercício no plano ainda.<br>Clique em um do banco ao lado para adicionar.</div>';
+    return;
+  }
+
+  container.innerHTML = data.map((ex, i) => `
+    <div class="exer-plan-item">
+      <div class="exer-num">${i + 1}</div>
+      <span style="flex:1">${ex.name}</span>
+      <button class="exer-rm-btn" onclick="removeExercise('${ex.id}')" title="Remover">×</button>
+    </div>`).join('');
+}
+
+async function addExercise(name) {
+  name = (name || '').trim();
+  if (!name) return;
+  if (!currentEvolutionId) return alert('Selecione uma sessão primeiro');
+  const { error } = await db.from('session_exercises').insert({
+    evolution_id: currentEvolutionId,
+    patient_id: currentPatientId,
+    name,
+  });
+  if (error) { alert('Erro: ' + error.message); return; }
+  const inp = document.getElementById('custom-exer');
+  if (inp) inp.value = '';
+  loadExercisePlan();
+}
+
+async function removeExercise(id) {
+  await db.from('session_exercises').delete().eq('id', id);
+  loadExercisePlan();
+}
+
+async function changeEvoSession(evoId) {
+  currentEvolutionId = evoId;
+  loadExercisePlan();
+}
+
+init();
+</script>
+</body>
+</html>
