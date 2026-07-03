@@ -198,11 +198,22 @@
       content: '';
       position: absolute;
       top: -120px; right: -80px;
-      width: 480px; height: 480px;
+      width: 560px; height: 560px;
       border-radius: 50%;
-      background: #FAF8F4;
-      opacity: 0.6;
+      background: var(--warm-100);
+      opacity: 0.85;
       pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -100px; left: -120px;
+      width: 420px; height: 420px;
+      border-radius: 50%;
+      border: 3px solid var(--warm-200);
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: 0;
     }
     .hero-inner {
       display: grid;
@@ -1087,6 +1098,138 @@
     .footer-links a { font-size: 13px; color: var(--gray-400); text-decoration: none; }
     .footer-links a:hover { color: var(--warm-200); }
 
+
+    /* ─────────────────────────────────────────────
+       DECORAÇÕES — círculos e padrões de reabilitação
+    ──────────────────────────────────────────────── */
+
+    /* Anéis nos headers escuros (evocam bolas e argolas de reabilitação) */
+    .cta-section { overflow: hidden; }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: -110px; right: -130px;
+      width: 480px; height: 480px;
+      border-radius: 50%;
+      border: 55px solid rgba(255,255,255,0.05);
+      pointer-events: none;
+    }
+    .cta-section::after {
+      content: '';
+      position: absolute;
+      bottom: -110px; left: -90px;
+      width: 340px; height: 340px;
+      border-radius: 50%;
+      border: 40px solid rgba(255,255,255,0.04);
+      pointer-events: none;
+    }
+
+    /* Header Serviços */
+    .servicos-header { overflow: hidden; }
+    .servicos-header::before {
+      content: '';
+      position: absolute;
+      top: -70px; right: -70px;
+      width: 340px; height: 340px;
+      border-radius: 50%;
+      border: 40px solid rgba(255,255,255,0.06);
+      pointer-events: none;
+    }
+    .servicos-header::after {
+      content: '';
+      position: absolute;
+      bottom: -50px; left: 18%;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      border: 22px solid rgba(255,255,255,0.04);
+      pointer-events: none;
+    }
+
+    /* Header Agenda */
+    .agenda-header-section { overflow: hidden; }
+    .agenda-header-section::before {
+      content: '';
+      position: absolute;
+      top: -50px; right: 8%;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      border: 32px solid rgba(255,255,255,0.06);
+      pointer-events: none;
+    }
+    .agenda-header-section::after {
+      content: '';
+      position: absolute;
+      bottom: -70px; left: -70px;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      border: 24px solid rgba(255,255,255,0.04);
+      pointer-events: none;
+    }
+
+    /* Tratamentos hero: círculo suave + anel (faixas elásticas) */
+    .tratamentos-hero { overflow: hidden; }
+    .tratamentos-hero::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -60px;
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      background: var(--warm-100);
+      opacity: 0.65;
+      pointer-events: none;
+    }
+    .tratamentos-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -70px; left: 38%;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      border: 2.5px solid var(--warm-200);
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    /* Currículo hero */
+    .curriculo-hero { overflow: hidden; }
+    .curriculo-hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      border: 3px solid var(--warm-200);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .curriculo-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; left: -80px;
+      width: 240px; height: 240px;
+      border-radius: 50%;
+      background: var(--warm-50);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    /* Grade de pontos (como tapete antiderrapante / base de equilíbrio) */
+    .deco-dots {
+      position: absolute;
+      pointer-events: none;
+      background-image: radial-gradient(circle, var(--warm-400) 1.5px, transparent 1.5px);
+      background-size: 22px 22px;
+      border-radius: 4px;
+    }
+
+    /* Padrão de cruzes (símbolo médico / fisioterapia) nos headers escuros */
+    .deco-plus-bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        url("data:image/svg+xml,%3Csvg width='44' height='44' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='20' y='12' width='4' height='20' rx='1' fill='white' fill-opacity='0.06'/%3E%3Crect x='12' y='20' width='20' height='4' rx='1' fill='white' fill-opacity='0.06'/%3E%3C/svg%3E");
+    }
+
     /* ──────────────────────────────
        MOBILE
     ────────────────────────────── */
@@ -1160,6 +1303,9 @@
 
   <!-- HERO -->
   <section class="hero">
+    <!-- pontos decorativos (tapete de reabilitação) -->
+    <div class="deco-dots" style="width:100px;height:100px;opacity:0.13;bottom:100px;left:60px;z-index:0;"></div>
+    <div class="deco-dots" style="width:80px;height:80px;opacity:0.10;top:80px;left:200px;z-index:0;"></div>
     <div class="container">
       <div class="hero-inner">
         <div class="hero-text">
@@ -1223,6 +1369,8 @@
   <section class="clinica-bg-section">
     <img src="clinica-fisio-jpg.png" alt="Consultório da Dra. Fernanda Rodrigues" class="clinica-bg-img">
     <div class="clinica-bg-overlay"></div>
+    <div style="position:absolute;top:-80px;left:-80px;width:320px;height:320px;border-radius:50%;border:3px solid rgba(255,255,255,0.15);pointer-events:none;z-index:1;"></div>
+    <div style="position:absolute;bottom:-60px;right:-60px;width:220px;height:220px;border-radius:50%;border:2px solid rgba(255,255,255,0.10);pointer-events:none;z-index:1;"></div>
     <div class="clinica-bg-content">
       <div class="tag">Nosso espaço</div>
       <h2>A recuperação começa no lugar mais confortável: a sua casa</h2>
@@ -1421,6 +1569,7 @@
 
   <!-- CTA FINAL -->
   <section class="cta-section">
+    <div class="deco-plus-bg"></div>
     <div class="container">
       <div class="tag">Agende agora</div>
       <h2>Pronto para começar a recuperação em casa?</h2>
@@ -1477,6 +1626,7 @@
 <main id="page-servicos" class="page">
 
   <div class="servicos-header">
+    <div class="deco-plus-bg"></div>
     <div class="container">
       <div class="tag">Programas de tratamento</div>
       <h1>Serviços especializados</h1>
@@ -1664,6 +1814,7 @@
 
   <!-- CTA SERVIÇOS -->
   <section class="cta-section">
+    <div class="deco-plus-bg"></div>
     <div class="container">
       <h2>Agende sua avaliação</h2>
       <p>O primeiro passo é uma ligação ou mensagem. A Dra. Fernanda agenda a visita e vai até você.</p>
@@ -1814,6 +1965,7 @@
   </section>
 
   <section class="cta-section">
+    <div class="deco-plus-bg"></div>
     <div class="container">
       <h2>Não sabe por onde começar?</h2>
       <p>A avaliação inicial acontece na sua casa. A Dra. Fernanda vai até você, avalia e define o melhor plano.</p>
@@ -2047,6 +2199,7 @@
 <main id="page-agenda" class="page agenda-page">
 
   <div class="agenda-header-section">
+    <div class="deco-plus-bg"></div>
     <div class="container">
       <h1>Agendar atendimento domiciliar</h1>
       <p>Escolha o melhor horário. A Dra. Fernanda vai até você</p>
