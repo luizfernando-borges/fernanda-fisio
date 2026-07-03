@@ -132,7 +132,7 @@
     }
 
     // Redireciona por tipo de usuário
-    if (email === ADMIN_EMAIL) {
+    if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
       window.location.href = 'admin.html';
     } else {
       window.location.href = 'paciente.html';
@@ -169,7 +169,7 @@
   db.auth.getSession().then(({ data: { session } }) => {
     if (session) {
       const email = session.user.email;
-      window.location.href = email === ADMIN_EMAIL ? 'admin.html' : 'paciente.html';
+      window.location.href = email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin.html' : 'paciente.html';
     }
   });
 </script>
