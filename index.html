@@ -2244,4 +2244,12 @@
 
   function bookSlot(date, hour) {
     const dateStr = date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
-    const msg = `Olá! Gostaria de
+    const msg = `Olá! Gostaria de agendar uma avaliação para ${dateStr} às ${hour}.`;
+    window.open('https://wa.me/5511996662826?text=' + encodeURIComponent(msg), '_blank');
+  }
+
+  buildAgenda();
+</script>
+
+</body>
+</html>
