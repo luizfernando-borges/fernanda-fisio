@@ -111,6 +111,7 @@
     /* ───── PAGES ───── */
     .page { display: none; padding-top: var(--nav-h); }
     .page.active { display: block; }
+    #page-cliente.active { display: flex; }
 
     /* ───── CONTAINER ───── */
     .container {
@@ -1142,7 +1143,7 @@
       <li><a href="#" onclick="showPage('tratamentos'); return false;" id="nav-tratamentos">Tratamentos</a></li>
       <li><a href="#" onclick="showPage('curriculo'); return false;" id="nav-curriculo">Currículo</a></li>
       <li><a href="#" onclick="showPage('agenda'); return false;" id="nav-agenda">Agenda</a></li>
-      <li><a href="#" onclick="showPage('cliente'); return false;" id="nav-cliente" class="nav-cta">Área do cliente</a></li>
+      <li><a href="/app/login" id="nav-cliente" class="nav-cta">Área do cliente</a></li>
     </ul>
     <button class="nav-menu-btn" id="menu-btn" onclick="toggleMenu()" aria-label="Menu">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -2172,7 +2173,7 @@
 ────────────────────────────────── -->
 <script>
   // ── Navegação entre páginas ──
-  const pages = ['home','servicos','tratamentos','curriculo','agenda','cliente'];
+  const pages = ['home','servicos','tratamentos','curriculo','agenda'];
 
   function showPage(id) {
     pages.forEach(p => {
