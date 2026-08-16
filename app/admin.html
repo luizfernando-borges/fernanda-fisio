@@ -273,18 +273,85 @@
 
 <!-- MODAL: Novo paciente -->
 <div class="overlay hidden" id="modal-novo-paciente">
-  <div class="modal">
+  <div class="modal" style="max-width:660px">
     <h3>Novo paciente</h3>
+
+    <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--w600);margin:0 0 10px;padding-bottom:6px;border-bottom:2px solid var(--w100)">Identificação</div>
+    <div class="fg"><label>Nome completo *</label><input id="np-name" type="text" placeholder="Ex: Maria da Silva Santos"/></div>
     <div class="form-row">
-      <div class="fg"><label>Nome completo *</label><input id="np-name" type="text" placeholder="Ex: João da Silva"/></div>
-      <div class="fg"><label>E-mail</label><input id="np-email" type="email" placeholder="paciente@email.com"/></div>
+      <div class="fg"><label>CPF</label><input id="np-cpf" type="text" placeholder="000.000.000-00"/></div>
+      <div class="fg"><label>RG</label><input id="np-rg" type="text" placeholder="00.000.000-0"/></div>
     </div>
     <div class="form-row">
-      <div class="fg"><label>Telefone</label><input id="np-phone" type="tel" placeholder="(00) 00000-0000"/></div>
       <div class="fg"><label>Data de nascimento</label><input id="np-birth" type="date"/></div>
+      <div class="fg"><label>Sexo</label>
+        <select id="np-sex">
+          <option value="">— Selecione —</option>
+          <option value="F">Feminino</option>
+          <option value="M">Masculino</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
     </div>
-    <div class="fg"><label>Diagnóstico / condição</label><input id="np-diagnosis" type="text" placeholder="Ex: Pós-AVC, paralisia cerebral..."/></div>
+    <div class="form-row">
+      <div class="fg"><label>Estado civil</label>
+        <select id="np-marital">
+          <option value="">— Selecione —</option>
+          <option value="Solteiro(a)">Solteiro(a)</option>
+          <option value="Casado(a)">Casado(a)</option>
+          <option value="Divorciado(a)">Divorciado(a)</option>
+          <option value="Viúvo(a)">Viúvo(a)</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+      <div class="fg"><label>Profissão</label><input id="np-profession" type="text" placeholder="Ex: Professora, Aposentado..."/></div>
+    </div>
+    <div class="fg"><label>Escolaridade</label>
+      <select id="np-education">
+        <option value="">— Selecione —</option>
+        <option value="Sem escolaridade">Sem escolaridade</option>
+        <option value="Ensino fundamental incompleto">Ensino fundamental incompleto</option>
+        <option value="Ensino fundamental completo">Ensino fundamental completo</option>
+        <option value="Ensino médio incompleto">Ensino médio incompleto</option>
+        <option value="Ensino médio completo">Ensino médio completo</option>
+        <option value="Ensino superior incompleto">Ensino superior incompleto</option>
+        <option value="Ensino superior completo">Ensino superior completo</option>
+        <option value="Pós-graduação">Pós-graduação</option>
+      </select>
+    </div>
+
+    <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--w600);margin:16px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--w100)">Contato</div>
+    <div class="form-row">
+      <div class="fg"><label>Telefone principal</label><input id="np-phone" type="tel" placeholder="(11) 99999-9999"/></div>
+      <div class="fg"><label>Telefone secundário</label><input id="np-phone2" type="tel" placeholder="(11) 99999-9999"/></div>
+    </div>
+    <div class="fg"><label>E-mail</label><input id="np-email" type="email" placeholder="paciente@email.com"/></div>
+
+    <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--w600);margin:16px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--w100)">Endereço</div>
+    <div class="form-row">
+      <div class="fg" style="flex:2"><label>Rua / Avenida</label><input id="np-street" type="text" placeholder="Ex: Rua das Flores"/></div>
+      <div class="fg" style="flex:0.7"><label>Número</label><input id="np-number" type="text" placeholder="123"/></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Complemento</label><input id="np-compl" type="text" placeholder="Apto, Casa, Bloco..."/></div>
+      <div class="fg"><label>Bairro</label><input id="np-hood" type="text" placeholder="Ex: Centro"/></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Cidade</label><input id="np-city" type="text" placeholder="Ex: Ribeirão Pires"/></div>
+      <div class="fg"><label>CEP</label><input id="np-zip" type="text" placeholder="00000-000"/></div>
+    </div>
+
+    <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--w600);margin:16px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--w100)">Contato de emergência</div>
+    <div class="form-row">
+      <div class="fg"><label>Nome</label><input id="np-emerg-name" type="text" placeholder="Nome do familiar"/></div>
+      <div class="fg"><label>Parentesco</label><input id="np-emerg-rel" type="text" placeholder="Ex: Filha, Marido..."/></div>
+    </div>
+    <div class="fg"><label>Telefone de emergência</label><input id="np-emerg-phone" type="tel" placeholder="(11) 99999-9999"/></div>
+
+    <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--w600);margin:16px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--w100)">Dados clínicos</div>
+    <div class="fg"><label>Diagnóstico / condição</label><input id="np-diagnosis" type="text" placeholder="Ex: Pós-AVC, LCA, Fratura de fêmur..."/></div>
     <div class="fg"><label>Observações iniciais</label><textarea id="np-notes" placeholder="Informações relevantes sobre o caso..."></textarea></div>
+
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('novo-paciente')">Cancelar</button>
       <button class="btn" onclick="savePatient()">Salvar paciente</button>
@@ -294,14 +361,47 @@
 
 <!-- MODAL: Nova evolução -->
 <div class="overlay hidden" id="modal-evolucao">
-  <div class="modal">
+  <div class="modal" style="max-width:580px">
     <h3>Registrar evolução</h3>
+
+    <!-- Identificação da sessão -->
     <div class="form-row">
       <div class="fg"><label>Data da sessão</label><input id="evo-date" type="date"/></div>
       <div class="fg"><label>Nº da sessão</label><input id="evo-num" type="number" min="1" placeholder="Ex: 5"/></div>
     </div>
+
+    <!-- Checkboxes rápidos -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+      <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer;background:var(--g50);border:1.5px solid var(--g200);border-radius:8px;padding:10px 12px;font-weight:500">
+        <input type="checkbox" id="evo-presence" checked style="accent-color:var(--w400);width:15px;height:15px"> Paciente presente
+      </label>
+      <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer;background:var(--g50);border:1.5px solid var(--g200);border-radius:8px;padding:10px 12px;font-weight:500">
+        <input type="checkbox" id="evo-payment" style="accent-color:var(--w400);width:15px;height:15px"> Pagamento recebido
+      </label>
+      <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer;background:var(--g50);border:1.5px solid var(--g200);border-radius:8px;padding:10px 12px;font-weight:500">
+        <input type="checkbox" id="evo-pain-present" style="accent-color:var(--w400);width:15px;height:15px"> Relata dor hoje
+      </label>
+    </div>
+
+    <!-- Progresso percebido -->
+    <div class="fg">
+      <label>Evolução desde a última sessão</label>
+      <div style="display:flex;gap:8px">
+        <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1.5px solid var(--g200);border-radius:8px;cursor:pointer;font-size:13px;transition:all .15s" id="prog-melhorou">
+          <input type="radio" name="evo-progress" value="melhorou" style="display:none"> 📈 Melhorou
+        </label>
+        <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1.5px solid var(--g200);border-radius:8px;cursor:pointer;font-size:13px;transition:all .15s" id="prog-igual">
+          <input type="radio" name="evo-progress" value="igual" style="display:none"> ➡️ Igual
+        </label>
+        <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1.5px solid var(--g200);border-radius:8px;cursor:pointer;font-size:13px;transition:all .15s" id="prog-piorou">
+          <input type="radio" name="evo-progress" value="piorou" style="display:none"> 📉 Piorou
+        </label>
+      </div>
+    </div>
+
+    <!-- Escalas clínicas -->
     <div class="fg" style="margin-bottom:20px">
-      <label style="margin-bottom:12px;display:block">Escalas de avaliação (0 = pior · 10 = melhor)</label>
+      <label style="margin-bottom:12px;display:block">Escalas clínicas (0 = pior · 10 = melhor)</label>
       <div class="score-row">
         <div class="score-group">
           <label>Mobilidade</label>
@@ -320,9 +420,20 @@
         </div>
       </div>
     </div>
-    <div class="fg"><label>Observações da sessão</label><textarea id="evo-notes" placeholder="Descreva o que foi trabalhado, reações do paciente..."></textarea></div>
-    <div class="fg"><label>Metas alcançadas</label><input id="evo-goals" type="text" placeholder="Ex: Conseguiu sentar sem apoio"/></div>
-    <div class="fg"><label>Próximas metas</label><input id="evo-next" type="text" placeholder="Ex: Treinar equilíbrio em pé"/></div>
+
+    <!-- Conduta -->
+    <div class="fg"><label>Conduta realizada</label><textarea id="evo-conduct" placeholder="Técnicas e recursos utilizados na sessão (ex: TENS, mobilização passiva, treino de marcha...)" style="min-height:64px"></textarea></div>
+
+    <!-- Observações subjetivas -->
+    <div class="fg"><label>Observações / relato do paciente</label><textarea id="evo-notes" placeholder="O que o paciente relatou, como reagiu aos procedimentos..."></textarea></div>
+
+    <!-- Metas -->
+    <div class="fg"><label>Metas alcançadas nesta sessão</label><input id="evo-goals" type="text" placeholder="Ex: Conseguiu sentar sem apoio"/></div>
+    <div class="fg"><label>Metas para a próxima sessão</label><input id="evo-next" type="text" placeholder="Ex: Treinar equilíbrio em pé"/></div>
+
+    <!-- Exercícios para casa -->
+    <div class="fg"><label>Exercícios prescritos para casa</label><input id="evo-home" type="text" placeholder="Ex: Alongamento de MMII 3x ao dia, 30 segundos cada"/></div>
+
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('evolucao')">Cancelar</button>
       <button class="btn" onclick="saveEvolution()">Salvar evolução</button>
@@ -457,20 +568,38 @@ function renderSidebarPatients() {
 }
 
 async function savePatient() {
-  const name = document.getElementById('np-name').value.trim();
+  const g = id => (document.getElementById(id)?.value || '').trim() || null;
+  const name = g('np-name');
   if (!name) return alert('Nome é obrigatório');
   const payload = {
     name,
-    email: document.getElementById('np-email').value.trim() || null,
-    phone: document.getElementById('np-phone').value.trim() || null,
-    birth_date: document.getElementById('np-birth').value || null,
-    diagnosis: document.getElementById('np-diagnosis').value.trim() || null,
-    notes: document.getElementById('np-notes').value.trim() || null,
+    email:          g('np-email'),
+    phone:          g('np-phone'),
+    phone2:         g('np-phone2'),
+    birth_date:     g('np-birth'),
+    sex:            g('np-sex'),
+    marital_status: g('np-marital'),
+    profession:     g('np-profession'),
+    education:      g('np-education'),
+    cpf:            g('np-cpf'),
+    rg:             g('np-rg'),
+    address_street: g('np-street'),
+    address_number: g('np-number'),
+    address_compl:  g('np-compl'),
+    address_hood:   g('np-hood'),
+    address_city:   g('np-city'),
+    address_zip:    g('np-zip'),
+    emerg_name:     g('np-emerg-name'),
+    emerg_relation: g('np-emerg-rel'),
+    emerg_phone:    g('np-emerg-phone'),
+    diagnosis:      g('np-diagnosis'),
+    notes:          g('np-notes'),
   };
   const { error } = await db.from('patients').insert(payload);
   if (error) { alert('Erro ao salvar: ' + error.message); return; }
   closeModal('novo-paciente');
-  ['np-name','np-email','np-phone','np-birth','np-diagnosis','np-notes'].forEach(id => document.getElementById(id).value = '');
+  document.querySelectorAll('#modal-novo-paciente input, #modal-novo-paciente select, #modal-novo-paciente textarea')
+    .forEach(el => el.value = '');
   loadPatients();
   loadDashboard();
 }
@@ -503,6 +632,30 @@ function setDetailTab(tab) {
 // ── EVOLUTIONS ──
 function openEvoModal() {
   document.getElementById('evo-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('evo-num').value = '';
+  document.getElementById('evo-presence').checked = true;
+  document.getElementById('evo-payment').checked = false;
+  document.getElementById('evo-pain-present').checked = false;
+  document.querySelectorAll('input[name="evo-progress"]').forEach(r => r.checked = false);
+  document.querySelectorAll('#prog-melhorou,#prog-igual,#prog-piorou').forEach(l => l.style.cssText = '');
+  ['sc-mobility','sc-pain','sc-func'].forEach(id => {
+    document.getElementById(id).value = 5;
+    updateScore(id.replace('sc-',''), 5);
+  });
+  ['evo-conduct','evo-notes','evo-goals','evo-next','evo-home'].forEach(id => document.getElementById(id).value = '');
+
+  // Radio buttons de progresso — estilo visual
+  document.querySelectorAll('input[name="evo-progress"]').forEach(r => {
+    r.closest('label').onclick = function() {
+      document.querySelectorAll('input[name="evo-progress"]').forEach(x => {
+        x.checked = false;
+        x.closest('label').style.cssText = '';
+      });
+      r.checked = true;
+      r.closest('label').style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1.5px solid var(--w400);border-radius:8px;cursor:pointer;font-size:13px;background:var(--w50);color:var(--w800);font-weight:600';
+    };
+  });
+
   openModal('evolucao');
 }
 
@@ -511,16 +664,23 @@ function updateScore(type, val) {
 }
 
 async function saveEvolution() {
+  const g = id => (document.getElementById(id)?.value || '').trim() || null;
   const payload = {
-    patient_id: currentPatientId,
-    session_date: document.getElementById('evo-date').value,
-    session_number: parseInt(document.getElementById('evo-num').value) || null,
-    mobility_score: parseInt(document.getElementById('sc-mobility').value),
-    pain_score: parseInt(document.getElementById('sc-pain').value),
-    function_score: parseInt(document.getElementById('sc-func').value),
-    notes: document.getElementById('evo-notes').value.trim() || null,
-    goals_met: document.getElementById('evo-goals').value.trim() || null,
-    next_goals: document.getElementById('evo-next').value.trim() || null,
+    patient_id:       currentPatientId,
+    session_date:     g('evo-date') || new Date().toISOString().split('T')[0],
+    session_number:   parseInt(document.getElementById('evo-num').value) || null,
+    presence:         document.getElementById('evo-presence').checked,
+    payment_received: document.getElementById('evo-payment').checked,
+    pain_present:     document.getElementById('evo-pain-present').checked,
+    progress:         document.querySelector('input[name="evo-progress"]:checked')?.value || null,
+    mobility_score:   parseInt(document.getElementById('sc-mobility').value),
+    pain_score:       parseInt(document.getElementById('sc-pain').value),
+    function_score:   parseInt(document.getElementById('sc-func').value),
+    conduct:          g('evo-conduct'),
+    notes:            g('evo-notes'),
+    goals_met:        g('evo-goals'),
+    next_goals:       g('evo-next'),
+    home_exercises:   g('evo-home'),
   };
   const { error } = await db.from('evolutions').insert(payload);
   if (error) { alert('Erro: ' + error.message); return; }
@@ -535,20 +695,28 @@ async function loadEvolutions() {
     .order('session_date', { ascending: false });
   const container = document.getElementById('detail-evolucoes');
   if (!data || !data.length) { container.innerHTML = '<div class="empty">Nenhuma evolução registrada ainda.<br>Clique em "+ Registrar evolução" para começar.</div>'; return; }
+  const progressIcon = { melhorou:'📈', igual:'➡️', piorou:'📉' };
   container.innerHTML = data.map(e => `
     <div class="evo-item">
       <div class="evo-header">
         <span class="evo-date">${new Date(e.session_date).toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long'})}</span>
         <span class="evo-session">Sessão ${e.session_number || '—'}</span>
       </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+        ${e.presence === false ? '<span style="background:#FEE2E2;color:#B91C1C;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600">Ausente</span>' : ''}
+        ${e.payment_received ? '<span style="background:#DCFCE7;color:#15803D;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600">Pagamento OK</span>' : ''}
+        ${e.progress ? `<span style="background:var(--g100);color:var(--g600);padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600">${progressIcon[e.progress] || ''} ${e.progress.charAt(0).toUpperCase()+e.progress.slice(1)}</span>` : ''}
+      </div>
       <div class="evo-scores">
         <span class="score-pill mobility">Mobilidade: ${e.mobility_score ?? '—'}/10</span>
         <span class="score-pill pain">Dor: ${e.pain_score ?? '—'}/10</span>
         <span class="score-pill func">Funcionalidade: ${e.function_score ?? '—'}/10</span>
       </div>
-      ${e.notes ? `<div class="evo-notes">${e.notes}</div>` : ''}
+      ${e.conduct ? `<div style="margin-top:8px;font-size:12px;font-weight:500;color:var(--g600)">Conduta: <span style="font-weight:400">${e.conduct}</span></div>` : ''}
+      ${e.notes ? `<div class="evo-notes" style="margin-top:6px">${e.notes}</div>` : ''}
       ${e.goals_met ? `<div style="margin-top:8px;font-size:12px;color:#15803D">✓ ${e.goals_met}</div>` : ''}
       ${e.next_goals ? `<div style="font-size:12px;color:var(--g400)">→ Próximo: ${e.next_goals}</div>` : ''}
+      ${e.home_exercises ? `<div style="font-size:12px;color:var(--w600);margin-top:4px">🏠 Casa: ${e.home_exercises}</div>` : ''}
     </div>`).join('');
 }
 
@@ -673,25 +841,27 @@ function assessSLIDER(label, id) {
 
 async function loadAssessment() {
   const c = document.getElementById('detail-avaliacao');
-  const { data: a } = await db.from('patient_assessments')
-    .select('*').eq('patient_id', currentPatientId).maybeSingle();
+  const { data: row } = await db.from('evaluations')
+    .select('*').eq('patient_id', currentPatientId).eq('type', 'general')
+    .order('updated_at', { ascending: false }).limit(1).maybeSingle();
+  const a = row?.data || null;
+  const evalDate = row?.evaluation_date || null;
 
   const v = (field) => a ? (a[field] ?? '') : '';
-  const sv = (field, def='5') => a ? (a[field] ?? def) : def;
 
   c.innerHTML = `
   ${a ? `<div style="margin-bottom:14px;display:flex;align-items:center;gap:10px">
-    <span class="assess-badge">&#10003; Avaliação salva em ${new Date(a.assessment_date+'T12:00:00').toLocaleDateString('pt-BR')}</span>
+    <span class="assess-badge">✓ Avaliação salva em ${evalDate ? new Date(evalDate+'T12:00:00').toLocaleDateString('pt-BR') : '—'}</span>
   </div>` : `<div style="margin-bottom:14px;padding:12px 16px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;font-size:13px;color:#92400E">
-    &#9888;&#65039; Avaliação inicial não realizada. Preencha abaixo para liberar o plano de exercícios.
+    ⚠️ Avaliação inicial não realizada. Preencha abaixo para liberar o plano de exercícios.
   </div>`}
 
   <!-- 1. Anamnese -->
   <div class="assess-section">
-    <div class="assess-title">1. Anamnese</div>
+    <div class="assess-title">📋 1. Anamnese</div>
     <div class="assess-row" style="margin-bottom:14px">
       <div class="fg"><label>Data da avaliação</label>
-        <input id="av-assessment_date" type="date" value="${v('assessment_date') || new Date().toISOString().split('T')[0]}"
+        <input id="av-assessment_date" type="date" value="${evalDate || new Date().toISOString().split('T')[0]}"
           style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
       </div>
       <div></div>
@@ -710,7 +880,7 @@ async function loadAssessment() {
 
   <!-- 2. Avaliação Funcional -->
   <div class="assess-section">
-    <div class="assess-title">2. Avaliação Funcional</div>
+    <div class="assess-title">🚶 2. Avaliação Funcional</div>
     <div class="assess-row" style="margin-bottom:14px">
       ${assessSEL('Nível de independência funcional','functional_level',['— Selecione —','Independente','Assistido parcialmente','Assistido totalmente','Dependente'])}
       ${assessSEL('Auxílio de marcha','mobility_aids',['— Selecione —','Nenhum','Bengala','Andador','Muleta(s)','Cadeira de rodas','Outro'])}
@@ -720,13 +890,13 @@ async function loadAssessment() {
 
   <!-- 3. Exame Físico -->
   <div class="assess-section">
-    <div class="assess-title">3. Exame Físico</div>
+    <div class="assess-title">🔍 3. Exame Físico</div>
     <div class="assess-row" style="margin-bottom:14px">
       ${assessTA('Inspeção geral','inspection_notes','Postura, marcha, deformidades visíveis, assimetrias...')}
       ${assessTA('Amplitude de movimento (ADM)','rom_notes','Limitações de ADM por segmento...')}
     </div>
     <div class="assess-row" style="margin-bottom:14px">
-      ${assessTA('Força muscular','muscle_strength_notes','Avaliação de força por grupos musculares (escala 0-5)...')}
+      ${assessTA('Força muscular','muscle_strength_notes','Avaliação de força por grupos musculares (escala 0–5)...')}
       ${assessTA('Coordenação','coordination_notes','Provas de coordenação, diadococinesia...')}
     </div>
     <div class="assess-row">
@@ -737,7 +907,7 @@ async function loadAssessment() {
 
   <!-- 4. Escalas Iniciais -->
   <div class="assess-section">
-    <div class="assess-title">4. Escalas de Avaliação Iniciais (0 = pior · 10 = melhor)</div>
+    <div class="assess-title">📊 4. Escalas de Avaliação Iniciais (0 = pior · 10 = melhor)</div>
     <div class="score-row">
       ${assessSLIDER('Mobilidade inicial','initial_mobility_score')}
       ${assessSLIDER('Dor inicial (invertida)','initial_pain_score')}
@@ -747,10 +917,10 @@ async function loadAssessment() {
 
   <!-- 5. Diagnóstico e Plano -->
   <div class="assess-section">
-    <div class="assess-title">5. Diagnóstico e Plano Terapêutico</div>
+    <div class="assess-title">🎯 5. Diagnóstico e Plano Terapêutico</div>
     <div style="margin-bottom:14px">${assessTA('Hipótese diagnóstica fisioterapêutica','diagnostic_hypothesis','Diagnóstico cinesiológico-funcional proposto...',true)}</div>
     <div class="assess-row" style="margin-bottom:14px">
-      ${assessTA('Objetivos a curto prazo','short_term_goals','Metas para as próximas 4-8 semanas...')}
+      ${assessTA('Objetivos a curto prazo','short_term_goals','Metas para as próximas 4–8 semanas...')}
       ${assessTA('Objetivos a longo prazo','long_term_goals','Metas para o tratamento completo...')}
     </div>
     <div style="margin-bottom:14px">${assessTA('Conduta terapêutica proposta','treatment_plan','Técnicas, recursos e abordagens planejadas...',true)}</div>
@@ -770,21 +940,21 @@ async function loadAssessment() {
 
   <!-- 6. Observações -->
   <div class="assess-section">
-    <div class="assess-title">6. Observações Adicionais</div>
+    <div class="assess-title">📝 6. Observações Adicionais</div>
     ${assessTA('Observações gerais','additional_notes','Qualquer informação relevante não contemplada acima...',true)}
   </div>
 
   <div class="assess-actions">
-    <button class="btn" onclick="saveAssessment()">Salvar avaliação</button>
+    <button class="btn" onclick="saveAssessment()">💾 Salvar avaliação</button>
   </div>`;
 
-  // Preenche valores salvos
+  // Preenche valores salvos (a = data JSONB; evalDate = evaluation_date do row)
   if (a) {
-    const fields = ['assessment_date','main_complaint','disease_history','medical_history','previous_surgeries',
+    const fields = ['main_complaint','disease_history','medical_history','previous_surgeries',
       'medications','allergies','functional_level','mobility_aids','adl_notes','inspection_notes','rom_notes',
       'muscle_strength_notes','sensitivity','balance_level','coordination_notes','diagnostic_hypothesis',
       'short_term_goals','long_term_goals','treatment_plan','session_frequency','estimated_duration',
-      'additional_notes','coordination_notes'];
+      'additional_notes'];
     fields.forEach(f => {
       const el = document.getElementById('av-' + f);
       if (el && a[f] != null) el.value = a[f];
@@ -803,72 +973,84 @@ async function saveAssessment() {
 
   if (!g('main_complaint')) { alert('Queixa principal é obrigatória'); return; }
 
-  const payload = {
-    patient_id: currentPatientId,
-    assessment_date: g('assessment_date') || new Date().toISOString().split('T')[0],
-    main_complaint: g('main_complaint'),
-    disease_history: g('disease_history'),
-    medical_history: g('medical_history'),
-    previous_surgeries: g('previous_surgeries'),
-    medications: g('medications'),
-    allergies: g('allergies'),
-    functional_level: g('functional_level'),
-    mobility_aids: g('mobility_aids'),
-    adl_notes: g('adl_notes'),
-    inspection_notes: g('inspection_notes'),
-    rom_notes: g('rom_notes'),
-    muscle_strength_notes: g('muscle_strength_notes'),
-    sensitivity: g('sensitivity'),
-    balance_level: g('balance_level'),
-    coordination_notes: g('coordination_notes'),
+  const evalDate = g('assessment_date') || new Date().toISOString().split('T')[0];
+  const data = {
+    main_complaint:         g('main_complaint'),
+    disease_history:        g('disease_history'),
+    medical_history:        g('medical_history'),
+    previous_surgeries:     g('previous_surgeries'),
+    medications:            g('medications'),
+    allergies:              g('allergies'),
+    functional_level:       g('functional_level'),
+    mobility_aids:          g('mobility_aids'),
+    adl_notes:              g('adl_notes'),
+    inspection_notes:       g('inspection_notes'),
+    rom_notes:              g('rom_notes'),
+    muscle_strength_notes:  g('muscle_strength_notes'),
+    sensitivity:            g('sensitivity'),
+    balance_level:          g('balance_level'),
+    coordination_notes:     g('coordination_notes'),
     initial_mobility_score: gi('initial_mobility_score'),
-    initial_pain_score: gi('initial_pain_score'),
+    initial_pain_score:     gi('initial_pain_score'),
     initial_function_score: gi('initial_function_score'),
-    diagnostic_hypothesis: g('diagnostic_hypothesis'),
-    short_term_goals: g('short_term_goals'),
-    long_term_goals: g('long_term_goals'),
-    treatment_plan: g('treatment_plan'),
-    session_frequency: g('session_frequency'),
-    estimated_duration: g('estimated_duration'),
-    additional_notes: g('additional_notes'),
-    updated_at: new Date().toISOString(),
+    diagnostic_hypothesis:  g('diagnostic_hypothesis'),
+    short_term_goals:       g('short_term_goals'),
+    long_term_goals:        g('long_term_goals'),
+    treatment_plan:         g('treatment_plan'),
+    session_frequency:      g('session_frequency'),
+    estimated_duration:     g('estimated_duration'),
+    additional_notes:       g('additional_notes'),
   };
 
-  const { error } = await db.from('patient_assessments').upsert(payload, { onConflict: 'patient_id' });
+  // Verifica se já existe avaliação 'general' para este paciente
+  const { data: existing } = await db.from('evaluations')
+    .select('id').eq('patient_id', currentPatientId).eq('type', 'general')
+    .limit(1).maybeSingle();
+
+  let error;
+  if (existing) {
+    ({ error } = await db.from('evaluations')
+      .update({ data, evaluation_date: evalDate, status: 'completed', updated_at: new Date().toISOString() })
+      .eq('id', existing.id));
+  } else {
+    ({ error } = await db.from('evaluations')
+      .insert({ patient_id: currentPatientId, type: 'general', status: 'completed', evaluation_date: evalDate, data }));
+  }
+
   if (error) { alert('Erro ao salvar: ' + error.message); return; }
   loadAssessment();
 }
 
 // ── EXERCISES ──
 const EXERCISE_BANK = [
-  { cat: 'Mobilidade', items: [
+  { cat: '🔄 Mobilidade', items: [
     'Rotação cervical','Inclinação lateral cervical','Flexão/extensão cervical',
     'Rotação de ombro (pendular)','Flexão de cotovelo','Mobilização de punho e dedos',
     'Rotação interna de quadril','Rotação externa de quadril',
     'Flexão de joelho','Extensão de joelho','Mobilização de tornozelo','Flexão plantar e dorsal'
   ]},
-  { cat: 'Fortalecimento', items: [
+  { cat: '💪 Fortalecimento', items: [
     'Abdução de quadril com faixa','Extensão de joelho (cadeira)','Agachamento assistido',
     'Elevação lateral de braço','Rotação externa de ombro com faixa','Ponte (glúteo)',
     'Elevação de panturrilha','Flexão de cotovelo com peso','Extensão de quadril em pé',
     'Abdominais adaptados (deitado)','Pressão de mãos (isométrico)'
   ]},
-  { cat: 'Equilíbrio', items: [
+  { cat: '⚖️ Equilíbrio', items: [
     'Apoio unipodal (com apoio)','Apoio unipodal (sem apoio)','Marcha tandem',
     'Exercício em superfície instável','Step lateral','Transferência de peso lateral',
     'Alcance funcional anterior','Agachamento em apoio'
   ]},
-  { cat: 'Neurológico', items: [
-    'Rolamento no solo','Transferência deitado para sentado','Transferência sentado para em pé',
+  { cat: '🧠 Neurológico', items: [
+    'Rolamento no solo','Transferência deitado → sentado','Transferência sentado → em pé',
     'Treino de marcha assistida','Treino de marcha com obstáculos',
     'Coordenação mão-olho (bola)','Propriocepção MMII','Dissociação de cinturas',
     'Estimulação sensorial MMSS','Estimulação sensorial MMII','Treino de preensão'
   ]},
-  { cat: 'Respiratório', items: [
+  { cat: '🫁 Respiratório', items: [
     'Respiração diafragmática','Inspirometria incentivada','Huffing',
     'Drenagem postural','Expansão torácica com bastão'
   ]},
-  { cat: 'Domiciliar', items: [
+  { cat: '🏠 Domiciliar', items: [
     'Subir/descer escadas','Caminhada supervisionada (5 min)','Caminhada supervisionada (10 min)',
     'Exercícios de preensão com bolinha','Alongamento de MMII deitado',
     'Exercícios de sentar e levantar','Elevação de braços sentado'
@@ -904,7 +1086,7 @@ async function loadExercises() {
     <div class="exer-layout">
       <div class="exer-panel">
         <h4>Banco de exercícios — clique para adicionar</h4>
-        <input class="exer-search" id="bank-search" placeholder="Buscar exercício..." oninput="filterBank(this.value)"/>
+        <input class="exer-search" id="bank-search" placeholder="🔍 Buscar exercício..." oninput="filterBank(this.value)"/>
         <div id="exer-bank-list" style="max-height:480px;overflow-y:auto"></div>
       </div>
       <div class="exer-panel">
