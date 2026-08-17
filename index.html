@@ -552,15 +552,15 @@
        SERVIÇOS
     ────────────────────────────── */
     .servicos-header {
-      background: var(--warm-800);
-      padding: 72px 0;
+      background: linear-gradient(to bottom, var(--warm-800) 0%, var(--warm-100) 100%);
+      padding: 64px 0 110px;
       position: relative;
       overflow: hidden;
     }
     .servicos-header .container {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      align-items: flex-start;
+      justify-content: flex-start;
       gap: 40px;
     }
     .servicos-header-text { flex: 1; min-width: 0; }
@@ -1153,22 +1153,24 @@
 
     /* Anéis nos headers escuros (evocam bolas e argolas de reabilitação) */
     .cta-section { overflow: hidden; }
+    /* Círculo grande vazio — canto superior direito */
     .cta-section::before {
       content: '';
       position: absolute;
-      top: -110px; right: -130px;
-      width: 480px; height: 480px;
+      top: -130px; right: -100px;
+      width: 450px; height: 450px;
       border-radius: 50%;
-      border: 55px solid rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.11);
       pointer-events: none;
     }
+    /* Círculo médio preenchido — canto inferior esquerdo */
     .cta-section::after {
       content: '';
       position: absolute;
-      bottom: -110px; left: -90px;
-      width: 340px; height: 340px;
+      bottom: -90px; left: -70px;
+      width: 240px; height: 240px;
       border-radius: 50%;
-      border: 40px solid rgba(255,255,255,0.04);
+      background: rgba(255,255,255,0.05);
       pointer-events: none;
     }
 
@@ -1252,12 +1254,30 @@
     }
 
     /* Padrão de cruzes (símbolo médico / fisioterapia) nos headers escuros */
+    /* Decoração: círculos — sem cruzes */
     .deco-plus-bg {
       position: absolute;
       inset: 0;
       pointer-events: none;
-      background-image:
-        url("data:image/svg+xml,%3Csvg width='44' height='44' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='20' y='12' width='4' height='20' rx='1' fill='white' fill-opacity='0.06'/%3E%3Crect x='12' y='20' width='20' height='4' rx='1' fill='white' fill-opacity='0.06'/%3E%3C/svg%3E");
+      overflow: hidden;
+      background: none;
+    }
+    .deco-plus-bg::before {
+      content: '';
+      position: absolute;
+      top: 18px; left: 22%;
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+    }
+    .deco-plus-bg::after {
+      content: '';
+      position: absolute;
+      bottom: -28px; right: 28%;
+      width: 150px; height: 150px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: transparent;
     }
 
     /* ──────────────────────────────
@@ -1775,54 +1795,7 @@
         <h1>Serviços especializados</h1>
         <p>Fisioterapia domiciliar especializada em Ribeirão Pires. A mesma qualidade de uma clínica, sem você sair de casa.</p>
       </div>
-    <div class="servicos-hero-illustration" aria-hidden="true">
-      <svg viewBox="0 0 460 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="spglow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="rgba(255,248,235,0.13)"/>
-            <stop offset="100%" stop-color="rgba(255,248,235,0)"/>
-          </radialGradient>
-        </defs>
 
-        <!-- Aura de fundo -->
-        <circle cx="330" cy="140" r="138" fill="url(#spglow)"/>
-        <!-- Anéis de profundidade -->
-        <circle cx="330" cy="140" r="112" stroke="rgba(255,248,235,0.07)" stroke-width="1.5" fill="none"/>
-        <circle cx="330" cy="140" r="82"  stroke="rgba(255,248,235,0.09)" stroke-width="1"   fill="none"/>
-
-        <!-- COLUNA VERTEBRAL — S-curve anatômica (principal) -->
-        <path d="M 358 18
-                 C 408 36 412 74 372 94
-                 C 332 114 282 120 268 142
-                 C 254 164 258 196 290 214
-                 C 322 232 370 238 372 260"
-              stroke="rgba(255,248,235,0.36)" stroke-width="11" stroke-linecap="round" fill="none"/>
-
-        <!-- Vértebras ao longo da curva -->
-        <circle cx="358" cy="18"  r="10" fill="rgba(255,248,235,0.24)"/>
-        <circle cx="392" cy="46"  r="7"  fill="rgba(255,248,235,0.19)"/>
-        <circle cx="404" cy="76"  r="7"  fill="rgba(255,248,235,0.19)"/>
-        <circle cx="375" cy="96"  r="8"  fill="rgba(255,248,235,0.22)"/>
-        <circle cx="336" cy="112" r="6"  fill="rgba(255,248,235,0.17)"/>
-        <circle cx="295" cy="128" r="6"  fill="rgba(255,248,235,0.17)"/>
-        <circle cx="270" cy="142" r="10" fill="rgba(255,248,235,0.24)"/>
-        <circle cx="264" cy="162" r="6"  fill="rgba(255,248,235,0.17)"/>
-        <circle cx="272" cy="182" r="6"  fill="rgba(255,248,235,0.17)"/>
-        <circle cx="295" cy="200" r="8"  fill="rgba(255,248,235,0.22)"/>
-        <circle cx="328" cy="218" r="6"  fill="rgba(255,248,235,0.17)"/>
-        <circle cx="358" cy="240" r="6"  fill="rgba(255,248,235,0.17)"/>
-        <circle cx="372" cy="260" r="10" fill="rgba(255,248,235,0.24)"/>
-
-        <!-- Coluna secundária (eco, mais suave) -->
-        <path d="M 318 28
-                 C 362 46 366 80 330 100
-                 C 294 120 246 126 232 148
-                 C 218 170 222 202 256 220
-                 C 290 238 332 244 334 264"
-              stroke="rgba(255,248,235,0.13)" stroke-width="5" stroke-linecap="round" fill="none"/>
-
-      </svg>
-    </div>
     </div>
   </div>
 
@@ -2078,51 +2051,7 @@
           <h3>Atendimento com equipamentos e técnicas profissionais</h3>
           <p>A Dra. Fernanda chega na sua casa com tudo: faixas elásticas, bolas terapêuticas, cones, maca dobrável e equipamentos de liberação miofascial. Cada sessão acontece com a mesma estrutura de uma clínica especializada.</p>
         </div>
-        <div class="trat-illus-svg" aria-hidden="true">
-                    <svg viewBox="0 0 380 138" fill="none" xmlns="http://www.w3.org/2000/svg">
 
-  <!-- COLUNA (esquerda) — S-curve menor -->
-  <g transform="translate(68, 10)" opacity="0.38">
-    <path d="M 32 0
-             C 58 10 60 36 40 52
-             C 20 68 4 80 4 104
-             C 4 128 22 134 32 128"
-          stroke="var(--warm-700)" stroke-width="7" stroke-linecap="round" fill="none"/>
-    <circle cx="32" cy="0"   r="6" fill="var(--warm-600)"/>
-    <circle cx="54" cy="24"  r="4" fill="var(--warm-500)"/>
-    <circle cx="48" cy="48"  r="5" fill="var(--warm-600)"/>
-    <circle cx="26" cy="70"  r="4" fill="var(--warm-500)"/>
-    <circle cx="7"  cy="94"  r="5" fill="var(--warm-600)"/>
-    <circle cx="14" cy="118" r="4" fill="var(--warm-500)"/>
-    <circle cx="32" cy="128" r="6" fill="var(--warm-600)"/>
-  </g>
-
-  <!-- MÃO TERAPÊUTICA (direita) — visão palmar, dedos para cima -->
-  <g transform="translate(208, 6)" opacity="0.38">
-    <!-- Polegar -->
-    <ellipse cx="10" cy="82" rx="11" ry="27"
-             fill="var(--warm-400)" stroke="var(--warm-700)" stroke-width="1.5"
-             transform="rotate(-28, 10, 82)"/>
-    <!-- Indicador -->
-    <rect x="30" y="18" width="16" height="56" rx="8"
-          fill="var(--warm-300)" stroke="var(--warm-700)" stroke-width="1.5"/>
-    <!-- Médio (maior) -->
-    <rect x="48" y="6"  width="16" height="66" rx="8"
-          fill="var(--warm-300)" stroke="var(--warm-700)" stroke-width="1.5"/>
-    <!-- Anelar -->
-    <rect x="66" y="12" width="16" height="60" rx="8"
-          fill="var(--warm-300)" stroke="var(--warm-700)" stroke-width="1.5"/>
-    <!-- Mínimo -->
-    <rect x="84" y="28" width="14" height="46" rx="7"
-          fill="var(--warm-300)" stroke="var(--warm-700)" stroke-width="1.5"/>
-    <!-- Palma -->
-    <path d="M 22 70 C 20 70 18 78 18 90 C 18 112 24 130 34 131
-             L 82 131 C 92 131 98 114 98 92 C 98 78 96 70 94 70 Z"
-          fill="var(--warm-400)" stroke="var(--warm-700)" stroke-width="1.5"/>
-  </g>
-
-</svg>
-        </div>
       </div>
       <div class="trat-grid">
         <div class="trat-card">
