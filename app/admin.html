@@ -76,8 +76,14 @@
     tr:last-child td{border-bottom:none}
     tr:hover td{background:var(--g50)}
     .badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+    .badge-ativo{background:#DCFCE7;color:#15803D}
+    .badge-pausado{background:#FEF9C3;color:#854D0E}
+    .badge-finalizado{background:var(--g100);color:var(--g400)}
     .badge-active{background:#DCFCE7;color:#15803D}
     .badge-inactive{background:var(--g100);color:var(--g400)}
+    .filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+    .filter-btn{padding:6px 14px;border-radius:20px;border:1.5px solid var(--g200);background:#fff;color:var(--g600);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+    .filter-btn.active{border-color:var(--w400);background:var(--w50);color:var(--w800);font-weight:600}
 
     /* MODAL */
     .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -226,6 +232,12 @@
           Novo paciente
         </button>
       </div>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="setStatusFilter('todos', this)">Todos</button>
+        <button class="filter-btn" onclick="setStatusFilter('ativo', this)">Ativos</button>
+        <button class="filter-btn" onclick="setStatusFilter('pausado', this)">Pausados</button>
+        <button class="filter-btn" onclick="setStatusFilter('finalizado', this)">Finalizados</button>
+      </div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Nome</th><th>Diagnóstico</th><th>Início</th><th>Status</th><th></th></tr></thead>
@@ -245,9 +257,18 @@
           <h2 id="detail-name"></h2>
           <p id="detail-diag"></p>
         </div>
-        <div style="margin-left:auto;display:flex;gap:8px">
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <span id="detail-status-badge" class="badge"></span>
+          <select id="detail-status-select" onchange="changePatientStatus(this.value)"
+            style="font-size:13px;padding:5px 10px;border:1.5px solid var(--g200);border-radius:8px;color:var(--g700);cursor:pointer;background:#fff">
+            <option value="ativo">Ativo</option>
+            <option value="pausado">Pausado</option>
+            <option value="finalizado">Finalizado</option>
+          </select>
           <button class="btn btn-sm" onclick="openEvoModal()">+ Registrar evolução</button>
           <button class="btn btn-outline btn-sm" onclick="openDocModal()">+ Documento</button>
+          <button class="btn btn-sm" onclick="deletePatient()"
+            style="background:#FEE2E2;color:#B91C1C;border:1.5px solid #FECACA">Excluir</button>
         </div>
       </div>
 
@@ -541,21 +562,39 @@ async function loadDashboard() {
 
 // ── PATIENTS ──
 async function loadPatients() {
-  const { data } = await db.from('patients').select('*').order('name');
+  const { data } = await db.from('patients').select('*').is('deleted_at', null).order('name');
   allPatients = data || [];
   renderPatientsTable();
   renderSidebarPatients();
 }
 
+let currentStatusFilter = 'todos';
+
+function setStatusFilter(status, btn) {
+  currentStatusFilter = status;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPatientsTable();
+}
+
+function statusLabel(s) {
+  return {ativo:'Ativo', pausado:'Pausado', finalizado:'Finalizado'}[s] || s || 'Ativo';
+}
+
 function renderPatientsTable() {
-  const rows = allPatients.map(p => `
-    <tr style="cursor:pointer" onclick="openPatient('${p.id}')">
+  const list = currentStatusFilter === 'todos'
+    ? allPatients
+    : allPatients.filter(p => (p.treatment_status || 'ativo') === currentStatusFilter);
+  const rows = list.map(p => {
+    const st = p.treatment_status || 'ativo';
+    return `<tr style="cursor:pointer" onclick="openPatient('${p.id}')">
       <td><strong>${p.name}</strong></td>
       <td>${p.diagnosis || '—'}</td>
       <td>${p.start_date ? new Date(p.start_date).toLocaleDateString('pt-BR') : '—'}</td>
-      <td><span class="badge ${p.active ? 'badge-active' : 'badge-inactive'}">${p.active ? 'Ativo' : 'Inativo'}</span></td>
+      <td><span class="badge badge-${st}">${statusLabel(st)}</span></td>
       <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openPatient('${p.id}')">Ver</button></td>
-    </tr>`).join('') || '<tr><td colspan="5" class="empty">Nenhum paciente cadastrado</td></tr>';
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" class="empty">Nenhum paciente encontrado</td></tr>';
   document.getElementById('patients-tbody').innerHTML = rows;
 }
 
@@ -604,6 +643,35 @@ async function savePatient() {
   loadDashboard();
 }
 
+// ── PATIENT STATUS / DELETE ──
+async function changePatientStatus(newStatus) {
+  const { error } = await db.from('patients')
+    .update({ treatment_status: newStatus, updated_at: new Date().toISOString() })
+    .eq('id', currentPatientId);
+  if (error) { alert('Erro ao atualizar status: ' + error.message); return; }
+  // Atualiza badge
+  const badge = document.getElementById('detail-status-badge');
+  badge.className = 'badge badge-' + newStatus;
+  badge.textContent = statusLabel(newStatus);
+  // Atualiza lista local
+  const p = allPatients.find(x => x.id === currentPatientId);
+  if (p) p.treatment_status = newStatus;
+  renderPatientsTable();
+}
+
+async function deletePatient() {
+  const p = allPatients.find(x => x.id === currentPatientId);
+  const nome = p?.name || 'este paciente';
+  if (!confirm(`Excluir o cadastro de ${nome}?\n\nOs dados serão arquivados e não aparecerão mais no painel.`)) return;
+  const { error } = await db.from('patients')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', currentPatientId);
+  if (error) { alert('Erro ao excluir: ' + error.message); return; }
+  showPage('pacientes');
+  loadPatients();
+  loadDashboard();
+}
+
 // ── PATIENT DETAIL ──
 async function openPatient(id) {
   currentPatientId = id;
@@ -612,6 +680,12 @@ async function openPatient(id) {
   document.getElementById('detail-avatar').textContent = p.name.charAt(0).toUpperCase();
   document.getElementById('detail-name').textContent = p.name;
   document.getElementById('detail-diag').textContent = (p.diagnosis || '—') + (p.phone ? ' · ' + p.phone : '');
+  // Status badge + select
+  const st = p.treatment_status || 'ativo';
+  const badge = document.getElementById('detail-status-badge');
+  badge.className = 'badge badge-' + st;
+  badge.textContent = statusLabel(st);
+  document.getElementById('detail-status-select').value = st;
   showPage('detalhe');
   setDetailTab('avaliacao');
 }
