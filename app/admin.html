@@ -646,7 +646,7 @@ async function savePatient() {
 // ── PATIENT STATUS / DELETE ──
 async function changePatientStatus(newStatus) {
   const { error } = await db.from('patients')
-    .update({ treatment_status: newStatus, updated_at: new Date().toISOString() })
+    .update({ treatment_status: newStatus })
     .eq('id', currentPatientId);
   if (error) { alert('Erro ao atualizar status: ' + error.message); return; }
   // Atualiza badge
