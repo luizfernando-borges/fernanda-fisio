@@ -549,10 +549,20 @@
     .contato-item span { font-size: 12px; color: rgba(255,255,255,0.55); text-align: center; }
 
     /* ──────────────────────────────
+       SERVIÇOS — wrapper gradiente
+    ────────────────────────────── */
+    .servicos-gradient-wrap {
+      background: linear-gradient(to bottom, var(--warm-800) 0%, #ffffff 100%);
+    }
+    .servicos-gradient-wrap > section {
+      background: transparent;
+    }
+
+    /* ──────────────────────────────
        SERVIÇOS
     ────────────────────────────── */
     .servicos-header {
-      background: linear-gradient(to bottom, var(--warm-800) 0%, var(--warm-100) 100%);
+      background: transparent;
       padding: 64px 0 110px;
       position: relative;
       overflow: hidden;
@@ -1788,6 +1798,7 @@
 ══════════════════════════════════ -->
 <main id="page-servicos" class="page">
 
+  <div class="servicos-gradient-wrap">
   <div class="servicos-header">
     <div class="container">
       <div class="servicos-header-text">
@@ -1890,6 +1901,7 @@
       </div>
     </div>
   </section>
+  </div><!-- /servicos-gradient-wrap -->
 
   <!-- COMO FUNCIONA -->
   <section class="processo-section">
