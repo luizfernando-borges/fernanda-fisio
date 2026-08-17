@@ -237,6 +237,7 @@
         <button class="filter-btn" onclick="setStatusFilter('ativo', this)">Ativos</button>
         <button class="filter-btn" onclick="setStatusFilter('pausado', this)">Pausados</button>
         <button class="filter-btn" onclick="setStatusFilter('finalizado', this)">Finalizados</button>
+        <button class="filter-btn" onclick="setStatusFilter('arquivados', this)" style="margin-left:auto;color:#92400E;border-color:#FDE68A">📦 Arquivados</button>
       </div>
       <div class="table-wrap">
         <table>
@@ -267,8 +268,8 @@
           </select>
           <button class="btn btn-sm" onclick="openEvoModal()">+ Registrar evolução</button>
           <button class="btn btn-outline btn-sm" onclick="openDocModal()">+ Documento</button>
-          <button class="btn btn-sm" onclick="deletePatient()"
-            style="background:#FEE2E2;color:#B91C1C;border:1.5px solid #FECACA">Excluir</button>
+          <button class="btn btn-sm" onclick="archivePatient()"
+            style="background:#FEF3C7;color:#92400E;border:1.5px solid #FDE68A">📦 Arquivar</button>
         </div>
       </div>
 
@@ -562,7 +563,10 @@ async function loadDashboard() {
 
 // ── PATIENTS ──
 async function loadPatients() {
-  const { data } = await db.from('patients').select('*').is('deleted_at', null).order('name');
+  const { data: ativos } = await db.from('patients').select('*').is('deleted_at', null).order('name');
+  const { data: arquivados } = await db.from('patients').select('*').not('deleted_at', 'is', null).order('name');
+  allPatients = ativos || [];
+  allArchived = arquivados || [];
   allPatients = data || [];
   renderPatientsTable();
   renderSidebarPatients();
@@ -582,19 +586,31 @@ function statusLabel(s) {
 }
 
 function renderPatientsTable() {
-  const list = currentStatusFilter === 'todos'
-    ? allPatients
-    : allPatients.filter(p => (p.treatment_status || 'ativo') === currentStatusFilter);
-  const rows = list.map(p => {
-    const st = p.treatment_status || 'ativo';
-    return `<tr style="cursor:pointer" onclick="openPatient('${p.id}')">
-      <td><strong>${p.name}</strong></td>
-      <td>${p.diagnosis || '—'}</td>
-      <td>${p.start_date ? new Date(p.start_date).toLocaleDateString('pt-BR') : '—'}</td>
-      <td><span class="badge badge-${st}">${statusLabel(st)}</span></td>
-      <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openPatient('${p.id}')">Ver</button></td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="5" class="empty">Nenhum paciente encontrado</td></tr>';
+  let list, rows;
+  if (currentStatusFilter === 'arquivados') {
+    rows = (allArchived.length ? allArchived : []).map(p => `
+      <tr>
+        <td><strong>${p.name}</strong></td>
+        <td>${p.diagnosis || '—'}</td>
+        <td>${p.deleted_at ? new Date(p.deleted_at).toLocaleDateString('pt-BR') : '—'}</td>
+        <td><span class="badge badge-finalizado">Arquivado</span></td>
+        <td><button class="btn btn-sm btn-outline btn-sm" onclick="reactivatePatient('${p.id}')">↩ Reativar</button></td>
+      </tr>`).join('') || '<tr><td colspan="5" class="empty">Nenhum paciente arquivado</td></tr>';
+  } else {
+    list = currentStatusFilter === 'todos'
+      ? allPatients
+      : allPatients.filter(p => (p.treatment_status || 'ativo') === currentStatusFilter);
+    rows = list.map(p => {
+      const st = p.treatment_status || 'ativo';
+      return `<tr style="cursor:pointer" onclick="openPatient('${p.id}')">
+        <td><strong>${p.name}</strong></td>
+        <td>${p.diagnosis || '—'}</td>
+        <td>${p.start_date ? new Date(p.start_date).toLocaleDateString('pt-BR') : '—'}</td>
+        <td><span class="badge badge-${st}">${statusLabel(st)}</span></td>
+        <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openPatient('${p.id}')">Ver</button></td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="5" class="empty">Nenhum paciente encontrado</td></tr>';
+  }
   document.getElementById('patients-tbody').innerHTML = rows;
 }
 
@@ -659,15 +675,27 @@ async function changePatientStatus(newStatus) {
   renderPatientsTable();
 }
 
-async function deletePatient() {
+async function archivePatient() {
   const p = allPatients.find(x => x.id === currentPatientId);
   const nome = p?.name || 'este paciente';
-  if (!confirm(`Excluir o cadastro de ${nome}?\n\nOs dados serão arquivados e não aparecerão mais no painel.`)) return;
+  if (!confirm(`Arquivar ${nome}?\n\nO cadastro ficará na aba "Arquivados" e pode ser reativado a qualquer momento.`)) return;
   const { error } = await db.from('patients')
     .update({ deleted_at: new Date().toISOString() })
     .eq('id', currentPatientId);
-  if (error) { alert('Erro ao excluir: ' + error.message); return; }
+  if (error) { alert('Erro ao arquivar: ' + error.message); return; }
   showPage('pacientes');
+  loadPatients();
+  loadDashboard();
+}
+
+async function reactivatePatient(id) {
+  const p = allArchived.find(x => x.id === id);
+  const nome = p?.name || 'este paciente';
+  if (!confirm(`Reativar ${nome}?\n\nVoltará para a lista como Ativo.`)) return;
+  const { error } = await db.from('patients')
+    .update({ deleted_at: null, treatment_status: 'ativo' })
+    .eq('id', id);
+  if (error) { alert('Erro ao reativar: ' + error.message); return; }
   loadPatients();
   loadDashboard();
 }
