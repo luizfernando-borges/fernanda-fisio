@@ -6,7 +6,198 @@
   <title>Painel Admin — Dra. Fernanda</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js">
+// ══════════════════════════════════════════════════════════
+// FINANCEIRO
+// ══════════════════════════════════════════════════════════
+const fmtBRL = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const methodLabel = m => ({pix:'Pix',dinheiro:'Dinheiro',transferencia:'Transferência'}[m]||m);
+const methodClass = m => ({pix:'pay-pix',dinheiro:'pay-dinheiro',transferencia:'pay-transferencia'}[m]||'');
+const modelLabel  = m => ({avista:'À vista',entrada_final:'Entrada + final',parcelado:'Parcelado',por_sessao:'Por sessão',mensal:'Mensal'}[m]||m);
+
+// ── ABA FINANCEIRO DO PACIENTE ────────────────────────────
+async function loadPatientFinanceiro() {
+  const el = document.getElementById('detail-financeiro');
+  el.innerHTML = '<p style="color:var(--g400);padding:20px">Carregando...</p>';
+
+  const { data: pkgs } = await db.from('treatment_packages')
+    .select('*, payments(*)')
+    .eq('patient_id', currentPatientId)
+    .order('created_at', { ascending: false });
+
+  if (!pkgs || pkgs.length === 0) {
+    el.innerHTML = `
+      <div class="fin-empty">Nenhum pacote cadastrado ainda.<br><br>
+        <button class="btn" onclick="openPackageModal()">+ Criar primeiro pacote</button>
+      </div>`;
+    return;
+  }
+
+  let html = `<div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+    <button class="btn" onclick="openPackageModal()">+ Novo pacote</button>
+  </div>`;
+
+  pkgs.forEach(pkg => {
+    const paid    = (pkg.payments||[]).reduce((s,p) => s + Number(p.amount), 0);
+    const balance = Number(pkg.total_value) - paid;
+    const pct     = pkg.total_sessions > 0 ? Math.round((pkg.sessions_used / pkg.total_sessions) * 100) : 0;
+    const payRows = (pkg.payments||[]).sort((a,b) => b.payment_date.localeCompare(a.payment_date))
+      .map(p => `<div class="pay-item">
+        <div>
+          <strong style="font-size:13px">${fmtBRL(p.amount)}</strong>
+          <span style="font-size:12px;color:var(--g400);margin-left:8px">${new Date(p.payment_date+'T12:00').toLocaleDateString('pt-BR')}</span>
+          ${p.notes ? `<span style="font-size:12px;color:var(--g400);margin-left:6px">· ${p.notes}</span>` : ''}
+        </div>
+        <span class="pay-method ${methodClass(p.method)}">${methodLabel(p.method)}</span>
+      </div>`).join('') || '<p style="font-size:13px;color:var(--g400);padding:8px 0">Nenhum pagamento ainda.</p>';
+
+    html += `<div class="pkg-box">
+      <div class="pkg-header">
+        <div>
+          <div class="pkg-title">${pkg.total_sessions} sessões · ${fmtBRL(pkg.total_value)}
+            <span class="model-label" style="margin-left:8px">${modelLabel(pkg.payment_model)}</span>
+          </div>
+          <div class="pkg-subtitle">${pkg.notes || ''}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge ${pkg.status==='ativo'?'badge-ativo':'badge-finalizado'}">${pkg.status==='ativo'?'Ativo':'Concluído'}</span>
+          <button class="btn btn-sm" onclick="openPaymentModal('${pkg.id}')">+ Pagamento</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700">${pkg.sessions_used}/${pkg.total_sessions}</div>
+          <div style="font-size:11px;color:var(--g400)">Sessões realizadas</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700;color:#15803D">${fmtBRL(paid)}</div>
+          <div style="font-size:11px;color:var(--g400)">Pago</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700;color:${balance>0?'#B91C1C':'#15803D'}">${fmtBRL(balance)}</div>
+          <div style="font-size:11px;color:var(--g400)">${balance>0?'Em aberto':'Quitado'}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700">${pct}%</div>
+          <div style="font-size:11px;color:var(--g400)">Progresso</div>
+        </div>
+      </div>
+      <div class="pkg-progress"><div class="pkg-progress-fill" style="width:${pct}%"></div></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--g100)">
+        <div style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:8px">HISTÓRICO DE PAGAMENTOS</div>
+        ${payRows}
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function openPackageModal() {
+  document.getElementById('pkg-sessions').value = 10;
+  document.getElementById('pkg-value').value = '';
+  document.getElementById('pkg-model').value = 'avista';
+  document.getElementById('pkg-notes').value = '';
+  openModal('novo-pacote');
+}
+
+function openPaymentModal(packageId) {
+  document.getElementById('pay-package-id').value = packageId;
+  document.getElementById('pay-amount').value = '';
+  document.getElementById('pay-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('pay-method').value = 'pix';
+  document.getElementById('pay-notes').value = '';
+  openModal('novo-pagamento');
+}
+
+async function savePackage() {
+  const sessions = parseInt(document.getElementById('pkg-sessions').value)||0;
+  const value    = parseFloat(document.getElementById('pkg-value').value)||0;
+  if (!sessions || !value) { alert('Informe o número de sessões e o valor total.'); return; }
+  const { error } = await db.from('treatment_packages').insert({
+    patient_id:     currentPatientId,
+    total_sessions: sessions,
+    total_value:    value,
+    payment_model:  document.getElementById('pkg-model').value,
+    notes:          document.getElementById('pkg-notes').value.trim() || null,
+  });
+  if (error) { alert('Erro ao salvar pacote: ' + error.message); return; }
+  closeModal('novo-pacote');
+  loadPatientFinanceiro();
+}
+
+async function savePayment() {
+  const amount = parseFloat(document.getElementById('pay-amount').value)||0;
+  if (!amount) { alert('Informe o valor recebido.'); return; }
+  const pkgId = document.getElementById('pay-package-id').value;
+  const { error } = await db.from('payments').insert({
+    package_id:   pkgId,
+    patient_id:   currentPatientId,
+    amount,
+    payment_date: document.getElementById('pay-date').value,
+    method:       document.getElementById('pay-method').value,
+    notes:        document.getElementById('pay-notes').value.trim() || null,
+  });
+  if (error) { alert('Erro ao registrar pagamento: ' + error.message); return; }
+  closeModal('novo-pagamento');
+  loadPatientFinanceiro();
+}
+
+// ── PÁGINA FINANCEIRO GLOBAL ──────────────────────────────
+async function loadFinanceiroPage() {
+  const now = new Date();
+  const mesInicio = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+
+  const [{ data: pkgs }, { data: paysMes }] = await Promise.all([
+    db.from('treatment_packages').select('*, payments(*), patients(name)').eq('status','ativo'),
+    db.from('payments').select('*, patients(name)').gte('payment_date', mesInicio).order('payment_date', {ascending:false}),
+  ]);
+
+  // Stats
+  const totalMes   = (paysMes||[]).reduce((s,p) => s + Number(p.amount), 0);
+  const totalAberto = (pkgs||[]).reduce((s,pkg) => {
+    const paid = (pkg.payments||[]).reduce((x,p) => x + Number(p.amount), 0);
+    return s + Math.max(0, Number(pkg.total_value) - paid);
+  }, 0);
+  const sessMes = (pkgs||[]).reduce((s,p) => s + (p.sessions_used||0), 0);
+
+  document.getElementById('fin-mes').textContent     = fmtBRL(totalMes);
+  document.getElementById('fin-aberto').textContent  = fmtBRL(totalAberto);
+  document.getElementById('fin-pacotes').textContent = (pkgs||[]).length;
+  document.getElementById('fin-sessoes').textContent = sessMes;
+
+  // Pacientes com saldo em aberto
+  const abertos = (pkgs||[]).map(pkg => {
+    const paid    = (pkg.payments||[]).reduce((s,p) => s + Number(p.amount), 0);
+    const balance = Number(pkg.total_value) - paid;
+    return { ...pkg, paid, balance };
+  }).filter(p => p.balance > 0).sort((a,b) => b.balance - a.balance);
+
+  document.getElementById('fin-abertos-body').innerHTML = abertos.length
+    ? abertos.map(pkg => `<tr style="cursor:pointer" onclick="openPatient('${pkg.patient_id}');setTimeout(()=>setDetailTab('financeiro'),400)">
+        <td><strong>${pkg.patients?.name||'—'}</strong></td>
+        <td><span class="model-label">${modelLabel(pkg.payment_model)}</span></td>
+        <td>${pkg.sessions_used}/${pkg.total_sessions}</td>
+        <td>${fmtBRL(pkg.total_value)}</td>
+        <td style="color:#15803D">${fmtBRL(pkg.paid)}</td>
+        <td style="color:#B91C1C;font-weight:600">${fmtBRL(pkg.balance)}</td>
+        <td><button class="btn btn-sm btn-outline">Ver</button></td>
+      </tr>`).join('')
+    : '<tr><td colspan="7" class="empty">Nenhum saldo em aberto 🎉</td></tr>';
+
+  // Pagamentos recentes
+  document.getElementById('fin-recent-body').innerHTML = (paysMes||[]).length
+    ? (paysMes||[]).map(p => `<tr>
+        <td>${new Date(p.payment_date+'T12:00').toLocaleDateString('pt-BR')}</td>
+        <td>${p.patients?.name||'—'}</td>
+        <td style="font-weight:600;color:#15803D">${fmtBRL(p.amount)}</td>
+        <td><span class="pay-method ${methodClass(p.method)}">${methodLabel(p.method)}</span></td>
+        <td style="color:var(--g400);font-size:12px">${p.notes||'—'}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" class="empty">Nenhum pagamento este mês</td></tr>';
+}
+
+</script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -170,6 +361,31 @@
     .exer-session-bar select:focus{border-color:var(--w400)}
     @media(max-width:900px){.exer-layout{grid-template-columns:1fr}}
 
+
+    /* FINANCEIRO */
+    .fin-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+    .fin-card{background:var(--white);border:1px solid var(--g200);border-radius:12px;padding:16px;text-align:center}
+    .fin-card .val{font-size:22px;font-weight:700;color:var(--g900);letter-spacing:-.02em}
+    .fin-card .val.green{color:#15803D}
+    .fin-card .val.red{color:#B91C1C}
+    .fin-card .val.amber{color:#92400E}
+    .fin-card .lbl{font-size:11px;color:var(--g400);margin-top:4px}
+    .pkg-box{background:var(--white);border:1px solid var(--g200);border-radius:12px;padding:20px;margin-bottom:16px}
+    .pkg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .pkg-title{font-size:14px;font-weight:600;color:var(--g900)}
+    .pkg-subtitle{font-size:12px;color:var(--g400);margin-top:2px}
+    .pkg-progress{background:var(--g100);border-radius:20px;height:8px;margin:12px 0;overflow:hidden}
+    .pkg-progress-fill{height:100%;border-radius:20px;background:var(--w400);transition:width .3s}
+    .pay-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--g100)}
+    .pay-item:last-child{border-bottom:none}
+    .pay-method{font-size:11px;font-weight:600;padding:2px 8px;border-radius:12px}
+    .pay-pix{background:#EFF6FF;color:#1D4ED8}
+    .pay-dinheiro{background:#F0FDF4;color:#15803D}
+    .pay-transferencia{background:#FAF5FF;color:#7E22CE}
+    .model-label{font-size:11px;font-weight:600;padding:2px 8px;border-radius:12px;background:#FEF9C3;color:#92400E}
+    .fin-empty{text-align:center;padding:40px;color:var(--g400);font-size:14px;border:2px dashed var(--g200);border-radius:12px}
+    @media(max-width:900px){.fin-summary{grid-template-columns:1fr 1fr}}
+
     @media(max-width:768px){
       .layout{grid-template-columns:1fr}
       .sidebar{display:none}
@@ -200,6 +416,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Pacientes
       </button>
+      <button class="sidebar-btn" onclick="showPage('financeiro')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Financeiro
+      </button>
     </div>
     <div class="sidebar-section" style="margin-top:8px">
       <div class="sidebar-label">Pacientes recentes</div>
@@ -221,6 +441,28 @@
       </div>
       <div class="sh" style="margin-top:8px"><h2>Últimas evoluções</h2></div>
       <div class="table-wrap" id="recent-evolutions"></div>
+    </div>
+
+
+    <!-- FINANCEIRO -->
+    <div id="page-financeiro" class="page">
+      <div class="sh"><h2>Financeiro</h2></div>
+      <div class="fin-summary">
+        <div class="fin-card"><div class="val green" id="fin-mes">—</div><div class="lbl">Recebido este mês</div></div>
+        <div class="fin-card"><div class="val amber" id="fin-aberto">—</div><div class="lbl">Saldo em aberto</div></div>
+        <div class="fin-card"><div class="val" id="fin-pacotes">—</div><div class="lbl">Pacotes ativos</div></div>
+        <div class="fin-card"><div class="val" id="fin-sessoes">—</div><div class="lbl">Sessões do mês</div></div>
+      </div>
+      <div class="sh" style="margin-top:8px"><h2>Pacientes com saldo em aberto</h2></div>
+      <div class="table-wrap" id="fin-abertos-table">
+        <table><thead><tr><th>Paciente</th><th>Pacote</th><th>Sessões</th><th>Total</th><th>Pago</th><th>Em aberto</th><th></th></tr></thead>
+        <tbody id="fin-abertos-body"></tbody></table>
+      </div>
+      <div class="sh" style="margin-top:24px"><h2>Pagamentos recentes</h2></div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Data</th><th>Paciente</th><th>Valor</th><th>Forma</th><th>Observação</th></tr></thead>
+        <tbody id="fin-recent-body"></tbody></table>
+      </div>
     </div>
 
     <!-- PACIENTES -->
@@ -280,6 +522,7 @@
         <button class="tab" onclick="setDetailTab('grafico')">Gráfico</button>
         <button class="tab" onclick="setDetailTab('documentos')">Documentos</button>
         <button class="tab" onclick="setDetailTab('familia')">Família</button>
+        <button class="tab" onclick="setDetailTab('financeiro')" style="color:var(--w600);font-weight:600">💰 Financeiro</button>
       </div>
 
       <div id="detail-avaliacao"></div>
@@ -288,6 +531,7 @@
       <div id="detail-grafico" style="display:none"><div class="chart-box"><h4>Evolução clínica ao longo do tempo</h4><canvas id="evo-chart" height="120"></canvas></div></div>
       <div id="detail-documentos" style="display:none"></div>
       <div id="detail-familia" style="display:none"></div>
+      <div id="detail-financeiro" style="display:none"></div>
     </div>
 
   </main>
@@ -486,8 +730,390 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js">
+// ══════════════════════════════════════════════════════════
+// FINANCEIRO
+// ══════════════════════════════════════════════════════════
+const fmtBRL = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const methodLabel = m => ({pix:'Pix',dinheiro:'Dinheiro',transferencia:'Transferência'}[m]||m);
+const methodClass = m => ({pix:'pay-pix',dinheiro:'pay-dinheiro',transferencia:'pay-transferencia'}[m]||'');
+const modelLabel  = m => ({avista:'À vista',entrada_final:'Entrada + final',parcelado:'Parcelado',por_sessao:'Por sessão',mensal:'Mensal'}[m]||m);
+
+// ── ABA FINANCEIRO DO PACIENTE ────────────────────────────
+async function loadPatientFinanceiro() {
+  const el = document.getElementById('detail-financeiro');
+  el.innerHTML = '<p style="color:var(--g400);padding:20px">Carregando...</p>';
+
+  const { data: pkgs } = await db.from('treatment_packages')
+    .select('*, payments(*)')
+    .eq('patient_id', currentPatientId)
+    .order('created_at', { ascending: false });
+
+  if (!pkgs || pkgs.length === 0) {
+    el.innerHTML = `
+      <div class="fin-empty">Nenhum pacote cadastrado ainda.<br><br>
+        <button class="btn" onclick="openPackageModal()">+ Criar primeiro pacote</button>
+      </div>`;
+    return;
+  }
+
+  let html = `<div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+    <button class="btn" onclick="openPackageModal()">+ Novo pacote</button>
+  </div>`;
+
+  pkgs.forEach(pkg => {
+    const paid    = (pkg.payments||[]).reduce((s,p) => s + Number(p.amount), 0);
+    const balance = Number(pkg.total_value) - paid;
+    const pct     = pkg.total_sessions > 0 ? Math.round((pkg.sessions_used / pkg.total_sessions) * 100) : 0;
+    const payRows = (pkg.payments||[]).sort((a,b) => b.payment_date.localeCompare(a.payment_date))
+      .map(p => `<div class="pay-item">
+        <div>
+          <strong style="font-size:13px">${fmtBRL(p.amount)}</strong>
+          <span style="font-size:12px;color:var(--g400);margin-left:8px">${new Date(p.payment_date+'T12:00').toLocaleDateString('pt-BR')}</span>
+          ${p.notes ? `<span style="font-size:12px;color:var(--g400);margin-left:6px">· ${p.notes}</span>` : ''}
+        </div>
+        <span class="pay-method ${methodClass(p.method)}">${methodLabel(p.method)}</span>
+      </div>`).join('') || '<p style="font-size:13px;color:var(--g400);padding:8px 0">Nenhum pagamento ainda.</p>';
+
+    html += `<div class="pkg-box">
+      <div class="pkg-header">
+        <div>
+          <div class="pkg-title">${pkg.total_sessions} sessões · ${fmtBRL(pkg.total_value)}
+            <span class="model-label" style="margin-left:8px">${modelLabel(pkg.payment_model)}</span>
+          </div>
+          <div class="pkg-subtitle">${pkg.notes || ''}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge ${pkg.status==='ativo'?'badge-ativo':'badge-finalizado'}">${pkg.status==='ativo'?'Ativo':'Concluído'}</span>
+          <button class="btn btn-sm" onclick="openPaymentModal('${pkg.id}')">+ Pagamento</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700">${pkg.sessions_used}/${pkg.total_sessions}</div>
+          <div style="font-size:11px;color:var(--g400)">Sessões realizadas</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700;color:#15803D">${fmtBRL(paid)}</div>
+          <div style="font-size:11px;color:var(--g400)">Pago</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700;color:${balance>0?'#B91C1C':'#15803D'}">${fmtBRL(balance)}</div>
+          <div style="font-size:11px;color:var(--g400)">${balance>0?'Em aberto':'Quitado'}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700">${pct}%</div>
+          <div style="font-size:11px;color:var(--g400)">Progresso</div>
+        </div>
+      </div>
+      <div class="pkg-progress"><div class="pkg-progress-fill" style="width:${pct}%"></div></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--g100)">
+        <div style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:8px">HISTÓRICO DE PAGAMENTOS</div>
+        ${payRows}
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function openPackageModal() {
+  document.getElementById('pkg-sessions').value = 10;
+  document.getElementById('pkg-value').value = '';
+  document.getElementById('pkg-model').value = 'avista';
+  document.getElementById('pkg-notes').value = '';
+  openModal('novo-pacote');
+}
+
+function openPaymentModal(packageId) {
+  document.getElementById('pay-package-id').value = packageId;
+  document.getElementById('pay-amount').value = '';
+  document.getElementById('pay-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('pay-method').value = 'pix';
+  document.getElementById('pay-notes').value = '';
+  openModal('novo-pagamento');
+}
+
+async function savePackage() {
+  const sessions = parseInt(document.getElementById('pkg-sessions').value)||0;
+  const value    = parseFloat(document.getElementById('pkg-value').value)||0;
+  if (!sessions || !value) { alert('Informe o número de sessões e o valor total.'); return; }
+  const { error } = await db.from('treatment_packages').insert({
+    patient_id:     currentPatientId,
+    total_sessions: sessions,
+    total_value:    value,
+    payment_model:  document.getElementById('pkg-model').value,
+    notes:          document.getElementById('pkg-notes').value.trim() || null,
+  });
+  if (error) { alert('Erro ao salvar pacote: ' + error.message); return; }
+  closeModal('novo-pacote');
+  loadPatientFinanceiro();
+}
+
+async function savePayment() {
+  const amount = parseFloat(document.getElementById('pay-amount').value)||0;
+  if (!amount) { alert('Informe o valor recebido.'); return; }
+  const pkgId = document.getElementById('pay-package-id').value;
+  const { error } = await db.from('payments').insert({
+    package_id:   pkgId,
+    patient_id:   currentPatientId,
+    amount,
+    payment_date: document.getElementById('pay-date').value,
+    method:       document.getElementById('pay-method').value,
+    notes:        document.getElementById('pay-notes').value.trim() || null,
+  });
+  if (error) { alert('Erro ao registrar pagamento: ' + error.message); return; }
+  closeModal('novo-pagamento');
+  loadPatientFinanceiro();
+}
+
+// ── PÁGINA FINANCEIRO GLOBAL ──────────────────────────────
+async function loadFinanceiroPage() {
+  const now = new Date();
+  const mesInicio = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+
+  const [{ data: pkgs }, { data: paysMes }] = await Promise.all([
+    db.from('treatment_packages').select('*, payments(*), patients(name)').eq('status','ativo'),
+    db.from('payments').select('*, patients(name)').gte('payment_date', mesInicio).order('payment_date', {ascending:false}),
+  ]);
+
+  // Stats
+  const totalMes   = (paysMes||[]).reduce((s,p) => s + Number(p.amount), 0);
+  const totalAberto = (pkgs||[]).reduce((s,pkg) => {
+    const paid = (pkg.payments||[]).reduce((x,p) => x + Number(p.amount), 0);
+    return s + Math.max(0, Number(pkg.total_value) - paid);
+  }, 0);
+  const sessMes = (pkgs||[]).reduce((s,p) => s + (p.sessions_used||0), 0);
+
+  document.getElementById('fin-mes').textContent     = fmtBRL(totalMes);
+  document.getElementById('fin-aberto').textContent  = fmtBRL(totalAberto);
+  document.getElementById('fin-pacotes').textContent = (pkgs||[]).length;
+  document.getElementById('fin-sessoes').textContent = sessMes;
+
+  // Pacientes com saldo em aberto
+  const abertos = (pkgs||[]).map(pkg => {
+    const paid    = (pkg.payments||[]).reduce((s,p) => s + Number(p.amount), 0);
+    const balance = Number(pkg.total_value) - paid;
+    return { ...pkg, paid, balance };
+  }).filter(p => p.balance > 0).sort((a,b) => b.balance - a.balance);
+
+  document.getElementById('fin-abertos-body').innerHTML = abertos.length
+    ? abertos.map(pkg => `<tr style="cursor:pointer" onclick="openPatient('${pkg.patient_id}');setTimeout(()=>setDetailTab('financeiro'),400)">
+        <td><strong>${pkg.patients?.name||'—'}</strong></td>
+        <td><span class="model-label">${modelLabel(pkg.payment_model)}</span></td>
+        <td>${pkg.sessions_used}/${pkg.total_sessions}</td>
+        <td>${fmtBRL(pkg.total_value)}</td>
+        <td style="color:#15803D">${fmtBRL(pkg.paid)}</td>
+        <td style="color:#B91C1C;font-weight:600">${fmtBRL(pkg.balance)}</td>
+        <td><button class="btn btn-sm btn-outline">Ver</button></td>
+      </tr>`).join('')
+    : '<tr><td colspan="7" class="empty">Nenhum saldo em aberto 🎉</td></tr>';
+
+  // Pagamentos recentes
+  document.getElementById('fin-recent-body').innerHTML = (paysMes||[]).length
+    ? (paysMes||[]).map(p => `<tr>
+        <td>${new Date(p.payment_date+'T12:00').toLocaleDateString('pt-BR')}</td>
+        <td>${p.patients?.name||'—'}</td>
+        <td style="font-weight:600;color:#15803D">${fmtBRL(p.amount)}</td>
+        <td><span class="pay-method ${methodClass(p.method)}">${methodLabel(p.method)}</span></td>
+        <td style="color:var(--g400);font-size:12px">${p.notes||'—'}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" class="empty">Nenhum pagamento este mês</td></tr>';
+}
+
+</script>
+<script src="config.js">
+// ══════════════════════════════════════════════════════════
+// FINANCEIRO
+// ══════════════════════════════════════════════════════════
+const fmtBRL = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const methodLabel = m => ({pix:'Pix',dinheiro:'Dinheiro',transferencia:'Transferência'}[m]||m);
+const methodClass = m => ({pix:'pay-pix',dinheiro:'pay-dinheiro',transferencia:'pay-transferencia'}[m]||'');
+const modelLabel  = m => ({avista:'À vista',entrada_final:'Entrada + final',parcelado:'Parcelado',por_sessao:'Por sessão',mensal:'Mensal'}[m]||m);
+
+// ── ABA FINANCEIRO DO PACIENTE ────────────────────────────
+async function loadPatientFinanceiro() {
+  const el = document.getElementById('detail-financeiro');
+  el.innerHTML = '<p style="color:var(--g400);padding:20px">Carregando...</p>';
+
+  const { data: pkgs } = await db.from('treatment_packages')
+    .select('*, payments(*)')
+    .eq('patient_id', currentPatientId)
+    .order('created_at', { ascending: false });
+
+  if (!pkgs || pkgs.length === 0) {
+    el.innerHTML = `
+      <div class="fin-empty">Nenhum pacote cadastrado ainda.<br><br>
+        <button class="btn" onclick="openPackageModal()">+ Criar primeiro pacote</button>
+      </div>`;
+    return;
+  }
+
+  let html = `<div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+    <button class="btn" onclick="openPackageModal()">+ Novo pacote</button>
+  </div>`;
+
+  pkgs.forEach(pkg => {
+    const paid    = (pkg.payments||[]).reduce((s,p) => s + Number(p.amount), 0);
+    const balance = Number(pkg.total_value) - paid;
+    const pct     = pkg.total_sessions > 0 ? Math.round((pkg.sessions_used / pkg.total_sessions) * 100) : 0;
+    const payRows = (pkg.payments||[]).sort((a,b) => b.payment_date.localeCompare(a.payment_date))
+      .map(p => `<div class="pay-item">
+        <div>
+          <strong style="font-size:13px">${fmtBRL(p.amount)}</strong>
+          <span style="font-size:12px;color:var(--g400);margin-left:8px">${new Date(p.payment_date+'T12:00').toLocaleDateString('pt-BR')}</span>
+          ${p.notes ? `<span style="font-size:12px;color:var(--g400);margin-left:6px">· ${p.notes}</span>` : ''}
+        </div>
+        <span class="pay-method ${methodClass(p.method)}">${methodLabel(p.method)}</span>
+      </div>`).join('') || '<p style="font-size:13px;color:var(--g400);padding:8px 0">Nenhum pagamento ainda.</p>';
+
+    html += `<div class="pkg-box">
+      <div class="pkg-header">
+        <div>
+          <div class="pkg-title">${pkg.total_sessions} sessões · ${fmtBRL(pkg.total_value)}
+            <span class="model-label" style="margin-left:8px">${modelLabel(pkg.payment_model)}</span>
+          </div>
+          <div class="pkg-subtitle">${pkg.notes || ''}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge ${pkg.status==='ativo'?'badge-ativo':'badge-finalizado'}">${pkg.status==='ativo'?'Ativo':'Concluído'}</span>
+          <button class="btn btn-sm" onclick="openPaymentModal('${pkg.id}')">+ Pagamento</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700">${pkg.sessions_used}/${pkg.total_sessions}</div>
+          <div style="font-size:11px;color:var(--g400)">Sessões realizadas</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700;color:#15803D">${fmtBRL(paid)}</div>
+          <div style="font-size:11px;color:var(--g400)">Pago</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700;color:${balance>0?'#B91C1C':'#15803D'}">${fmtBRL(balance)}</div>
+          <div style="font-size:11px;color:var(--g400)">${balance>0?'Em aberto':'Quitado'}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700">${pct}%</div>
+          <div style="font-size:11px;color:var(--g400)">Progresso</div>
+        </div>
+      </div>
+      <div class="pkg-progress"><div class="pkg-progress-fill" style="width:${pct}%"></div></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--g100)">
+        <div style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:8px">HISTÓRICO DE PAGAMENTOS</div>
+        ${payRows}
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function openPackageModal() {
+  document.getElementById('pkg-sessions').value = 10;
+  document.getElementById('pkg-value').value = '';
+  document.getElementById('pkg-model').value = 'avista';
+  document.getElementById('pkg-notes').value = '';
+  openModal('novo-pacote');
+}
+
+function openPaymentModal(packageId) {
+  document.getElementById('pay-package-id').value = packageId;
+  document.getElementById('pay-amount').value = '';
+  document.getElementById('pay-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('pay-method').value = 'pix';
+  document.getElementById('pay-notes').value = '';
+  openModal('novo-pagamento');
+}
+
+async function savePackage() {
+  const sessions = parseInt(document.getElementById('pkg-sessions').value)||0;
+  const value    = parseFloat(document.getElementById('pkg-value').value)||0;
+  if (!sessions || !value) { alert('Informe o número de sessões e o valor total.'); return; }
+  const { error } = await db.from('treatment_packages').insert({
+    patient_id:     currentPatientId,
+    total_sessions: sessions,
+    total_value:    value,
+    payment_model:  document.getElementById('pkg-model').value,
+    notes:          document.getElementById('pkg-notes').value.trim() || null,
+  });
+  if (error) { alert('Erro ao salvar pacote: ' + error.message); return; }
+  closeModal('novo-pacote');
+  loadPatientFinanceiro();
+}
+
+async function savePayment() {
+  const amount = parseFloat(document.getElementById('pay-amount').value)||0;
+  if (!amount) { alert('Informe o valor recebido.'); return; }
+  const pkgId = document.getElementById('pay-package-id').value;
+  const { error } = await db.from('payments').insert({
+    package_id:   pkgId,
+    patient_id:   currentPatientId,
+    amount,
+    payment_date: document.getElementById('pay-date').value,
+    method:       document.getElementById('pay-method').value,
+    notes:        document.getElementById('pay-notes').value.trim() || null,
+  });
+  if (error) { alert('Erro ao registrar pagamento: ' + error.message); return; }
+  closeModal('novo-pagamento');
+  loadPatientFinanceiro();
+}
+
+// ── PÁGINA FINANCEIRO GLOBAL ──────────────────────────────
+async function loadFinanceiroPage() {
+  const now = new Date();
+  const mesInicio = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+
+  const [{ data: pkgs }, { data: paysMes }] = await Promise.all([
+    db.from('treatment_packages').select('*, payments(*), patients(name)').eq('status','ativo'),
+    db.from('payments').select('*, patients(name)').gte('payment_date', mesInicio).order('payment_date', {ascending:false}),
+  ]);
+
+  // Stats
+  const totalMes   = (paysMes||[]).reduce((s,p) => s + Number(p.amount), 0);
+  const totalAberto = (pkgs||[]).reduce((s,pkg) => {
+    const paid = (pkg.payments||[]).reduce((x,p) => x + Number(p.amount), 0);
+    return s + Math.max(0, Number(pkg.total_value) - paid);
+  }, 0);
+  const sessMes = (pkgs||[]).reduce((s,p) => s + (p.sessions_used||0), 0);
+
+  document.getElementById('fin-mes').textContent     = fmtBRL(totalMes);
+  document.getElementById('fin-aberto').textContent  = fmtBRL(totalAberto);
+  document.getElementById('fin-pacotes').textContent = (pkgs||[]).length;
+  document.getElementById('fin-sessoes').textContent = sessMes;
+
+  // Pacientes com saldo em aberto
+  const abertos = (pkgs||[]).map(pkg => {
+    const paid    = (pkg.payments||[]).reduce((s,p) => s + Number(p.amount), 0);
+    const balance = Number(pkg.total_value) - paid;
+    return { ...pkg, paid, balance };
+  }).filter(p => p.balance > 0).sort((a,b) => b.balance - a.balance);
+
+  document.getElementById('fin-abertos-body').innerHTML = abertos.length
+    ? abertos.map(pkg => `<tr style="cursor:pointer" onclick="openPatient('${pkg.patient_id}');setTimeout(()=>setDetailTab('financeiro'),400)">
+        <td><strong>${pkg.patients?.name||'—'}</strong></td>
+        <td><span class="model-label">${modelLabel(pkg.payment_model)}</span></td>
+        <td>${pkg.sessions_used}/${pkg.total_sessions}</td>
+        <td>${fmtBRL(pkg.total_value)}</td>
+        <td style="color:#15803D">${fmtBRL(pkg.paid)}</td>
+        <td style="color:#B91C1C;font-weight:600">${fmtBRL(pkg.balance)}</td>
+        <td><button class="btn btn-sm btn-outline">Ver</button></td>
+      </tr>`).join('')
+    : '<tr><td colspan="7" class="empty">Nenhum saldo em aberto 🎉</td></tr>';
+
+  // Pagamentos recentes
+  document.getElementById('fin-recent-body').innerHTML = (paysMes||[]).length
+    ? (paysMes||[]).map(p => `<tr>
+        <td>${new Date(p.payment_date+'T12:00').toLocaleDateString('pt-BR')}</td>
+        <td>${p.patients?.name||'—'}</td>
+        <td style="font-weight:600;color:#15803D">${fmtBRL(p.amount)}</td>
+        <td><span class="pay-method ${methodClass(p.method)}">${methodLabel(p.method)}</span></td>
+        <td style="color:var(--g400);font-size:12px">${p.notes||'—'}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" class="empty">Nenhum pagamento este mês</td></tr>';
+}
+
+</script>
 <script>
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -719,16 +1345,17 @@ async function openPatient(id) {
 }
 
 function setDetailTab(tab) {
-  ['avaliacao','evolucoes','exercicios','grafico','documentos','familia'].forEach(t => {
+  ['avaliacao','evolucoes','exercicios','grafico','documentos','familia','financeiro'].forEach(t => {
     document.getElementById('detail-' + t).style.display = t === tab ? 'block' : 'none';
   });
-  document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('active', ['avaliacao','evolucoes','exercicios','grafico','documentos','familia'][i] === tab));
+  document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('active', ['avaliacao','evolucoes','exercicios','grafico','documentos','familia','financeiro'][i] === tab));
   if (tab === 'avaliacao')  loadAssessment();
   if (tab === 'evolucoes')  loadEvolutions();
   if (tab === 'exercicios') loadExercises();
   if (tab === 'grafico')    loadChart();
   if (tab === 'documentos') loadDocuments();
   if (tab === 'familia')    loadFamily();
+  if (tab === 'financeiro') loadPatientFinanceiro();
 }
 
 // ── EVOLUTIONS ──
@@ -1274,6 +1901,247 @@ async function changeEvoSession(evoId) {
 }
 
 init();
+
+// ══════════════════════════════════════════════════════════
+// FINANCEIRO
+// ══════════════════════════════════════════════════════════
+const fmtBRL = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const methodLabel = m => ({pix:'Pix',dinheiro:'Dinheiro',transferencia:'Transferência'}[m]||m);
+const methodClass = m => ({pix:'pay-pix',dinheiro:'pay-dinheiro',transferencia:'pay-transferencia'}[m]||'');
+const modelLabel  = m => ({avista:'À vista',entrada_final:'Entrada + final',parcelado:'Parcelado',por_sessao:'Por sessão',mensal:'Mensal'}[m]||m);
+
+// ── ABA FINANCEIRO DO PACIENTE ────────────────────────────
+async function loadPatientFinanceiro() {
+  const el = document.getElementById('detail-financeiro');
+  el.innerHTML = '<p style="color:var(--g400);padding:20px">Carregando...</p>';
+
+  const { data: pkgs } = await db.from('treatment_packages')
+    .select('*, payments(*)')
+    .eq('patient_id', currentPatientId)
+    .order('created_at', { ascending: false });
+
+  if (!pkgs || pkgs.length === 0) {
+    el.innerHTML = `
+      <div class="fin-empty">Nenhum pacote cadastrado ainda.<br><br>
+        <button class="btn" onclick="openPackageModal()">+ Criar primeiro pacote</button>
+      </div>`;
+    return;
+  }
+
+  let html = `<div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+    <button class="btn" onclick="openPackageModal()">+ Novo pacote</button>
+  </div>`;
+
+  pkgs.forEach(pkg => {
+    const paid    = (pkg.payments||[]).reduce((s,p) => s + Number(p.amount), 0);
+    const balance = Number(pkg.total_value) - paid;
+    const pct     = pkg.total_sessions > 0 ? Math.round((pkg.sessions_used / pkg.total_sessions) * 100) : 0;
+    const payRows = (pkg.payments||[]).sort((a,b) => b.payment_date.localeCompare(a.payment_date))
+      .map(p => `<div class="pay-item">
+        <div>
+          <strong style="font-size:13px">${fmtBRL(p.amount)}</strong>
+          <span style="font-size:12px;color:var(--g400);margin-left:8px">${new Date(p.payment_date+'T12:00').toLocaleDateString('pt-BR')}</span>
+          ${p.notes ? `<span style="font-size:12px;color:var(--g400);margin-left:6px">· ${p.notes}</span>` : ''}
+        </div>
+        <span class="pay-method ${methodClass(p.method)}">${methodLabel(p.method)}</span>
+      </div>`).join('') || '<p style="font-size:13px;color:var(--g400);padding:8px 0">Nenhum pagamento ainda.</p>';
+
+    html += `<div class="pkg-box">
+      <div class="pkg-header">
+        <div>
+          <div class="pkg-title">${pkg.total_sessions} sessões · ${fmtBRL(pkg.total_value)}
+            <span class="model-label" style="margin-left:8px">${modelLabel(pkg.payment_model)}</span>
+          </div>
+          <div class="pkg-subtitle">${pkg.notes || ''}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge ${pkg.status==='ativo'?'badge-ativo':'badge-finalizado'}">${pkg.status==='ativo'?'Ativo':'Concluído'}</span>
+          <button class="btn btn-sm" onclick="openPaymentModal('${pkg.id}')">+ Pagamento</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700">${pkg.sessions_used}/${pkg.total_sessions}</div>
+          <div style="font-size:11px;color:var(--g400)">Sessões realizadas</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700;color:#15803D">${fmtBRL(paid)}</div>
+          <div style="font-size:11px;color:var(--g400)">Pago</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700;color:${balance>0?'#B91C1C':'#15803D'}">${fmtBRL(balance)}</div>
+          <div style="font-size:11px;color:var(--g400)">${balance>0?'Em aberto':'Quitado'}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:20px;font-weight:700">${pct}%</div>
+          <div style="font-size:11px;color:var(--g400)">Progresso</div>
+        </div>
+      </div>
+      <div class="pkg-progress"><div class="pkg-progress-fill" style="width:${pct}%"></div></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--g100)">
+        <div style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:8px">HISTÓRICO DE PAGAMENTOS</div>
+        ${payRows}
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function openPackageModal() {
+  document.getElementById('pkg-sessions').value = 10;
+  document.getElementById('pkg-value').value = '';
+  document.getElementById('pkg-model').value = 'avista';
+  document.getElementById('pkg-notes').value = '';
+  openModal('novo-pacote');
+}
+
+function openPaymentModal(packageId) {
+  document.getElementById('pay-package-id').value = packageId;
+  document.getElementById('pay-amount').value = '';
+  document.getElementById('pay-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('pay-method').value = 'pix';
+  document.getElementById('pay-notes').value = '';
+  openModal('novo-pagamento');
+}
+
+async function savePackage() {
+  const sessions = parseInt(document.getElementById('pkg-sessions').value)||0;
+  const value    = parseFloat(document.getElementById('pkg-value').value)||0;
+  if (!sessions || !value) { alert('Informe o número de sessões e o valor total.'); return; }
+  const { error } = await db.from('treatment_packages').insert({
+    patient_id:     currentPatientId,
+    total_sessions: sessions,
+    total_value:    value,
+    payment_model:  document.getElementById('pkg-model').value,
+    notes:          document.getElementById('pkg-notes').value.trim() || null,
+  });
+  if (error) { alert('Erro ao salvar pacote: ' + error.message); return; }
+  closeModal('novo-pacote');
+  loadPatientFinanceiro();
+}
+
+async function savePayment() {
+  const amount = parseFloat(document.getElementById('pay-amount').value)||0;
+  if (!amount) { alert('Informe o valor recebido.'); return; }
+  const pkgId = document.getElementById('pay-package-id').value;
+  const { error } = await db.from('payments').insert({
+    package_id:   pkgId,
+    patient_id:   currentPatientId,
+    amount,
+    payment_date: document.getElementById('pay-date').value,
+    method:       document.getElementById('pay-method').value,
+    notes:        document.getElementById('pay-notes').value.trim() || null,
+  });
+  if (error) { alert('Erro ao registrar pagamento: ' + error.message); return; }
+  closeModal('novo-pagamento');
+  loadPatientFinanceiro();
+}
+
+// ── PÁGINA FINANCEIRO GLOBAL ──────────────────────────────
+async function loadFinanceiroPage() {
+  const now = new Date();
+  const mesInicio = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+
+  const [{ data: pkgs }, { data: paysMes }] = await Promise.all([
+    db.from('treatment_packages').select('*, payments(*), patients(name)').eq('status','ativo'),
+    db.from('payments').select('*, patients(name)').gte('payment_date', mesInicio).order('payment_date', {ascending:false}),
+  ]);
+
+  // Stats
+  const totalMes   = (paysMes||[]).reduce((s,p) => s + Number(p.amount), 0);
+  const totalAberto = (pkgs||[]).reduce((s,pkg) => {
+    const paid = (pkg.payments||[]).reduce((x,p) => x + Number(p.amount), 0);
+    return s + Math.max(0, Number(pkg.total_value) - paid);
+  }, 0);
+  const sessMes = (pkgs||[]).reduce((s,p) => s + (p.sessions_used||0), 0);
+
+  document.getElementById('fin-mes').textContent     = fmtBRL(totalMes);
+  document.getElementById('fin-aberto').textContent  = fmtBRL(totalAberto);
+  document.getElementById('fin-pacotes').textContent = (pkgs||[]).length;
+  document.getElementById('fin-sessoes').textContent = sessMes;
+
+  // Pacientes com saldo em aberto
+  const abertos = (pkgs||[]).map(pkg => {
+    const paid    = (pkg.payments||[]).reduce((s,p) => s + Number(p.amount), 0);
+    const balance = Number(pkg.total_value) - paid;
+    return { ...pkg, paid, balance };
+  }).filter(p => p.balance > 0).sort((a,b) => b.balance - a.balance);
+
+  document.getElementById('fin-abertos-body').innerHTML = abertos.length
+    ? abertos.map(pkg => `<tr style="cursor:pointer" onclick="openPatient('${pkg.patient_id}');setTimeout(()=>setDetailTab('financeiro'),400)">
+        <td><strong>${pkg.patients?.name||'—'}</strong></td>
+        <td><span class="model-label">${modelLabel(pkg.payment_model)}</span></td>
+        <td>${pkg.sessions_used}/${pkg.total_sessions}</td>
+        <td>${fmtBRL(pkg.total_value)}</td>
+        <td style="color:#15803D">${fmtBRL(pkg.paid)}</td>
+        <td style="color:#B91C1C;font-weight:600">${fmtBRL(pkg.balance)}</td>
+        <td><button class="btn btn-sm btn-outline">Ver</button></td>
+      </tr>`).join('')
+    : '<tr><td colspan="7" class="empty">Nenhum saldo em aberto 🎉</td></tr>';
+
+  // Pagamentos recentes
+  document.getElementById('fin-recent-body').innerHTML = (paysMes||[]).length
+    ? (paysMes||[]).map(p => `<tr>
+        <td>${new Date(p.payment_date+'T12:00').toLocaleDateString('pt-BR')}</td>
+        <td>${p.patients?.name||'—'}</td>
+        <td style="font-weight:600;color:#15803D">${fmtBRL(p.amount)}</td>
+        <td><span class="pay-method ${methodClass(p.method)}">${methodLabel(p.method)}</span></td>
+        <td style="color:var(--g400);font-size:12px">${p.notes||'—'}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" class="empty">Nenhum pagamento este mês</td></tr>';
+}
+
 </script>
+
+  <!-- MODAL: NOVO PACOTE -->
+  <div class="overlay hidden" id="overlay-novo-pacote">
+    <div class="modal">
+      <h3>Novo pacote de tratamento</h3>
+      <div class="form-row">
+        <div class="fg"><label>Total de sessões</label><input type="number" id="pkg-sessions" value="10" min="1"/></div>
+        <div class="fg"><label>Valor total (R$)</label><input type="number" id="pkg-value" placeholder="Ex: 950,00" step="0.01"/></div>
+      </div>
+      <div class="fg"><label>Modelo de pagamento</label>
+        <select id="pkg-model">
+          <option value="avista">À vista (paga tudo ao fechar)</option>
+          <option value="entrada_final">Entrada + restante no final</option>
+          <option value="parcelado">Parcelado (2x, 3x…)</option>
+          <option value="por_sessao">Por sessão (paga após cada atendimento)</option>
+          <option value="mensal">Mensal (fecha no fim do mês)</option>
+        </select>
+      </div>
+      <div class="fg"><label>Observações (opcional)</label><textarea id="pkg-notes" placeholder="Ex: Entrada R$ 500 em 22/08, restante ao final das 10 sessões"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('novo-pacote')">Cancelar</button>
+        <button class="btn" onclick="savePackage()">Salvar pacote</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR PAGAMENTO -->
+  <div class="overlay hidden" id="overlay-novo-pagamento">
+    <div class="modal" style="max-width:420px">
+      <h3>Registrar pagamento</h3>
+      <input type="hidden" id="pay-package-id"/>
+      <div class="form-row">
+        <div class="fg"><label>Valor recebido (R$)</label><input type="number" id="pay-amount" placeholder="Ex: 475,00" step="0.01"/></div>
+        <div class="fg"><label>Data</label><input type="date" id="pay-date"/></div>
+      </div>
+      <div class="fg"><label>Forma de recebimento</label>
+        <select id="pay-method">
+          <option value="pix">Pix</option>
+          <option value="dinheiro">Dinheiro</option>
+          <option value="transferencia">Transferência bancária</option>
+        </select>
+      </div>
+      <div class="fg"><label>Observação (opcional)</label><input type="text" id="pay-notes" placeholder="Ex: Entrada do pacote"/></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('novo-pagamento')">Cancelar</button>
+        <button class="btn" onclick="savePayment()">Registrar</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
