@@ -867,6 +867,9 @@ function renderFinRecebido(periodo) {
             <option value="pausado">Pausado</option>
             <option value="finalizado">Finalizado</option>
           </select>
+          <button class="btn btn-outline btn-sm" onclick="openEditPatient()" style="gap:4px">
+            ✏️ Editar dados
+          </button>
           <button class="btn btn-sm" onclick="openEvoModal()">+ Registrar evolução</button>
           <button class="btn btn-outline btn-sm" onclick="openDocModal()">+ Documento</button>
           <button class="btn btn-sm" onclick="archivePatient()"
@@ -899,7 +902,7 @@ function renderFinRecebido(periodo) {
 <!-- MODAL: Novo paciente -->
 <div class="overlay hidden" id="modal-novo-paciente">
   <div class="modal" style="max-width:660px">
-    <h3>Novo paciente</h3>
+    <h3 id="np-modal-title">Novo paciente</h3>
 
     <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--w600);margin:0 0 10px;padding-bottom:6px;border-bottom:2px solid var(--w100)">Identificação</div>
     <div class="fg"><label>Nome completo *</label><input id="np-name" type="text" placeholder="Ex: Maria da Silva Santos"/></div>
@@ -979,7 +982,7 @@ function renderFinRecebido(periodo) {
 
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('novo-paciente')">Cancelar</button>
-      <button class="btn" onclick="savePatient()">Salvar paciente</button>
+      <button class="btn" id="np-save-btn" onclick="savePatient()">Salvar paciente</button>
     </div>
   </div>
 </div>
@@ -1844,6 +1847,43 @@ function renderSidebarPatients() {
     </div>`).join('');
 }
 
+let editingPatientId = null;
+
+function openEditPatient() {
+  const p = allPatients.find(x => x.id === currentPatientId)
+         || allArchived.find(x => x.id === currentPatientId);
+  if (!p) return;
+  editingPatientId = p.id;
+
+  const s = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+  s('np-name',       p.name);
+  s('np-cpf',        p.cpf);
+  s('np-rg',         p.rg);
+  s('np-birth',      p.birth_date);
+  s('np-sex',        p.sex);
+  s('np-marital',    p.marital_status);
+  s('np-profession', p.profession);
+  s('np-education',  p.education);
+  s('np-phone',      p.phone);
+  s('np-phone2',     p.phone2);
+  s('np-email',      p.email);
+  s('np-street',     p.address_street);
+  s('np-number',     p.address_number);
+  s('np-compl',      p.address_compl);
+  s('np-hood',       p.address_hood);
+  s('np-city',       p.address_city);
+  s('np-zip',        p.address_zip);
+  s('np-emerg-name', p.emerg_name);
+  s('np-emerg-rel',  p.emerg_relation);
+  s('np-emerg-phone',p.emerg_phone);
+  s('np-diagnosis',  p.diagnosis);
+  s('np-notes',      p.notes);
+
+  document.getElementById('np-modal-title').textContent = 'Editar dados do paciente';
+  document.getElementById('np-save-btn').textContent = 'Salvar alterações';
+  openModal('novo-paciente');
+}
+
 async function savePatient() {
   const g = id => (document.getElementById(id)?.value || '').trim() || null;
   const name = g('np-name');
@@ -1872,13 +1912,25 @@ async function savePatient() {
     diagnosis:      g('np-diagnosis'),
     notes:          g('np-notes'),
   };
-  const { error } = await db.from('patients').insert(payload);
+
+  let error;
+  if (editingPatientId) {
+    ({ error } = await db.from('patients').update(payload).eq('id', editingPatientId));
+  } else {
+    ({ error } = await db.from('patients').insert(payload));
+  }
   if (error) { alert('Erro ao salvar: ' + error.message); return; }
+
   closeModal('novo-paciente');
   document.querySelectorAll('#modal-novo-paciente input, #modal-novo-paciente select, #modal-novo-paciente textarea')
     .forEach(el => el.value = '');
-  loadPatients();
+  document.getElementById('np-modal-title').textContent = 'Novo paciente';
+  document.getElementById('np-save-btn').textContent = 'Salvar paciente';
+  editingPatientId = null;
+
+  await loadPatients();
   loadDashboard();
+  if (currentPatientId) openPatient(currentPatientId); // atualiza cabeçalho
 }
 
 // ── PATIENT STATUS / DELETE ──
