@@ -98,7 +98,20 @@ function openPackageModal() {
   document.getElementById('pkg-value').value = '';
   document.getElementById('pkg-model').value = 'avista';
   document.getElementById('pkg-notes').value = '';
+  onPkgModelChange('avista');
   openModal('novo-pacote');
+}
+
+function onPkgModelChange(val) {
+  document.getElementById('pkg-avista-section').style.display    = val === 'avista'    ? 'block' : 'none';
+  document.getElementById('pkg-parcelado-section').style.display = val === 'parcelado' ? 'block' : 'none';
+  if (val === 'parcelado') calcInstallment();
+}
+
+function calcInstallment() {
+  const total = parseFloat(document.getElementById('pkg-value').value) || 0;
+  const n     = parseInt(document.getElementById('pkg-installments').value) || 2;
+  document.getElementById('pkg-installment-val').value = total > 0 ? (total / n).toFixed(2) : '';
 }
 
 function openPaymentModal(packageId) {
@@ -113,15 +126,40 @@ function openPaymentModal(packageId) {
 async function savePackage() {
   const sessions = parseInt(document.getElementById('pkg-sessions').value)||0;
   const value    = parseFloat(document.getElementById('pkg-value').value)||0;
+  const model    = document.getElementById('pkg-model').value;
   if (!sessions || !value) { alert('Informe o número de sessões e o valor total.'); return; }
-  const { error } = await db.from('treatment_packages').insert({
+
+  // Monta notes com parcelamento se necessário
+  let notes = document.getElementById('pkg-notes').value.trim() || null;
+  if (model === 'parcelado') {
+    const n   = document.getElementById('pkg-installments').value;
+    const pv  = document.getElementById('pkg-installment-val').value;
+    const pre = n + 'x de R$ ' + parseFloat(pv||0).toFixed(2).replace('.',',');
+    notes     = notes ? pre + ' — ' + notes : pre;
+  }
+
+  const { data: pkg, error } = await db.from('treatment_packages').insert({
     patient_id:     currentPatientId,
     total_sessions: sessions,
     total_value:    value,
-    payment_model:  document.getElementById('pkg-model').value,
-    notes:          document.getElementById('pkg-notes').value.trim() || null,
-  });
+    payment_model:  model,
+    notes,
+  }).select().single();
   if (error) { alert('Erro ao salvar pacote: ' + error.message); return; }
+
+  // À vista: registra pagamento automaticamente
+  if (model === 'avista' && pkg) {
+    const method = document.getElementById('pkg-avista-method').value;
+    await db.from('payments').insert({
+      package_id:   pkg.id,
+      patient_id:   currentPatientId,
+      amount:       value,
+      payment_date: new Date().toISOString().split('T')[0],
+      method,
+      notes:        'Pagamento à vista no fechamento do pacote',
+    });
+  }
+
   closeModal('novo-pacote');
   loadPatientFinanceiro();
 }
@@ -822,7 +860,20 @@ function openPackageModal() {
   document.getElementById('pkg-value').value = '';
   document.getElementById('pkg-model').value = 'avista';
   document.getElementById('pkg-notes').value = '';
+  onPkgModelChange('avista');
   openModal('novo-pacote');
+}
+
+function onPkgModelChange(val) {
+  document.getElementById('pkg-avista-section').style.display    = val === 'avista'    ? 'block' : 'none';
+  document.getElementById('pkg-parcelado-section').style.display = val === 'parcelado' ? 'block' : 'none';
+  if (val === 'parcelado') calcInstallment();
+}
+
+function calcInstallment() {
+  const total = parseFloat(document.getElementById('pkg-value').value) || 0;
+  const n     = parseInt(document.getElementById('pkg-installments').value) || 2;
+  document.getElementById('pkg-installment-val').value = total > 0 ? (total / n).toFixed(2) : '';
 }
 
 function openPaymentModal(packageId) {
@@ -837,15 +888,40 @@ function openPaymentModal(packageId) {
 async function savePackage() {
   const sessions = parseInt(document.getElementById('pkg-sessions').value)||0;
   const value    = parseFloat(document.getElementById('pkg-value').value)||0;
+  const model    = document.getElementById('pkg-model').value;
   if (!sessions || !value) { alert('Informe o número de sessões e o valor total.'); return; }
-  const { error } = await db.from('treatment_packages').insert({
+
+  // Monta notes com parcelamento se necessário
+  let notes = document.getElementById('pkg-notes').value.trim() || null;
+  if (model === 'parcelado') {
+    const n   = document.getElementById('pkg-installments').value;
+    const pv  = document.getElementById('pkg-installment-val').value;
+    const pre = n + 'x de R$ ' + parseFloat(pv||0).toFixed(2).replace('.',',');
+    notes     = notes ? pre + ' — ' + notes : pre;
+  }
+
+  const { data: pkg, error } = await db.from('treatment_packages').insert({
     patient_id:     currentPatientId,
     total_sessions: sessions,
     total_value:    value,
-    payment_model:  document.getElementById('pkg-model').value,
-    notes:          document.getElementById('pkg-notes').value.trim() || null,
-  });
+    payment_model:  model,
+    notes,
+  }).select().single();
   if (error) { alert('Erro ao salvar pacote: ' + error.message); return; }
+
+  // À vista: registra pagamento automaticamente
+  if (model === 'avista' && pkg) {
+    const method = document.getElementById('pkg-avista-method').value;
+    await db.from('payments').insert({
+      package_id:   pkg.id,
+      patient_id:   currentPatientId,
+      amount:       value,
+      payment_date: new Date().toISOString().split('T')[0],
+      method,
+      notes:        'Pagamento à vista no fechamento do pacote',
+    });
+  }
+
   closeModal('novo-pacote');
   loadPatientFinanceiro();
 }
@@ -1014,7 +1090,20 @@ function openPackageModal() {
   document.getElementById('pkg-value').value = '';
   document.getElementById('pkg-model').value = 'avista';
   document.getElementById('pkg-notes').value = '';
+  onPkgModelChange('avista');
   openModal('novo-pacote');
+}
+
+function onPkgModelChange(val) {
+  document.getElementById('pkg-avista-section').style.display    = val === 'avista'    ? 'block' : 'none';
+  document.getElementById('pkg-parcelado-section').style.display = val === 'parcelado' ? 'block' : 'none';
+  if (val === 'parcelado') calcInstallment();
+}
+
+function calcInstallment() {
+  const total = parseFloat(document.getElementById('pkg-value').value) || 0;
+  const n     = parseInt(document.getElementById('pkg-installments').value) || 2;
+  document.getElementById('pkg-installment-val').value = total > 0 ? (total / n).toFixed(2) : '';
 }
 
 function openPaymentModal(packageId) {
@@ -1029,15 +1118,40 @@ function openPaymentModal(packageId) {
 async function savePackage() {
   const sessions = parseInt(document.getElementById('pkg-sessions').value)||0;
   const value    = parseFloat(document.getElementById('pkg-value').value)||0;
+  const model    = document.getElementById('pkg-model').value;
   if (!sessions || !value) { alert('Informe o número de sessões e o valor total.'); return; }
-  const { error } = await db.from('treatment_packages').insert({
+
+  // Monta notes com parcelamento se necessário
+  let notes = document.getElementById('pkg-notes').value.trim() || null;
+  if (model === 'parcelado') {
+    const n   = document.getElementById('pkg-installments').value;
+    const pv  = document.getElementById('pkg-installment-val').value;
+    const pre = n + 'x de R$ ' + parseFloat(pv||0).toFixed(2).replace('.',',');
+    notes     = notes ? pre + ' — ' + notes : pre;
+  }
+
+  const { data: pkg, error } = await db.from('treatment_packages').insert({
     patient_id:     currentPatientId,
     total_sessions: sessions,
     total_value:    value,
-    payment_model:  document.getElementById('pkg-model').value,
-    notes:          document.getElementById('pkg-notes').value.trim() || null,
-  });
+    payment_model:  model,
+    notes,
+  }).select().single();
   if (error) { alert('Erro ao salvar pacote: ' + error.message); return; }
+
+  // À vista: registra pagamento automaticamente
+  if (model === 'avista' && pkg) {
+    const method = document.getElementById('pkg-avista-method').value;
+    await db.from('payments').insert({
+      package_id:   pkg.id,
+      patient_id:   currentPatientId,
+      amount:       value,
+      payment_date: new Date().toISOString().split('T')[0],
+      method,
+      notes:        'Pagamento à vista no fechamento do pacote',
+    });
+  }
+
   closeModal('novo-pacote');
   loadPatientFinanceiro();
 }
@@ -1993,7 +2107,20 @@ function openPackageModal() {
   document.getElementById('pkg-value').value = '';
   document.getElementById('pkg-model').value = 'avista';
   document.getElementById('pkg-notes').value = '';
+  onPkgModelChange('avista');
   openModal('novo-pacote');
+}
+
+function onPkgModelChange(val) {
+  document.getElementById('pkg-avista-section').style.display    = val === 'avista'    ? 'block' : 'none';
+  document.getElementById('pkg-parcelado-section').style.display = val === 'parcelado' ? 'block' : 'none';
+  if (val === 'parcelado') calcInstallment();
+}
+
+function calcInstallment() {
+  const total = parseFloat(document.getElementById('pkg-value').value) || 0;
+  const n     = parseInt(document.getElementById('pkg-installments').value) || 2;
+  document.getElementById('pkg-installment-val').value = total > 0 ? (total / n).toFixed(2) : '';
 }
 
 function openPaymentModal(packageId) {
@@ -2008,15 +2135,40 @@ function openPaymentModal(packageId) {
 async function savePackage() {
   const sessions = parseInt(document.getElementById('pkg-sessions').value)||0;
   const value    = parseFloat(document.getElementById('pkg-value').value)||0;
+  const model    = document.getElementById('pkg-model').value;
   if (!sessions || !value) { alert('Informe o número de sessões e o valor total.'); return; }
-  const { error } = await db.from('treatment_packages').insert({
+
+  // Monta notes com parcelamento se necessário
+  let notes = document.getElementById('pkg-notes').value.trim() || null;
+  if (model === 'parcelado') {
+    const n   = document.getElementById('pkg-installments').value;
+    const pv  = document.getElementById('pkg-installment-val').value;
+    const pre = n + 'x de R$ ' + parseFloat(pv||0).toFixed(2).replace('.',',');
+    notes     = notes ? pre + ' — ' + notes : pre;
+  }
+
+  const { data: pkg, error } = await db.from('treatment_packages').insert({
     patient_id:     currentPatientId,
     total_sessions: sessions,
     total_value:    value,
-    payment_model:  document.getElementById('pkg-model').value,
-    notes:          document.getElementById('pkg-notes').value.trim() || null,
-  });
+    payment_model:  model,
+    notes,
+  }).select().single();
   if (error) { alert('Erro ao salvar pacote: ' + error.message); return; }
+
+  // À vista: registra pagamento automaticamente
+  if (model === 'avista' && pkg) {
+    const method = document.getElementById('pkg-avista-method').value;
+    await db.from('payments').insert({
+      package_id:   pkg.id,
+      patient_id:   currentPatientId,
+      amount:       value,
+      payment_date: new Date().toISOString().split('T')[0],
+      method,
+      notes:        'Pagamento à vista no fechamento do pacote',
+    });
+  }
+
   closeModal('novo-pacote');
   loadPatientFinanceiro();
 }
@@ -2100,10 +2252,10 @@ async function loadFinanceiroPage() {
       <h3>Novo pacote de tratamento</h3>
       <div class="form-row">
         <div class="fg"><label>Total de sessões</label><input type="number" id="pkg-sessions" value="10" min="1"/></div>
-        <div class="fg"><label>Valor total (R$)</label><input type="number" id="pkg-value" placeholder="Ex: 950,00" step="0.01"/></div>
+        <div class="fg"><label>Valor total (R$)</label><input type="number" id="pkg-value" placeholder="Ex: 950,00" step="0.01" oninput="calcInstallment()"/></div>
       </div>
       <div class="fg"><label>Modelo de pagamento</label>
-        <select id="pkg-model">
+        <select id="pkg-model" onchange="onPkgModelChange(this.value)">
           <option value="avista">À vista (paga tudo ao fechar)</option>
           <option value="entrada_final">Entrada + restante no final</option>
           <option value="parcelado">Parcelado (2x, 3x…)</option>
@@ -2111,7 +2263,42 @@ async function loadFinanceiroPage() {
           <option value="mensal">Mensal (fecha no fim do mês)</option>
         </select>
       </div>
-      <div class="fg"><label>Observações (opcional)</label><textarea id="pkg-notes" placeholder="Ex: Entrada R$ 500 em 22/08, restante ao final das 10 sessões"></textarea></div>
+
+      <!-- À VISTA: forma de recebimento -->
+      <div id="pkg-avista-section" class="fg" style="background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:14px">
+        <label style="font-weight:600;color:var(--w800)">✓ Pagamento recebido no ato — como foi?</label>
+        <select id="pkg-avista-method" style="margin-top:8px;width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif">
+          <option value="pix">Pix</option>
+          <option value="dinheiro">Dinheiro</option>
+          <option value="transferencia">Transferência bancária</option>
+        </select>
+      </div>
+
+      <!-- PARCELADO: número de parcelas -->
+      <div id="pkg-parcelado-section" style="display:none">
+        <div class="form-row">
+          <div class="fg">
+            <label>Número de parcelas</label>
+            <select id="pkg-installments" onchange="calcInstallment()">
+              <option value="2">2x</option>
+              <option value="3">3x</option>
+              <option value="4">4x</option>
+              <option value="5">5x</option>
+              <option value="6">6x</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Valor por parcela (R$)</label>
+            <input type="number" id="pkg-installment-val" placeholder="Calculado auto" step="0.01" readonly
+              style="background:var(--g50);color:var(--g600)"/>
+          </div>
+        </div>
+        <div class="fg" style="font-size:12px;color:var(--g400)">
+          Você registra cada pagamento manualmente quando receber.
+        </div>
+      </div>
+
+      <div class="fg"><label>Observações (opcional)</label><textarea id="pkg-notes" placeholder="Ex: Paga a cada 3 sessões / dia 5 de cada mês"></textarea></div>
       <div class="modal-actions">
         <button class="btn btn-outline" onclick="closeModal('novo-pacote')">Cancelar</button>
         <button class="btn" onclick="savePackage()">Salvar pacote</button>
@@ -2120,7 +2307,7 @@ async function loadFinanceiroPage() {
   </div>
 
   <!-- MODAL: REGISTRAR PAGAMENTO -->
-  <div class="overlay hidden" id="overlay-novo-pagamento">
+  <div class="overlay hidden" id="modal-novo-pagamento">
     <div class="modal" style="max-width:420px">
       <h3>Registrar pagamento</h3>
       <input type="hidden" id="pay-package-id"/>
