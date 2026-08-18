@@ -61,7 +61,7 @@ async function loadPatientFinanceiro() {
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <span class="badge ${pkg.status==='ativo'?'badge-ativo':'badge-finalizado'}">${pkg.status==='ativo'?'Ativo':'Concluído'}</span>
-          <button class="btn btn-sm" onclick="openPaymentModal('${pkg.id}')">+ Pagamento</button>
+          ${balance > 0 ? `<button class="btn btn-sm" onclick="openPaymentModal('${pkg.id}')">+ Pagamento</button>` : ''}
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
@@ -234,13 +234,14 @@ async function loadFinanceiroPage() {
   const now = new Date();
   const mesInicio = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
 
-  const [{ data: pkgs }, { data: paysMes }] = await Promise.all([
+  const [{ data: pkgs }, { data: allPays }] = await Promise.all([
     db.from('treatment_packages').select('*, payments(*), patients(name)').eq('status','ativo'),
-    db.from('payments').select('*, patients(name)').gte('payment_date', mesInicio).order('payment_date', {ascending:false}),
+    db.from('payments').select('*, patients(name)').order('payment_date', {ascending:false}),
   ]);
 
-  // Stats
-  const totalMes   = (paysMes||[]).reduce((s,p) => s + Number(p.amount), 0);
+  // Stats (sempre do mês corrente para os cards)
+  const paysMes    = (allPays||[]).filter(p => p.payment_date >= mesInicio);
+  const totalMes   = paysMes.reduce((s,p) => s + Number(p.amount), 0);
   const totalAberto = (pkgs||[]).reduce((s,pkg) => {
     const paid = (pkg.payments||[]).reduce((x,p) => x + Number(p.amount), 0);
     return s + Math.max(0, Number(pkg.total_value) - paid);
@@ -252,7 +253,7 @@ async function loadFinanceiroPage() {
   document.getElementById('fin-pacotes').textContent = (pkgs||[]).length;
   document.getElementById('fin-sessoes').textContent = sessMes;
 
-  // Pacientes com saldo em aberto
+  // A Receber — todos com saldo > 0
   const abertos = (pkgs||[]).map(pkg => {
     const paid    = (pkg.payments||[]).reduce((s,p) => s + Number(p.amount), 0);
     const balance = Number(pkg.total_value) - paid;
@@ -267,21 +268,53 @@ async function loadFinanceiroPage() {
         <td>${fmtBRL(pkg.total_value)}</td>
         <td style="color:#15803D">${fmtBRL(pkg.paid)}</td>
         <td style="color:#B91C1C;font-weight:600">${fmtBRL(pkg.balance)}</td>
+        <td style="font-size:11px;color:var(--g500);max-width:160px">${pkg.notes||'—'}</td>
         <td><button class="btn btn-sm btn-outline">Ver</button></td>
       </tr>`).join('')
-    : '<tr><td colspan="7" class="empty">Nenhum saldo em aberto 🎉</td></tr>';
+    : '<tr><td colspan="8" class="empty">Nenhum saldo em aberto 🎉</td></tr>';
 
-  // Pagamentos recentes
-  document.getElementById('fin-recent-body').innerHTML = (paysMes||[]).length
-    ? (paysMes||[]).map(p => `<tr>
+  // Recebido — guarda allPays em variável global para filtro
+  window._finAllPays = allPays || [];
+  renderFinRecebido('semana');
+}
+
+function setFinPeriodo(periodo, btn) {
+  document.querySelectorAll('#fin-btn-semana,#fin-btn-mes,#fin-btn-todos').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderFinRecebido(periodo);
+}
+
+function renderFinRecebido(periodo) {
+  const pays = window._finAllPays || [];
+  const hoje = new Date();
+  const startOfWeek = new Date(hoje); startOfWeek.setDate(hoje.getDate() - hoje.getDay() + 1); // segunda
+  const semanaInicio = startOfWeek.toISOString().split('T')[0];
+  const mesInicio2   = hoje.toISOString().slice(0,8) + '01';
+
+  const filtered = pays.filter(p => {
+    if (periodo === 'semana') return p.payment_date >= semanaInicio;
+    if (periodo === 'mes')    return p.payment_date >= mesInicio2;
+    return true;
+  });
+
+  const totalFiltrado = filtered.reduce((s,p) => s + Number(p.amount), 0);
+  const labelTotais = filtered.length > 0
+    ? `<tr style="background:var(--g50);font-weight:600"><td colspan="2">Total</td><td style="color:#15803D">${fmtBRL(totalFiltrado)}</td><td colspan="2"></td></tr>`
+    : '';
+
+  document.getElementById('fin-recent-body').innerHTML = filtered.length
+    ? filtered.map(p => `<tr>
         <td>${new Date(p.payment_date+'T12:00').toLocaleDateString('pt-BR')}</td>
         <td>${p.patients?.name||'—'}</td>
         <td style="font-weight:600;color:#15803D">${fmtBRL(p.amount)}</td>
         <td><span class="pay-method ${methodClass(p.method)}">${methodLabel(p.method)}</span></td>
         <td style="color:var(--g400);font-size:12px">${p.notes||'—'}</td>
-      </tr>`).join('')
-    : '<tr><td colspan="5" class="empty">Nenhum pagamento este mês</td></tr>';
+      </tr>`).join('') + labelTotais
+    : '<tr><td colspan="5" class="empty">Nenhum pagamento neste período</td></tr>';
 }
+
+// placeholder para chamadas anteriores à função real
+function _loadGlobalFinanceiro_unused() {
 
 </script>
   <style>
@@ -541,10 +574,18 @@ async function loadFinanceiroPage() {
       </div>
       <div class="sh" style="margin-top:8px"><h2>Pacientes com saldo em aberto</h2></div>
       <div class="table-wrap" id="fin-abertos-table">
-        <table><thead><tr><th>Paciente</th><th>Pacote</th><th>Sessões</th><th>Total</th><th>Pago</th><th>Em aberto</th><th></th></tr></thead>
+        <table><thead><tr><th>Paciente</th><th>Modelo</th><th>Sessões</th><th>Valor total</th><th>Pago</th><th>Em aberto</th><th>Agenda</th><th></th></tr></thead>
         <tbody id="fin-abertos-body"></tbody></table>
       </div>
-      <div class="sh" style="margin-top:24px"><h2>Pagamentos recentes</h2></div>
+
+      <div class="sh" style="margin-top:24px">
+        <h2>Pagamentos recebidos</h2>
+        <div class="filter-bar" style="margin:0;padding:0;background:none;border:none;gap:6px">
+          <button class="filter-btn active" id="fin-btn-semana" onclick="setFinPeriodo('semana',this)">Esta semana</button>
+          <button class="filter-btn" id="fin-btn-mes" onclick="setFinPeriodo('mes',this)">Este mês</button>
+          <button class="filter-btn" id="fin-btn-todos" onclick="setFinPeriodo('todos',this)">Todo período</button>
+        </div>
+      </div>
       <div class="table-wrap">
         <table><thead><tr><th>Data</th><th>Paciente</th><th>Valor</th><th>Forma</th><th>Observação</th></tr></thead>
         <tbody id="fin-recent-body"></tbody></table>
@@ -871,7 +912,7 @@ async function loadPatientFinanceiro() {
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <span class="badge ${pkg.status==='ativo'?'badge-ativo':'badge-finalizado'}">${pkg.status==='ativo'?'Ativo':'Concluído'}</span>
-          <button class="btn btn-sm" onclick="openPaymentModal('${pkg.id}')">+ Pagamento</button>
+          ${balance > 0 ? `<button class="btn btn-sm" onclick="openPaymentModal('${pkg.id}')">+ Pagamento</button>` : ''}
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
@@ -1044,13 +1085,14 @@ async function loadFinanceiroPage() {
   const now = new Date();
   const mesInicio = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
 
-  const [{ data: pkgs }, { data: paysMes }] = await Promise.all([
+  const [{ data: pkgs }, { data: allPays }] = await Promise.all([
     db.from('treatment_packages').select('*, payments(*), patients(name)').eq('status','ativo'),
-    db.from('payments').select('*, patients(name)').gte('payment_date', mesInicio).order('payment_date', {ascending:false}),
+    db.from('payments').select('*, patients(name)').order('payment_date', {ascending:false}),
   ]);
 
-  // Stats
-  const totalMes   = (paysMes||[]).reduce((s,p) => s + Number(p.amount), 0);
+  // Stats (sempre do mês corrente para os cards)
+  const paysMes    = (allPays||[]).filter(p => p.payment_date >= mesInicio);
+  const totalMes   = paysMes.reduce((s,p) => s + Number(p.amount), 0);
   const totalAberto = (pkgs||[]).reduce((s,pkg) => {
     const paid = (pkg.payments||[]).reduce((x,p) => x + Number(p.amount), 0);
     return s + Math.max(0, Number(pkg.total_value) - paid);
@@ -1062,7 +1104,7 @@ async function loadFinanceiroPage() {
   document.getElementById('fin-pacotes').textContent = (pkgs||[]).length;
   document.getElementById('fin-sessoes').textContent = sessMes;
 
-  // Pacientes com saldo em aberto
+  // A Receber — todos com saldo > 0
   const abertos = (pkgs||[]).map(pkg => {
     const paid    = (pkg.payments||[]).reduce((s,p) => s + Number(p.amount), 0);
     const balance = Number(pkg.total_value) - paid;
@@ -1077,21 +1119,53 @@ async function loadFinanceiroPage() {
         <td>${fmtBRL(pkg.total_value)}</td>
         <td style="color:#15803D">${fmtBRL(pkg.paid)}</td>
         <td style="color:#B91C1C;font-weight:600">${fmtBRL(pkg.balance)}</td>
+        <td style="font-size:11px;color:var(--g500);max-width:160px">${pkg.notes||'—'}</td>
         <td><button class="btn btn-sm btn-outline">Ver</button></td>
       </tr>`).join('')
-    : '<tr><td colspan="7" class="empty">Nenhum saldo em aberto 🎉</td></tr>';
+    : '<tr><td colspan="8" class="empty">Nenhum saldo em aberto 🎉</td></tr>';
 
-  // Pagamentos recentes
-  document.getElementById('fin-recent-body').innerHTML = (paysMes||[]).length
-    ? (paysMes||[]).map(p => `<tr>
+  // Recebido — guarda allPays em variável global para filtro
+  window._finAllPays = allPays || [];
+  renderFinRecebido('semana');
+}
+
+function setFinPeriodo(periodo, btn) {
+  document.querySelectorAll('#fin-btn-semana,#fin-btn-mes,#fin-btn-todos').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderFinRecebido(periodo);
+}
+
+function renderFinRecebido(periodo) {
+  const pays = window._finAllPays || [];
+  const hoje = new Date();
+  const startOfWeek = new Date(hoje); startOfWeek.setDate(hoje.getDate() - hoje.getDay() + 1); // segunda
+  const semanaInicio = startOfWeek.toISOString().split('T')[0];
+  const mesInicio2   = hoje.toISOString().slice(0,8) + '01';
+
+  const filtered = pays.filter(p => {
+    if (periodo === 'semana') return p.payment_date >= semanaInicio;
+    if (periodo === 'mes')    return p.payment_date >= mesInicio2;
+    return true;
+  });
+
+  const totalFiltrado = filtered.reduce((s,p) => s + Number(p.amount), 0);
+  const labelTotais = filtered.length > 0
+    ? `<tr style="background:var(--g50);font-weight:600"><td colspan="2">Total</td><td style="color:#15803D">${fmtBRL(totalFiltrado)}</td><td colspan="2"></td></tr>`
+    : '';
+
+  document.getElementById('fin-recent-body').innerHTML = filtered.length
+    ? filtered.map(p => `<tr>
         <td>${new Date(p.payment_date+'T12:00').toLocaleDateString('pt-BR')}</td>
         <td>${p.patients?.name||'—'}</td>
         <td style="font-weight:600;color:#15803D">${fmtBRL(p.amount)}</td>
         <td><span class="pay-method ${methodClass(p.method)}">${methodLabel(p.method)}</span></td>
         <td style="color:var(--g400);font-size:12px">${p.notes||'—'}</td>
-      </tr>`).join('')
-    : '<tr><td colspan="5" class="empty">Nenhum pagamento este mês</td></tr>';
+      </tr>`).join('') + labelTotais
+    : '<tr><td colspan="5" class="empty">Nenhum pagamento neste período</td></tr>';
 }
+
+// placeholder para chamadas anteriores à função real
+function _loadGlobalFinanceiro_unused() {
 
 </script>
 <script src="config.js">
@@ -1149,7 +1223,7 @@ async function loadPatientFinanceiro() {
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <span class="badge ${pkg.status==='ativo'?'badge-ativo':'badge-finalizado'}">${pkg.status==='ativo'?'Ativo':'Concluído'}</span>
-          <button class="btn btn-sm" onclick="openPaymentModal('${pkg.id}')">+ Pagamento</button>
+          ${balance > 0 ? `<button class="btn btn-sm" onclick="openPaymentModal('${pkg.id}')">+ Pagamento</button>` : ''}
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
@@ -1322,13 +1396,14 @@ async function loadFinanceiroPage() {
   const now = new Date();
   const mesInicio = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
 
-  const [{ data: pkgs }, { data: paysMes }] = await Promise.all([
+  const [{ data: pkgs }, { data: allPays }] = await Promise.all([
     db.from('treatment_packages').select('*, payments(*), patients(name)').eq('status','ativo'),
-    db.from('payments').select('*, patients(name)').gte('payment_date', mesInicio).order('payment_date', {ascending:false}),
+    db.from('payments').select('*, patients(name)').order('payment_date', {ascending:false}),
   ]);
 
-  // Stats
-  const totalMes   = (paysMes||[]).reduce((s,p) => s + Number(p.amount), 0);
+  // Stats (sempre do mês corrente para os cards)
+  const paysMes    = (allPays||[]).filter(p => p.payment_date >= mesInicio);
+  const totalMes   = paysMes.reduce((s,p) => s + Number(p.amount), 0);
   const totalAberto = (pkgs||[]).reduce((s,pkg) => {
     const paid = (pkg.payments||[]).reduce((x,p) => x + Number(p.amount), 0);
     return s + Math.max(0, Number(pkg.total_value) - paid);
@@ -1340,7 +1415,7 @@ async function loadFinanceiroPage() {
   document.getElementById('fin-pacotes').textContent = (pkgs||[]).length;
   document.getElementById('fin-sessoes').textContent = sessMes;
 
-  // Pacientes com saldo em aberto
+  // A Receber — todos com saldo > 0
   const abertos = (pkgs||[]).map(pkg => {
     const paid    = (pkg.payments||[]).reduce((s,p) => s + Number(p.amount), 0);
     const balance = Number(pkg.total_value) - paid;
@@ -1355,21 +1430,53 @@ async function loadFinanceiroPage() {
         <td>${fmtBRL(pkg.total_value)}</td>
         <td style="color:#15803D">${fmtBRL(pkg.paid)}</td>
         <td style="color:#B91C1C;font-weight:600">${fmtBRL(pkg.balance)}</td>
+        <td style="font-size:11px;color:var(--g500);max-width:160px">${pkg.notes||'—'}</td>
         <td><button class="btn btn-sm btn-outline">Ver</button></td>
       </tr>`).join('')
-    : '<tr><td colspan="7" class="empty">Nenhum saldo em aberto 🎉</td></tr>';
+    : '<tr><td colspan="8" class="empty">Nenhum saldo em aberto 🎉</td></tr>';
 
-  // Pagamentos recentes
-  document.getElementById('fin-recent-body').innerHTML = (paysMes||[]).length
-    ? (paysMes||[]).map(p => `<tr>
+  // Recebido — guarda allPays em variável global para filtro
+  window._finAllPays = allPays || [];
+  renderFinRecebido('semana');
+}
+
+function setFinPeriodo(periodo, btn) {
+  document.querySelectorAll('#fin-btn-semana,#fin-btn-mes,#fin-btn-todos').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderFinRecebido(periodo);
+}
+
+function renderFinRecebido(periodo) {
+  const pays = window._finAllPays || [];
+  const hoje = new Date();
+  const startOfWeek = new Date(hoje); startOfWeek.setDate(hoje.getDate() - hoje.getDay() + 1); // segunda
+  const semanaInicio = startOfWeek.toISOString().split('T')[0];
+  const mesInicio2   = hoje.toISOString().slice(0,8) + '01';
+
+  const filtered = pays.filter(p => {
+    if (periodo === 'semana') return p.payment_date >= semanaInicio;
+    if (periodo === 'mes')    return p.payment_date >= mesInicio2;
+    return true;
+  });
+
+  const totalFiltrado = filtered.reduce((s,p) => s + Number(p.amount), 0);
+  const labelTotais = filtered.length > 0
+    ? `<tr style="background:var(--g50);font-weight:600"><td colspan="2">Total</td><td style="color:#15803D">${fmtBRL(totalFiltrado)}</td><td colspan="2"></td></tr>`
+    : '';
+
+  document.getElementById('fin-recent-body').innerHTML = filtered.length
+    ? filtered.map(p => `<tr>
         <td>${new Date(p.payment_date+'T12:00').toLocaleDateString('pt-BR')}</td>
         <td>${p.patients?.name||'—'}</td>
         <td style="font-weight:600;color:#15803D">${fmtBRL(p.amount)}</td>
         <td><span class="pay-method ${methodClass(p.method)}">${methodLabel(p.method)}</span></td>
         <td style="color:var(--g400);font-size:12px">${p.notes||'—'}</td>
-      </tr>`).join('')
-    : '<tr><td colspan="5" class="empty">Nenhum pagamento este mês</td></tr>';
+      </tr>`).join('') + labelTotais
+    : '<tr><td colspan="5" class="empty">Nenhum pagamento neste período</td></tr>';
 }
+
+// placeholder para chamadas anteriores à função real
+function _loadGlobalFinanceiro_unused() {
 
 </script>
 <script>
@@ -2214,7 +2321,7 @@ async function loadPatientFinanceiro() {
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <span class="badge ${pkg.status==='ativo'?'badge-ativo':'badge-finalizado'}">${pkg.status==='ativo'?'Ativo':'Concluído'}</span>
-          <button class="btn btn-sm" onclick="openPaymentModal('${pkg.id}')">+ Pagamento</button>
+          ${balance > 0 ? `<button class="btn btn-sm" onclick="openPaymentModal('${pkg.id}')">+ Pagamento</button>` : ''}
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
@@ -2387,13 +2494,14 @@ async function loadFinanceiroPage() {
   const now = new Date();
   const mesInicio = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
 
-  const [{ data: pkgs }, { data: paysMes }] = await Promise.all([
+  const [{ data: pkgs }, { data: allPays }] = await Promise.all([
     db.from('treatment_packages').select('*, payments(*), patients(name)').eq('status','ativo'),
-    db.from('payments').select('*, patients(name)').gte('payment_date', mesInicio).order('payment_date', {ascending:false}),
+    db.from('payments').select('*, patients(name)').order('payment_date', {ascending:false}),
   ]);
 
-  // Stats
-  const totalMes   = (paysMes||[]).reduce((s,p) => s + Number(p.amount), 0);
+  // Stats (sempre do mês corrente para os cards)
+  const paysMes    = (allPays||[]).filter(p => p.payment_date >= mesInicio);
+  const totalMes   = paysMes.reduce((s,p) => s + Number(p.amount), 0);
   const totalAberto = (pkgs||[]).reduce((s,pkg) => {
     const paid = (pkg.payments||[]).reduce((x,p) => x + Number(p.amount), 0);
     return s + Math.max(0, Number(pkg.total_value) - paid);
@@ -2405,7 +2513,7 @@ async function loadFinanceiroPage() {
   document.getElementById('fin-pacotes').textContent = (pkgs||[]).length;
   document.getElementById('fin-sessoes').textContent = sessMes;
 
-  // Pacientes com saldo em aberto
+  // A Receber — todos com saldo > 0
   const abertos = (pkgs||[]).map(pkg => {
     const paid    = (pkg.payments||[]).reduce((s,p) => s + Number(p.amount), 0);
     const balance = Number(pkg.total_value) - paid;
@@ -2420,21 +2528,53 @@ async function loadFinanceiroPage() {
         <td>${fmtBRL(pkg.total_value)}</td>
         <td style="color:#15803D">${fmtBRL(pkg.paid)}</td>
         <td style="color:#B91C1C;font-weight:600">${fmtBRL(pkg.balance)}</td>
+        <td style="font-size:11px;color:var(--g500);max-width:160px">${pkg.notes||'—'}</td>
         <td><button class="btn btn-sm btn-outline">Ver</button></td>
       </tr>`).join('')
-    : '<tr><td colspan="7" class="empty">Nenhum saldo em aberto 🎉</td></tr>';
+    : '<tr><td colspan="8" class="empty">Nenhum saldo em aberto 🎉</td></tr>';
 
-  // Pagamentos recentes
-  document.getElementById('fin-recent-body').innerHTML = (paysMes||[]).length
-    ? (paysMes||[]).map(p => `<tr>
+  // Recebido — guarda allPays em variável global para filtro
+  window._finAllPays = allPays || [];
+  renderFinRecebido('semana');
+}
+
+function setFinPeriodo(periodo, btn) {
+  document.querySelectorAll('#fin-btn-semana,#fin-btn-mes,#fin-btn-todos').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderFinRecebido(periodo);
+}
+
+function renderFinRecebido(periodo) {
+  const pays = window._finAllPays || [];
+  const hoje = new Date();
+  const startOfWeek = new Date(hoje); startOfWeek.setDate(hoje.getDate() - hoje.getDay() + 1); // segunda
+  const semanaInicio = startOfWeek.toISOString().split('T')[0];
+  const mesInicio2   = hoje.toISOString().slice(0,8) + '01';
+
+  const filtered = pays.filter(p => {
+    if (periodo === 'semana') return p.payment_date >= semanaInicio;
+    if (periodo === 'mes')    return p.payment_date >= mesInicio2;
+    return true;
+  });
+
+  const totalFiltrado = filtered.reduce((s,p) => s + Number(p.amount), 0);
+  const labelTotais = filtered.length > 0
+    ? `<tr style="background:var(--g50);font-weight:600"><td colspan="2">Total</td><td style="color:#15803D">${fmtBRL(totalFiltrado)}</td><td colspan="2"></td></tr>`
+    : '';
+
+  document.getElementById('fin-recent-body').innerHTML = filtered.length
+    ? filtered.map(p => `<tr>
         <td>${new Date(p.payment_date+'T12:00').toLocaleDateString('pt-BR')}</td>
         <td>${p.patients?.name||'—'}</td>
         <td style="font-weight:600;color:#15803D">${fmtBRL(p.amount)}</td>
         <td><span class="pay-method ${methodClass(p.method)}">${methodLabel(p.method)}</span></td>
         <td style="color:var(--g400);font-size:12px">${p.notes||'—'}</td>
-      </tr>`).join('')
-    : '<tr><td colspan="5" class="empty">Nenhum pagamento este mês</td></tr>';
+      </tr>`).join('') + labelTotais
+    : '<tr><td colspan="5" class="empty">Nenhum pagamento neste período</td></tr>';
 }
+
+// placeholder para chamadas anteriores à função real
+function _loadGlobalFinanceiro_unused() {
 
 </script>
 
