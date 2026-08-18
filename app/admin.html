@@ -596,6 +596,52 @@ function renderFinRecebido(periodo) {
     .ag-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--g500); }
     .ag-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
 
+  
+    /* ── DISPONIBILIDADE ─────────────────────────── */
+    .disp-day { margin-bottom: 20px; }
+    .disp-day-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--g50); border: 1px solid var(--g200);
+      border-radius: 10px 10px 0 0; padding: 10px 16px;
+      font-weight: 600; font-size: 13px;
+    }
+    .disp-blocks { border: 1px solid var(--g200); border-top: none; border-radius: 0 0 10px 10px; padding: 12px 16px; }
+    .disp-block-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0; border-bottom: 1px solid var(--g100);
+    }
+    .disp-block-row:last-child { border-bottom: none; }
+    .disp-block-label { flex: 1; font-size: 13px; }
+    .disp-block-time { font-size: 12px; color: var(--g500); }
+    .disp-block-color { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .disp-add-btn {
+      font-size: 12px; color: var(--w700,#B45309); background: none;
+      border: 1.5px dashed var(--w300,#FCD34D); border-radius: 6px;
+      padding: 4px 10px; cursor: pointer; margin-top: 8px; width: 100%;
+    }
+    .disp-add-btn:hover { background: #FEF9EE; }
+    .disp-del-btn {
+      background: none; border: none; color: var(--g400);
+      cursor: pointer; font-size: 16px; padding: 0 4px;
+      line-height: 1;
+    }
+    .disp-del-btn:hover { color: #DC2626; }
+    .disp-free-badge {
+      font-size: 11px; background: #DCFCE7; color: #15803D;
+      border-radius: 12px; padding: 2px 8px; font-weight: 600;
+    }
+    .disp-busy-badge {
+      font-size: 11px; background: #FEE2E2; color: #B91C1C;
+      border-radius: 12px; padding: 2px 8px; font-weight: 600;
+    }
+    .cal-sync-bar {
+      background: #FEF9EE; border: 1px solid #FDE68A;
+      border-radius: 10px; padding: 14px 18px;
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px; font-size: 13px;
+    }
+    .cal-sync-bar svg { flex-shrink: 0; color: var(--w600,#D97706); }
+
   </style>
 </head>
 <body>
@@ -628,6 +674,10 @@ function renderFinRecebido(periodo) {
       <button class="sidebar-btn" onclick="showPage('agenda')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Agenda
+      </button>
+      <button class="sidebar-btn" onclick="showPage('disponibilidade')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Disponibilidade
       </button>
     </div>
     <div class="sidebar-section" style="margin-top:8px">
@@ -682,6 +732,36 @@ function renderFinRecebido(periodo) {
       </div>
     </div>
 
+
+
+    <!-- DISPONIBILIDADE -->
+    <div id="page-disponibilidade" class="page">
+      <div class="sh"><h2>Disponibilidade</h2></div>
+
+      <div class="cal-sync-bar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <div style="flex:1">
+          <strong>Conectar ao Cal.com</strong> — para que as mudanças aqui reflitam automaticamente na agenda do site,
+          insira a chave de API do Cal.com.
+        </div>
+        <input id="cal-api-key" type="password" placeholder="Chave de API Cal.com"
+          style="border:1.5px solid var(--g200);border-radius:8px;padding:7px 12px;font-size:12px;width:220px"/>
+        <button class="btn btn-sm" onclick="saveCalApiKey()">Salvar</button>
+      </div>
+
+      <p style="font-size:13px;color:var(--g500);margin-bottom:20px">
+        Horários em vermelho = bloqueados (não aparecem no site). Em verde = disponíveis para novos pacientes.
+      </p>
+
+      <div id="disp-days-container"></div>
+
+      <div style="margin-top:24px;display:flex;gap:12px">
+        <button class="btn" onclick="saveDisponibilidade()">💾 Salvar disponibilidade</button>
+        <button class="btn btn-outline" id="btn-sync-cal" onclick="syncToCalCom()" style="display:none">
+          🔄 Sincronizar Cal.com
+        </button>
+      </div>
+    </div>
 
     <!-- AGENDA -->
     <div id="page-agenda" class="page">
@@ -1655,6 +1735,7 @@ function showPage(id) {
   if (btn) btn.classList.add('active');
   if (id === 'agenda') loadAgenda();
   if (id === 'financeiro') loadGlobalFinanceiro();
+  if (id === 'disponibilidade') loadDisponibilidade();
 }
 
 function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); }
@@ -2862,6 +2943,133 @@ async function saveAppointment() {
   if (error) { alert('Erro: ' + error.message); return; }
   closeModal('novo-atendimento');
   loadAgenda();
+}
+
+
+// ══════════════════════════════════════════════════════════
+// DISPONIBILIDADE
+// ══════════════════════════════════════════════════════════
+const DISP_DAYS = [
+  { dow: 1, label: 'Segunda-feira',  workStart: '08:00', workEnd: '20:00' },
+  { dow: 2, label: 'Terça-feira',    workStart: '08:00', workEnd: '20:00' },
+  { dow: 3, label: 'Quarta-feira',   workStart: '08:00', workEnd: '20:00' },
+  { dow: 4, label: 'Quinta-feira',   workStart: '08:00', workEnd: '20:00' },
+  { dow: 5, label: 'Sexta-feira',    workStart: '08:00', workEnd: '20:00' },
+  { dow: 6, label: 'Sábado',         workStart: '09:00', workEnd: '17:00' },
+];
+
+let dispBlocks = {}; // {dow: [{id, label, start_time, end_time, color}]}
+
+function saveCalApiKey() {
+  const key = document.getElementById('cal-api-key').value.trim();
+  if (!key) return;
+  localStorage.setItem('cal_api_key', key);
+  document.getElementById('btn-sync-cal').style.display = 'inline-flex';
+  alert('Chave salva! Agora clique em "Sincronizar Cal.com" após salvar a disponibilidade.');
+}
+
+async function loadDisponibilidade() {
+  const { data: blocks } = await db.from('schedule_blocks').select('*').eq('active', true).order('start_time');
+  dispBlocks = {};
+  (blocks||[]).forEach(b => {
+    (dispBlocks[b.day_of_week] = dispBlocks[b.day_of_week] || []).push(b);
+  });
+  renderDispDays();
+  const savedKey = localStorage.getItem('cal_api_key');
+  if (savedKey) document.getElementById('btn-sync-cal').style.display = 'inline-flex';
+}
+
+function renderDispDays() {
+  const container = document.getElementById('disp-days-container');
+  if (!container) return;
+  container.innerHTML = DISP_DAYS.map(day => {
+    const blocks = dispBlocks[day.dow] || [];
+    const rows = blocks.map((b, bi) => `
+      <div class="disp-block-row" data-dow="${day.dow}" data-idx="${bi}">
+        <div class="disp-block-color" style="background:${b.color||'#94A3B8'}"></div>
+        <input type="text" value="${b.label}" data-field="label"
+          style="flex:1;border:1px solid var(--g200);border-radius:6px;padding:5px 8px;font-size:12px"
+          onchange="updateDispBlock(${day.dow},${bi},'label',this.value)"/>
+        <input type="time" value="${b.start_time.slice(0,5)}" data-field="start"
+          style="width:80px;border:1px solid var(--g200);border-radius:6px;padding:5px 6px;font-size:12px"
+          onchange="updateDispBlock(${day.dow},${bi},'start_time',this.value)"/>
+        <span style="color:var(--g400);font-size:11px">até</span>
+        <input type="time" value="${b.end_time.slice(0,5)}" data-field="end"
+          style="width:80px;border:1px solid var(--g200);border-radius:6px;padding:5px 6px;font-size:12px"
+          onchange="updateDispBlock(${day.dow},${bi},'end_time',this.value)"/>
+        <span class="disp-busy-badge">Bloqueado</span>
+        <button class="disp-del-btn" onclick="removeDispBlock(${day.dow},${bi})">×</button>
+      </div>`).join('');
+
+    // Calcula slots livres
+    const freeSlots = calcFreeSlots(day, blocks);
+    const freeBadges = freeSlots.map(s =>
+      `<span class="disp-free-badge">${s}</span>`).join(' ');
+
+    return `<div class="disp-day">
+      <div class="disp-day-header">
+        <span>${day.label}</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${freeBadges || '<span style="font-size:11px;color:var(--g400)">Sem horários livres</span>'}</div>
+      </div>
+      <div class="disp-blocks">
+        ${rows || '<p style="font-size:12px;color:var(--g400);padding:4px 0">Nenhum bloqueio — dia todo livre</p>'}
+        <button class="disp-add-btn" onclick="addDispBlock(${day.dow})">+ Adicionar bloqueio</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function calcFreeSlots(day, blocks) {
+  const toMin = t => { const [h,m] = t.split(':'); return +h*60+ +m; };
+  const toStr = m => String(Math.floor(m/60)).padStart(2,'0') + 'h' + (m%60?String(m%60).padStart(2,'0'):'');
+  let free = [[toMin(day.workStart), toMin(day.workEnd)]];
+  blocks.forEach(b => {
+    const bs = toMin(b.start_time), be = toMin(b.end_time);
+    free = free.flatMap(([s,e]) => {
+      if (be <= s || bs >= e) return [[s,e]];
+      const res = [];
+      if (bs > s) res.push([s, bs]);
+      if (be < e) res.push([be, e]);
+      return res;
+    });
+  });
+  return free.filter(([s,e]) => e-s >= 30).map(([s,e]) => toStr(s)+'-'+toStr(e));
+}
+
+function updateDispBlock(dow, idx, field, val) {
+  if (dispBlocks[dow] && dispBlocks[dow][idx]) {
+    dispBlocks[dow][idx][field] = val;
+  }
+}
+
+function removeDispBlock(dow, idx) {
+  if (dispBlocks[dow]) {
+    dispBlocks[dow].splice(idx, 1);
+    renderDispDays();
+  }
+}
+
+function addDispBlock(dow) {
+  dispBlocks[dow] = dispBlocks[dow] || [];
+  dispBlocks[dow].push({ label: 'Compromisso', start_time: '09:00', end_time: '10:00', color: '#94A3B8', day_of_week: dow, active: true });
+  renderDispDays();
+}
+
+async function saveDisponibilidade() {
+  // Apaga todos e recria
+  await db.from('schedule_blocks').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  const rows = Object.values(dispBlocks).flat().map(b => ({
+    label: b.label, day_of_week: b.day_of_week,
+    start_time: b.start_time, end_time: b.end_time,
+    color: b.color || '#94A3B8', active: true,
+  }));
+  if (rows.length) await db.from('schedule_blocks').insert(rows);
+  alert('Disponibilidade salva! A agenda do painel já está atualizada.');
+  loadAgenda();
+}
+
+async function syncToCalCom() {
+  alert('Função de sincronização com Cal.com em breve — aguardando chave de API configurada.');
 }
 
 </script>
