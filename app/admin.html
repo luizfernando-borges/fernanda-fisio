@@ -314,155 +314,6 @@ function renderFinRecebido(periodo) {
 }
 
 
-
-// ══════════════════════════════════════════════════════════
-// AGENDA
-// ══════════════════════════════════════════════════════════
-let agendaWeekOffset = 0;
-const HOURS = Array.from({length:12}, (_,i) => i + 8); // 8h..19h
-const DAYS  = ['SEG','TER','QUA','QUI','SEX','SÁB'];
-const DAY_NUMS = [1,2,3,4,5,6]; // day_of_week: 1=seg...6=sáb
-
-function getWeekStart(offset = 0) {
-  const d = new Date();
-  const day = d.getDay() || 7; // 1=seg
-  d.setDate(d.getDate() - day + 1 + offset * 7);
-  d.setHours(0,0,0,0);
-  return d;
-}
-
-function changeAgendaWeek(delta) { agendaWeekOffset += delta; loadAgenda(); }
-function goAgendaToday() { agendaWeekOffset = 0; loadAgenda(); }
-
-async function loadAgenda() {
-  const weekStart = getWeekStart(agendaWeekOffset);
-  const weekEnd   = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 5); // até sábado
-
-  // Label do cabeçalho
-  const fmt = d => d.toLocaleDateString('pt-BR', {day:'2-digit', month:'short'});
-  document.getElementById('ag-week-label').textContent =
-    fmt(weekStart) + ' – ' + fmt(weekEnd);
-
-  const dateStr = d => d.toISOString().split('T')[0];
-  const startStr = dateStr(weekStart);
-  const endStr   = dateStr(weekEnd);
-
-  const [{ data: blocks }, { data: appts }] = await Promise.all([
-    db.from('schedule_blocks').select('*').eq('active', true),
-    db.from('appointments').select('*, patients(name)')
-      .gte('date', startStr).lte('date', endStr),
-  ]);
-
-  renderAgendaCal(weekStart, blocks || [], appts || []);
-}
-
-function renderAgendaCal(weekStart, blocks, appts) {
-  const todayStr = new Date().toISOString().split('T')[0];
-  const cal = document.getElementById('ag-cal');
-  const dayDates = DAY_NUMS.map((_, i) => {
-    const d = new Date(weekStart); d.setDate(d.getDate() + i);
-    return d;
-  });
-
-  // Indexar blocos: {day_of_week: [{...}]}
-  const blockMap = {};
-  (blocks||[]).forEach(b => {
-    (blockMap[b.day_of_week] = blockMap[b.day_of_week] || []).push(b);
-  });
-  // Indexar atendimentos: {dateStr+hour: [{...}]}
-  const apptMap = {};
-  (appts||[]).forEach(a => {
-    const h = parseInt(a.start_time.slice(0,2));
-    const key = a.date + '_' + h;
-    (apptMap[key] = apptMap[key] || []).push(a);
-  });
-
-  let html = '';
-
-  // Cabeçalho
-  html += '<div class="ag-head" style="background:var(--g50);border-right:1px solid var(--g200)"></div>';
-  dayDates.forEach((d, i) => {
-    const ds = d.toISOString().split('T')[0];
-    const isToday = ds === todayStr;
-    const label = DAYS[i] + ' ' + d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
-    html += `<div class="ag-head${isToday?' today-col':''}">${label}</div>`;
-  });
-
-  // Linhas de hora
-  HOURS.forEach(h => {
-    html += `<div class="ag-time">${h}h</div>`;
-    dayDates.forEach((d, di) => {
-      const dow = DAY_NUMS[di];
-      const ds  = d.toISOString().split('T')[0];
-      const isToday = ds === todayStr;
-
-      // Bloco fixo nessa hora?
-      const fixedBlocks = (blockMap[dow]||[]).filter(b => {
-        const bh = parseInt(b.start_time.slice(0,2));
-        const eh = parseInt(b.end_time.slice(0,2));
-        return h >= bh && h < eh;
-      });
-      // Atendimento nessa hora?
-      const dayAppts = (apptMap[ds+'_'+h]||[]);
-
-      let inner = '';
-      if (fixedBlocks.length) {
-        const b = fixedBlocks[0];
-        const isFirst = parseInt(b.start_time.slice(0,2)) === h;
-        inner = `<div class="ag-block" style="background:${b.color}">
-          ${isFirst ? `<div>${b.label}</div><div style="opacity:.8;font-weight:400">${b.start_time.slice(0,5)}–${b.end_time.slice(0,5)}</div>` : ''}
-        </div>`;
-      } else if (dayAppts.length) {
-        const a = dayAppts[0];
-        inner = `<div class="ag-appt" onclick="openPatient('${a.patient_id}')">
-          <div>${a.patients?.name||'Paciente'}</div>
-          <div style="opacity:.85;font-weight:400">${a.start_time.slice(0,5)}</div>
-        </div>`;
-      }
-
-      const onclick = (!fixedBlocks.length && !dayAppts.length)
-        ? `openNewAppt('${ds}','${String(h).padStart(2,'0')}:00')`
-        : '';
-
-      html += `<div class="ag-cell${isToday?' today-col':''}" ${onclick?'onclick="'+onclick+'"':''}>${inner}</div>`;
-    });
-  });
-
-  cal.innerHTML = html;
-}
-
-function openNewAppt(date, time) {
-  document.getElementById('appt-date').value = date;
-  document.getElementById('appt-time').value = time;
-  document.getElementById('appt-notes').value = '';
-  // Popular select de pacientes
-  const sel = document.getElementById('appt-patient');
-  sel.innerHTML = '<option value="">Selecione...</option>';
-  (allPatients||[]).forEach(p => {
-    sel.innerHTML += `<option value="${p.id}">${p.name}</option>`;
-  });
-  openModal('novo-atendimento');
-}
-
-async function saveAppointment() {
-  const date     = document.getElementById('appt-date').value;
-  const time     = document.getElementById('appt-time').value;
-  const patientId= document.getElementById('appt-patient').value;
-  const type     = document.getElementById('appt-type').value;
-  const notes    = document.getElementById('appt-notes').value.trim();
-  if (!date || !time || !patientId) { alert('Preencha data, horário e paciente.'); return; }
-  const [h, m] = time.split(':');
-  const endTime = String(parseInt(h)+1).padStart(2,'0') + ':' + m; // +1h
-  const { error } = await db.from('appointments').insert({
-    patient_id: patientId,
-    date, start_time: time, end_time: endTime,
-    type, notes: notes||null,
-  });
-  if (error) { alert('Erro: ' + error.message); return; }
-  closeModal('novo-atendimento');
-  loadAgenda();
-}
-
 </script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -2866,6 +2717,152 @@ function renderFinRecebido(periodo) {
     : '<tr><td colspan="5" class="empty">Nenhum pagamento neste período</td></tr>';
 }
 
+
+
+// ══════════════════════════════════════════════════════════
+// AGENDA
+// ══════════════════════════════════════════════════════════
+let agendaWeekOffset = 0;
+const HOURS = Array.from({length:12}, (_,i) => i + 8); // 8h..19h
+const DAYS  = ['SEG','TER','QUA','QUI','SEX','SÁB'];
+const DAY_NUMS = [1,2,3,4,5,6]; // day_of_week: 1=seg...6=sáb
+
+function getWeekStart(offset = 0) {
+  const d = new Date();
+  const day = d.getDay() || 7; // 1=seg
+  d.setDate(d.getDate() - day + 1 + offset * 7);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function changeAgendaWeek(delta) { agendaWeekOffset += delta; loadAgenda(); }
+function goAgendaToday() { agendaWeekOffset = 0; loadAgenda(); }
+
+async function loadAgenda() {
+  const weekStart = getWeekStart(agendaWeekOffset);
+  const weekEnd   = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 5);
+
+  const fmt = d => d.toLocaleDateString('pt-BR', {day:'2-digit', month:'short'});
+  document.getElementById('ag-week-label').textContent =
+    fmt(weekStart) + ' – ' + fmt(weekEnd);
+
+  const dateStr = d => d.toISOString().split('T')[0];
+  const startStr = dateStr(weekStart);
+  const endStr   = dateStr(weekEnd);
+
+  const [{ data: blocks, error: e1 }, { data: appts, error: e2 }] = await Promise.all([
+    db.from('schedule_blocks').select('*').eq('active', true),
+    db.from('appointments').select('*, patients(name)')
+      .gte('date', startStr).lte('date', endStr),
+  ]);
+  if (e1) { console.error('blocks error', e1); }
+  if (e2) { console.error('appts error', e2); }
+
+  renderAgendaCal(weekStart, blocks || [], appts || []);
+}
+
+function renderAgendaCal(weekStart, blocks, appts) {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const cal = document.getElementById('ag-cal');
+  if (!cal) return;
+  const dayDates = DAY_NUMS.map((_, i) => {
+    const d = new Date(weekStart); d.setDate(d.getDate() + i);
+    return d;
+  });
+
+  const blockMap = {};
+  (blocks||[]).forEach(b => {
+    (blockMap[b.day_of_week] = blockMap[b.day_of_week] || []).push(b);
+  });
+  const apptMap = {};
+  (appts||[]).forEach(a => {
+    const h = parseInt(a.start_time.slice(0,2));
+    const key = a.date + '_' + h;
+    (apptMap[key] = apptMap[key] || []).push(a);
+  });
+
+  let html = '';
+
+  // Cabeçalho
+  html += '<div class="ag-head" style="background:var(--g50);border-right:1px solid var(--g200)"></div>';
+  dayDates.forEach((d, i) => {
+    const ds = d.toISOString().split('T')[0];
+    const isToday = ds === todayStr;
+    const label = DAYS[i] + '<br>' + d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+    html += `<div class="ag-head${isToday?' today-col':''}">${label}</div>`;
+  });
+
+  // Linhas de hora
+  HOURS.forEach(h => {
+    html += `<div class="ag-time">${h}h</div>`;
+    dayDates.forEach((d, di) => {
+      const dow = DAY_NUMS[di];
+      const ds  = d.toISOString().split('T')[0];
+      const isToday = ds === todayStr;
+
+      const fixedBlocks = (blockMap[dow]||[]).filter(b => {
+        const bh = parseInt(b.start_time.slice(0,2));
+        const eh = parseInt(b.end_time.slice(0,2));
+        return h >= bh && h < eh;
+      });
+      const dayAppts = (apptMap[ds+'_'+h]||[]);
+
+      let inner = '';
+      if (fixedBlocks.length) {
+        const b = fixedBlocks[0];
+        const isFirst = parseInt(b.start_time.slice(0,2)) === h;
+        inner = `<div class="ag-block" style="background:${b.color}">
+          ${isFirst ? `<div>${b.label}</div><div style="opacity:.8;font-weight:400">${b.start_time.slice(0,5)}–${b.end_time.slice(0,5)}</div>` : ''}
+        </div>`;
+      } else if (dayAppts.length) {
+        const a = dayAppts[0];
+        inner = `<div class="ag-appt" onclick="openPatient('${a.patient_id}')">
+          <div>${a.patients?.name||'Paciente'}</div>
+          <div style="opacity:.85;font-weight:400">${a.start_time.slice(0,5)}</div>
+        </div>`;
+      }
+
+      const onclick = (!fixedBlocks.length && !dayAppts.length)
+        ? `openNewAppt('${ds}','${String(h).padStart(2,'0')}:00')`
+        : '';
+
+      html += `<div class="ag-cell${isToday?' today-col':''}" ${onclick?`onclick="${onclick}"`:''}>${inner}</div>`;
+    });
+  });
+
+  cal.innerHTML = html;
+}
+
+function openNewAppt(date, time) {
+  document.getElementById('appt-date').value = date;
+  document.getElementById('appt-time').value = time;
+  document.getElementById('appt-notes').value = '';
+  const sel = document.getElementById('appt-patient');
+  sel.innerHTML = '<option value="">Selecione...</option>';
+  (allPatients||[]).forEach(p => {
+    sel.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+  });
+  openModal('novo-atendimento');
+}
+
+async function saveAppointment() {
+  const date      = document.getElementById('appt-date').value;
+  const time      = document.getElementById('appt-time').value;
+  const patientId = document.getElementById('appt-patient').value;
+  const type      = document.getElementById('appt-type').value;
+  const notes     = document.getElementById('appt-notes').value.trim();
+  if (!date || !time || !patientId) { alert('Preencha data, horário e paciente.'); return; }
+  const [h] = time.split(':');
+  const endTime = String(parseInt(h)+1).padStart(2,'0') + ':00';
+  const { error } = await db.from('appointments').insert({
+    patient_id: patientId, date,
+    start_time: time, end_time: endTime,
+    type, notes: notes||null,
+  });
+  if (error) { alert('Erro: ' + error.message); return; }
+  closeModal('novo-atendimento');
+  loadAgenda();
+}
 
 </script>
 
