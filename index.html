@@ -2496,35 +2496,12 @@
         Agendar via WhatsApp
       </a>
     </div>
-    <div class="agenda-card">
-      <div class="agenda-nav">
-        <h3 id="agenda-month">Julho 2026</h3>
-        <div class="agenda-nav-btns">
-          <button class="agenda-nav-btn" onclick="changeWeek(-1)">&#8249;</button>
-          <button class="agenda-nav-btn" onclick="changeWeek(1)">&#8250;</button>
-        </div>
-      </div>
-      <div class="agenda-days-header">
-        <div class="agenda-time-col"></div>
-        <div class="agenda-day-label" id="d0">SEG</div>
-        <div class="agenda-day-label" id="d1">TER</div>
-        <div class="agenda-day-label" id="d2">QUA</div>
-        <div class="agenda-day-label" id="d3">QUI</div>
-        <div class="agenda-day-label" id="d4">SEX</div>
-        <div class="agenda-day-label" id="d5">SÁB</div>
-      </div>
-      <div class="agenda-body" id="agenda-body">
-      </div>
-      <div class="agenda-google-banner">
-        <div class="google-info">
-          <div class="google-dot"></div>
-          <div><strong>Integração com Google Calendar</strong>, disponível em breve</div>
-        </div>
-        <button class="google-sync-btn" disabled style="opacity:0.5; cursor:not-allowed;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          Sincronizar com Google
-        </button>
-      </div>
+    <!-- Cal.com embed -->
+    <div id="cal-fernanda" style="min-height:600px;border-radius:var(--radius-md);overflow:hidden"></div>
+
+    <div style="margin-top:12px;font-size:13px;color:var(--gray-500);text-align:center">
+      Problema para carregar?
+      <a href="https://cal.com/fernanda-rodrigues-vxketx" target="_blank" style="color:var(--warm-600)">Abrir calendário direto →</a>
     </div>
 
     <div style="margin-top: 24px; padding: 20px; background: #FAF8F4; border: 1px solid #F0E9DC; border-radius: var(--radius-md);">
@@ -2720,6 +2697,51 @@
   }
 
   buildAgenda();
+</script>
+
+
+<!-- Cal.com Embed -->
+<script type="text/javascript">
+  (function (C, A, L) {
+    let p = function (a, ar) { a.q.push(ar); };
+    let d = C.document;
+    C.Cal = C.Cal || function () {
+      let cal = C.Cal;
+      let ar = arguments;
+      if (!cal.loaded) {
+        cal.ns = {};
+        cal.q = cal.q || [];
+        d.head.appendChild(d.createElement("script")).src = A;
+        cal.loaded = true;
+      }
+      if (ar[0] === L) {
+        const api = function () { p(api, arguments); };
+        const namespace = ar[1];
+        api.q = api.q || [];
+        if (typeof namespace === "string") {
+          cal.ns[namespace] = cal.ns[namespace] || api;
+          p(cal.ns[namespace], ar);
+          p(cal, ["-ns", namespace, api]);
+        } else p(cal, ar);
+        return;
+      }
+      p(cal, ar);
+    };
+  })(window, "https://app.cal.com/embed/embed.js", "init");
+
+  Cal("init", { origin: "https://cal.com" });
+
+  Cal("inline", {
+    elementOrSelector: "#cal-fernanda",
+    calLink: "fernanda-rodrigues-vxketx",
+    layout: "month_view"
+  });
+
+  Cal("ui", {
+    styles: { branding: { brandColor: "#92400E" } },
+    hideEventTypeDetails: false,
+    layout: "month_view"
+  });
 </script>
 
 </body>
