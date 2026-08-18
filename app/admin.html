@@ -109,8 +109,21 @@ function onPkgModelChange(val) {
 }
 
 function onVencTipoChange(val) {
-  const wrap = document.getElementById('pkg-venc-dia-wrap');
-  if (wrap) wrap.style.display = val === 'mensal' ? 'block' : 'none';
+  const wrap  = document.getElementById('pkg-venc-dia-wrap');
+  const label = document.getElementById('pkg-venc-dia-label');
+  const input = document.getElementById('pkg-venc-dia');
+  if (!wrap) return;
+  if (val === 'mensal') {
+    wrap.style.display = 'block';
+    label.textContent  = 'Todo dia';
+    input.min = 1; input.max = 28; input.value = input.value || 5; input.placeholder = '5';
+  } else if (val === 'sessao') {
+    wrap.style.display = 'block';
+    label.textContent  = 'A cada (sessões)';
+    input.min = 1; input.max = 20; input.value = input.value || 4; input.placeholder = '4';
+  } else {
+    wrap.style.display = 'none';
+  }
   calcInstallment();
 }
 
@@ -134,7 +147,7 @@ function calcInstallment() {
     mensal:    `todo dia ${dia} do mês`,
     quinzenal: 'a cada 15 dias',
     semanal:   'toda semana',
-    sessao:    'a cada sessão concluída',
+    sessao:    `a cada ${dia} sessões`,
   }[tipo] || '';
 
   resumoEl.innerHTML = `<strong>${n}x de ${pvFmt}</strong> &nbsp;·&nbsp; ${tipoLabel}`;
@@ -167,7 +180,7 @@ async function savePackage() {
       mensal:    `todo dia ${dia} do mês`,
       quinzenal: 'a cada 15 dias',
       semanal:   'toda semana',
-      sessao:    'a cada sessão concluída',
+      sessao:    `a cada ${dia} sessões`,
     }[tipo] || '';
     const pre = `${n}x de R$ ${pvFmt} · ${tipoLabel}`;
     notes     = notes ? pre + ' — ' + notes : pre;
@@ -906,8 +919,21 @@ function onPkgModelChange(val) {
 }
 
 function onVencTipoChange(val) {
-  const wrap = document.getElementById('pkg-venc-dia-wrap');
-  if (wrap) wrap.style.display = val === 'mensal' ? 'block' : 'none';
+  const wrap  = document.getElementById('pkg-venc-dia-wrap');
+  const label = document.getElementById('pkg-venc-dia-label');
+  const input = document.getElementById('pkg-venc-dia');
+  if (!wrap) return;
+  if (val === 'mensal') {
+    wrap.style.display = 'block';
+    label.textContent  = 'Todo dia';
+    input.min = 1; input.max = 28; input.value = input.value || 5; input.placeholder = '5';
+  } else if (val === 'sessao') {
+    wrap.style.display = 'block';
+    label.textContent  = 'A cada (sessões)';
+    input.min = 1; input.max = 20; input.value = input.value || 4; input.placeholder = '4';
+  } else {
+    wrap.style.display = 'none';
+  }
   calcInstallment();
 }
 
@@ -931,7 +957,7 @@ function calcInstallment() {
     mensal:    `todo dia ${dia} do mês`,
     quinzenal: 'a cada 15 dias',
     semanal:   'toda semana',
-    sessao:    'a cada sessão concluída',
+    sessao:    `a cada ${dia} sessões`,
   }[tipo] || '';
 
   resumoEl.innerHTML = `<strong>${n}x de ${pvFmt}</strong> &nbsp;·&nbsp; ${tipoLabel}`;
@@ -964,7 +990,7 @@ async function savePackage() {
       mensal:    `todo dia ${dia} do mês`,
       quinzenal: 'a cada 15 dias',
       semanal:   'toda semana',
-      sessao:    'a cada sessão concluída',
+      sessao:    `a cada ${dia} sessões`,
     }[tipo] || '';
     const pre = `${n}x de R$ ${pvFmt} · ${tipoLabel}`;
     notes     = notes ? pre + ' — ' + notes : pre;
@@ -1171,8 +1197,21 @@ function onPkgModelChange(val) {
 }
 
 function onVencTipoChange(val) {
-  const wrap = document.getElementById('pkg-venc-dia-wrap');
-  if (wrap) wrap.style.display = val === 'mensal' ? 'block' : 'none';
+  const wrap  = document.getElementById('pkg-venc-dia-wrap');
+  const label = document.getElementById('pkg-venc-dia-label');
+  const input = document.getElementById('pkg-venc-dia');
+  if (!wrap) return;
+  if (val === 'mensal') {
+    wrap.style.display = 'block';
+    label.textContent  = 'Todo dia';
+    input.min = 1; input.max = 28; input.value = input.value || 5; input.placeholder = '5';
+  } else if (val === 'sessao') {
+    wrap.style.display = 'block';
+    label.textContent  = 'A cada (sessões)';
+    input.min = 1; input.max = 20; input.value = input.value || 4; input.placeholder = '4';
+  } else {
+    wrap.style.display = 'none';
+  }
   calcInstallment();
 }
 
@@ -1196,7 +1235,7 @@ function calcInstallment() {
     mensal:    `todo dia ${dia} do mês`,
     quinzenal: 'a cada 15 dias',
     semanal:   'toda semana',
-    sessao:    'a cada sessão concluída',
+    sessao:    `a cada ${dia} sessões`,
   }[tipo] || '';
 
   resumoEl.innerHTML = `<strong>${n}x de ${pvFmt}</strong> &nbsp;·&nbsp; ${tipoLabel}`;
@@ -1229,7 +1268,7 @@ async function savePackage() {
       mensal:    `todo dia ${dia} do mês`,
       quinzenal: 'a cada 15 dias',
       semanal:   'toda semana',
-      sessao:    'a cada sessão concluída',
+      sessao:    `a cada ${dia} sessões`,
     }[tipo] || '';
     const pre = `${n}x de R$ ${pvFmt} · ${tipoLabel}`;
     notes     = notes ? pre + ' — ' + notes : pre;
@@ -2223,8 +2262,21 @@ function onPkgModelChange(val) {
 }
 
 function onVencTipoChange(val) {
-  const wrap = document.getElementById('pkg-venc-dia-wrap');
-  if (wrap) wrap.style.display = val === 'mensal' ? 'block' : 'none';
+  const wrap  = document.getElementById('pkg-venc-dia-wrap');
+  const label = document.getElementById('pkg-venc-dia-label');
+  const input = document.getElementById('pkg-venc-dia');
+  if (!wrap) return;
+  if (val === 'mensal') {
+    wrap.style.display = 'block';
+    label.textContent  = 'Todo dia';
+    input.min = 1; input.max = 28; input.value = input.value || 5; input.placeholder = '5';
+  } else if (val === 'sessao') {
+    wrap.style.display = 'block';
+    label.textContent  = 'A cada (sessões)';
+    input.min = 1; input.max = 20; input.value = input.value || 4; input.placeholder = '4';
+  } else {
+    wrap.style.display = 'none';
+  }
   calcInstallment();
 }
 
@@ -2248,7 +2300,7 @@ function calcInstallment() {
     mensal:    `todo dia ${dia} do mês`,
     quinzenal: 'a cada 15 dias',
     semanal:   'toda semana',
-    sessao:    'a cada sessão concluída',
+    sessao:    `a cada ${dia} sessões`,
   }[tipo] || '';
 
   resumoEl.innerHTML = `<strong>${n}x de ${pvFmt}</strong> &nbsp;·&nbsp; ${tipoLabel}`;
@@ -2281,7 +2333,7 @@ async function savePackage() {
       mensal:    `todo dia ${dia} do mês`,
       quinzenal: 'a cada 15 dias',
       semanal:   'toda semana',
-      sessao:    'a cada sessão concluída',
+      sessao:    `a cada ${dia} sessões`,
     }[tipo] || '';
     const pre = `${n}x de R$ ${pvFmt} · ${tipoLabel}`;
     notes     = notes ? pre + ' — ' + notes : pre;
@@ -2440,11 +2492,11 @@ async function loadFinanceiroPage() {
               <option value="mensal">Mensal (todo dia X)</option>
               <option value="quinzenal">Quinzenal</option>
               <option value="semanal">Semanal</option>
-              <option value="sessao">Por sessão concluída</option>
+              <option value="sessao">A cada X sessões</option>
             </select>
           </div>
           <div class="fg" id="pkg-venc-dia-wrap">
-            <label>Todo dia</label>
+            <label id="pkg-venc-dia-label">Todo dia</label>
             <input type="number" id="pkg-venc-dia" min="1" max="28" value="5"
               oninput="calcInstallment()" placeholder="5"/>
           </div>
