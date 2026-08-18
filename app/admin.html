@@ -314,6 +314,155 @@ function renderFinRecebido(periodo) {
 }
 
 
+
+// ══════════════════════════════════════════════════════════
+// AGENDA
+// ══════════════════════════════════════════════════════════
+let agendaWeekOffset = 0;
+const HOURS = Array.from({length:12}, (_,i) => i + 8); // 8h..19h
+const DAYS  = ['SEG','TER','QUA','QUI','SEX','SÁB'];
+const DAY_NUMS = [1,2,3,4,5,6]; // day_of_week: 1=seg...6=sáb
+
+function getWeekStart(offset = 0) {
+  const d = new Date();
+  const day = d.getDay() || 7; // 1=seg
+  d.setDate(d.getDate() - day + 1 + offset * 7);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function changeAgendaWeek(delta) { agendaWeekOffset += delta; loadAgenda(); }
+function goAgendaToday() { agendaWeekOffset = 0; loadAgenda(); }
+
+async function loadAgenda() {
+  const weekStart = getWeekStart(agendaWeekOffset);
+  const weekEnd   = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 5); // até sábado
+
+  // Label do cabeçalho
+  const fmt = d => d.toLocaleDateString('pt-BR', {day:'2-digit', month:'short'});
+  document.getElementById('ag-week-label').textContent =
+    fmt(weekStart) + ' – ' + fmt(weekEnd);
+
+  const dateStr = d => d.toISOString().split('T')[0];
+  const startStr = dateStr(weekStart);
+  const endStr   = dateStr(weekEnd);
+
+  const [{ data: blocks }, { data: appts }] = await Promise.all([
+    db.from('schedule_blocks').select('*').eq('active', true),
+    db.from('appointments').select('*, patients(name)')
+      .gte('date', startStr).lte('date', endStr),
+  ]);
+
+  renderAgendaCal(weekStart, blocks || [], appts || []);
+}
+
+function renderAgendaCal(weekStart, blocks, appts) {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const cal = document.getElementById('ag-cal');
+  const dayDates = DAY_NUMS.map((_, i) => {
+    const d = new Date(weekStart); d.setDate(d.getDate() + i);
+    return d;
+  });
+
+  // Indexar blocos: {day_of_week: [{...}]}
+  const blockMap = {};
+  (blocks||[]).forEach(b => {
+    (blockMap[b.day_of_week] = blockMap[b.day_of_week] || []).push(b);
+  });
+  // Indexar atendimentos: {dateStr+hour: [{...}]}
+  const apptMap = {};
+  (appts||[]).forEach(a => {
+    const h = parseInt(a.start_time.slice(0,2));
+    const key = a.date + '_' + h;
+    (apptMap[key] = apptMap[key] || []).push(a);
+  });
+
+  let html = '';
+
+  // Cabeçalho
+  html += '<div class="ag-head" style="background:var(--g50);border-right:1px solid var(--g200)"></div>';
+  dayDates.forEach((d, i) => {
+    const ds = d.toISOString().split('T')[0];
+    const isToday = ds === todayStr;
+    const label = DAYS[i] + ' ' + d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+    html += `<div class="ag-head${isToday?' today-col':''}">${label}</div>`;
+  });
+
+  // Linhas de hora
+  HOURS.forEach(h => {
+    html += `<div class="ag-time">${h}h</div>`;
+    dayDates.forEach((d, di) => {
+      const dow = DAY_NUMS[di];
+      const ds  = d.toISOString().split('T')[0];
+      const isToday = ds === todayStr;
+
+      // Bloco fixo nessa hora?
+      const fixedBlocks = (blockMap[dow]||[]).filter(b => {
+        const bh = parseInt(b.start_time.slice(0,2));
+        const eh = parseInt(b.end_time.slice(0,2));
+        return h >= bh && h < eh;
+      });
+      // Atendimento nessa hora?
+      const dayAppts = (apptMap[ds+'_'+h]||[]);
+
+      let inner = '';
+      if (fixedBlocks.length) {
+        const b = fixedBlocks[0];
+        const isFirst = parseInt(b.start_time.slice(0,2)) === h;
+        inner = `<div class="ag-block" style="background:${b.color}">
+          ${isFirst ? `<div>${b.label}</div><div style="opacity:.8;font-weight:400">${b.start_time.slice(0,5)}–${b.end_time.slice(0,5)}</div>` : ''}
+        </div>`;
+      } else if (dayAppts.length) {
+        const a = dayAppts[0];
+        inner = `<div class="ag-appt" onclick="openPatient('${a.patient_id}')">
+          <div>${a.patients?.name||'Paciente'}</div>
+          <div style="opacity:.85;font-weight:400">${a.start_time.slice(0,5)}</div>
+        </div>`;
+      }
+
+      const onclick = (!fixedBlocks.length && !dayAppts.length)
+        ? `openNewAppt('${ds}','${String(h).padStart(2,'0')}:00')`
+        : '';
+
+      html += `<div class="ag-cell${isToday?' today-col':''}" ${onclick?'onclick="'+onclick+'"':''}>${inner}</div>`;
+    });
+  });
+
+  cal.innerHTML = html;
+}
+
+function openNewAppt(date, time) {
+  document.getElementById('appt-date').value = date;
+  document.getElementById('appt-time').value = time;
+  document.getElementById('appt-notes').value = '';
+  // Popular select de pacientes
+  const sel = document.getElementById('appt-patient');
+  sel.innerHTML = '<option value="">Selecione...</option>';
+  (allPatients||[]).forEach(p => {
+    sel.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+  });
+  openModal('novo-atendimento');
+}
+
+async function saveAppointment() {
+  const date     = document.getElementById('appt-date').value;
+  const time     = document.getElementById('appt-time').value;
+  const patientId= document.getElementById('appt-patient').value;
+  const type     = document.getElementById('appt-type').value;
+  const notes    = document.getElementById('appt-notes').value.trim();
+  if (!date || !time || !patientId) { alert('Preencha data, horário e paciente.'); return; }
+  const [h, m] = time.split(':');
+  const endTime = String(parseInt(h)+1).padStart(2,'0') + ':' + m; // +1h
+  const { error } = await db.from('appointments').insert({
+    patient_id: patientId,
+    date, start_time: time, end_time: endTime,
+    type, notes: notes||null,
+  });
+  if (error) { alert('Erro: ' + error.message); return; }
+  closeModal('novo-atendimento');
+  loadAgenda();
+}
+
 </script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -508,6 +657,94 @@ function renderFinRecebido(periodo) {
       .sidebar{display:none}
       .stats-row{grid-template-columns:1fr 1fr}
     }
+  
+    /* ── AGENDA ─────────────────────────────── */
+    .agenda-wrap { overflow-x: auto; }
+    .agenda-cal {
+      display: grid;
+      grid-template-columns: 52px repeat(6, 1fr);
+      min-width: 640px;
+      border: 1px solid var(--g200);
+      border-radius: 12px;
+      overflow: hidden;
+      font-size: 12px;
+    }
+    .ag-head {
+      background: var(--g50);
+      padding: 10px 6px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 11px;
+      color: var(--g600);
+      border-bottom: 2px solid var(--g200);
+      border-right: 1px solid var(--g200);
+      position: sticky; top: 0; z-index: 2;
+    }
+    .ag-head.today-col { background: #FEF9EE; color: var(--w700,#B45309); }
+    .ag-head:last-child { border-right: none; }
+    .ag-time {
+      padding: 0 6px;
+      text-align: right;
+      color: var(--g400);
+      font-size: 10px;
+      border-right: 1px solid var(--g200);
+      border-bottom: 1px solid var(--g100);
+      height: 52px;
+      display: flex; align-items: flex-start; padding-top: 4px;
+      background: var(--g50);
+    }
+    .ag-cell {
+      height: 52px;
+      border-right: 1px solid var(--g100);
+      border-bottom: 1px solid var(--g100);
+      position: relative;
+      cursor: pointer;
+      transition: background .12s;
+    }
+    .ag-cell:last-child { border-right: none; }
+    .ag-cell:hover { background: #FAF8F4; }
+    .ag-cell.today-col { background: #FFFBF0; }
+    .ag-cell.today-col:hover { background: #FFF4D6; }
+    .ag-block {
+      position: absolute; inset: 2px;
+      border-radius: 6px;
+      padding: 3px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      color: #fff;
+      overflow: hidden;
+      cursor: default;
+      line-height: 1.3;
+      pointer-events: none;
+    }
+    .ag-appt {
+      position: absolute; inset: 2px;
+      border-radius: 6px;
+      padding: 3px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      background: var(--w600,#D97706);
+      color: #fff;
+      overflow: hidden;
+      cursor: pointer;
+      line-height: 1.3;
+    }
+    .ag-nav {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    }
+    .ag-nav h3 { font-size: 16px; font-weight: 600; flex:1; }
+    .ag-nav-btn {
+      width: 32px; height: 32px; border: 1.5px solid var(--g200);
+      border-radius: 8px; background: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: var(--g600);
+      transition: border-color .15s;
+    }
+    .ag-nav-btn:hover { border-color: var(--w400,#FCD34D); }
+    .ag-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+    .ag-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--g500); }
+    .ag-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
   </style>
 </head>
 <body>
@@ -536,6 +773,10 @@ function renderFinRecebido(periodo) {
       <button class="sidebar-btn" onclick="showPage('financeiro')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         Financeiro
+      </button>
+      <button class="sidebar-btn" onclick="showPage('agenda')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Agenda
       </button>
     </div>
     <div class="sidebar-section" style="margin-top:8px">
@@ -587,6 +828,62 @@ function renderFinRecebido(periodo) {
       <div class="table-wrap">
         <table><thead><tr><th>Data</th><th>Paciente</th><th>Valor</th><th>Forma</th><th>Observação</th></tr></thead>
         <tbody id="fin-recent-body"></tbody></table>
+      </div>
+    </div>
+
+
+    <!-- AGENDA -->
+    <div id="page-agenda" class="page">
+      <div class="sh">
+        <h2>Agenda</h2>
+        <button class="btn btn-sm" onclick="openModal('novo-atendimento')">+ Atendimento</button>
+      </div>
+
+      <div class="ag-nav">
+        <button class="ag-nav-btn" onclick="changeAgendaWeek(-1)">&#8249;</button>
+        <h3 id="ag-week-label">—</h3>
+        <button class="ag-nav-btn" onclick="changeAgendaWeek(1)">&#8250;</button>
+        <button class="btn btn-outline btn-sm" onclick="goAgendaToday()">Hoje</button>
+      </div>
+
+      <div class="agenda-wrap">
+        <div class="agenda-cal" id="ag-cal"></div>
+      </div>
+
+      <div class="ag-legend">
+        <div class="ag-legend-item"><div class="ag-legend-dot" style="background:#475569"></div> Clinica Elgra (emprego fixo)</div>
+        <div class="ag-legend-item"><div class="ag-legend-dot" style="background:#1D4ED8"></div> CEPHO / Faculdade</div>
+        <div class="ag-legend-item"><div class="ag-legend-dot" style="background:#B45309"></div> Paciente externo fixo</div>
+        <div class="ag-legend-item"><div class="ag-legend-dot" style="background:#D97706"></div> Paciente agendado</div>
+      </div>
+    </div>
+
+    <!-- MODAL: NOVO ATENDIMENTO -->
+    <div class="overlay hidden" id="modal-novo-atendimento">
+      <div class="modal">
+        <h3>Novo atendimento</h3>
+        <div class="form-row">
+          <div class="fg"><label>Data</label><input type="date" id="appt-date"/></div>
+          <div class="fg"><label>Horário</label><input type="time" id="appt-time" step="3600"/></div>
+        </div>
+        <div class="fg"><label>Paciente</label>
+          <select id="appt-patient">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+        <div class="fg"><label>Tipo</label>
+          <select id="appt-type">
+            <option value="session">Sessão</option>
+            <option value="evaluation">Avaliação</option>
+          </select>
+        </div>
+        <div class="fg"><label>Observações (opcional)</label>
+          <input type="text" id="appt-notes" placeholder="Ex: Trazer exames"/>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal('novo-atendimento')">Cancelar</button>
+          <button class="btn" onclick="saveAppointment()">Salvar</button>
+        </div>
       </div>
     </div>
 
@@ -1505,6 +1802,8 @@ function showPage(id) {
   document.getElementById('page-' + id).classList.add('active');
   const btn = document.querySelector(`.sidebar-btn[onclick*="${id}"]`);
   if (btn) btn.classList.add('active');
+  if (id === 'agenda') loadAgenda();
+  if (id === 'financeiro') loadGlobalFinanceiro();
 }
 
 function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); }
