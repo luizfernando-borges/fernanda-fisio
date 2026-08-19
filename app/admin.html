@@ -2561,7 +2561,6 @@ async function confirmTreatmentPlan() {
   const [hh, mm] = planTime.split(':');
   const endH = String(parseInt(hh) + 1).padStart(2,'0');
   const endTime = `${endH}:${mm}`;
-  const dayNames = ['','Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 
   const appts = sessionDates.map((d, i) => ({
     patient_id:  currentPatientId,
