@@ -2476,7 +2476,7 @@ async function loadAssessment() {
       'medications','allergies','functional_level','mobility_aids','adl_notes','inspection_notes','rom_notes',
       'muscle_strength_notes','sensitivity','balance_level','coordination_notes','diagnostic_hypothesis',
       'short_term_goals','long_term_goals','treatment_plan','session_frequency','estimated_duration',
-      'additional_notes'];
+      'additional_notes','plan_total_sessions','plan_time','plan_price','plan_payment_method'];
     fields.forEach(f => {
       const el = document.getElementById('av-' + f);
       if (el && a[f] != null) el.value = a[f];
@@ -2487,6 +2487,113 @@ async function loadAssessment() {
       if (el && a[f] != null) { el.value = a[f]; if (vEl) vEl.textContent = a[f]; }
     });
   }
+}
+
+
+async function confirmTreatmentPlan() {
+  const totalSessions = parseInt(document.getElementById('av-plan_total_sessions')?.value);
+  const planTime      = document.getElementById('av-plan_time')?.value;
+  const planDays      = [1,2,3,4,5,6].filter(d => document.getElementById('av-plan_day_'+d)?.checked);
+  const planPrice     = parseFloat(document.getElementById('av-plan_price')?.value) || 0;
+  const planPayment   = document.getElementById('av-plan_payment_method')?.value || 'dinheiro';
+
+  if (!totalSessions || totalSessions < 1) { alert('Informe o total de sessões.'); return; }
+  if (planDays.length === 0)               { alert('Selecione pelo menos um dia da semana.'); return; }
+  if (!planTime)                           { alert('Informe o horário das sessões.'); return; }
+
+  // Busca data de início do paciente
+  const { data: pat } = await db.from('patients').select('treatment_start_date,name')
+    .eq('id', currentPatientId).single();
+  const startDate = pat?.treatment_start_date ? new Date(pat.treatment_start_date + 'T12:00') : new Date();
+
+  // Gera as datas das sessões
+  const sessionDates = [];
+  const cursor = new Date(startDate);
+  cursor.setHours(12,0,0,0);
+  // Avança até o próximo dia válido
+  while (sessionDates.length < totalSessions) {
+    const dow = cursor.getDay() === 0 ? 7 : cursor.getDay(); // 1=Seg…6=Sáb, 7=Dom
+    if (planDays.includes(dow)) {
+      sessionDates.push(new Date(cursor));
+    }
+    cursor.setDate(cursor.getDate() + 1);
+    if (cursor - startDate > 365 * 24 * 3600 * 1000 * 3) break; // segurança: max 3 anos
+  }
+
+  // Cria o pacote financeiro
+  const { error: pkgErr } = await db.from('treatment_packages').insert({
+    patient_id:       currentPatientId,
+    package_type:     'pacote',
+    total_sessions:   totalSessions,
+    total_value:      planPrice,
+    payment_method:   planPayment,
+    sessions_used:    0,
+    status:           'active',
+  });
+  if (pkgErr) { alert('Erro ao criar pacote: ' + pkgErr.message); return; }
+
+  // Insere os appointments na agenda
+  const [hh, mm] = planTime.split(':');
+  const endH = String(parseInt(hh) + 1).padStart(2,'0');
+  const endTime = `${endH}:${mm}`;
+  const dayNames = ['','Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+
+  const appts = sessionDates.map((d, i) => ({
+    patient_id:  currentPatientId,
+    title:       `Sessão ${i+1} — ${pat?.name || 'Paciente'}`,
+    date:        d.toISOString().slice(0,10),
+    start_time:  planTime,
+    end_time:    endTime,
+    status:      'scheduled',
+    source:      'manual',
+  }));
+  const { error: apptErr } = await db.from('appointments').insert(appts);
+  if (apptErr) { alert('Erro ao criar agenda: ' + apptErr.message); return; }
+
+  // Marca plan_confirmed na avaliação
+  const { data: existing } = await db.from('evaluations')
+    .select('id,data').eq('patient_id', currentPatientId).eq('type','general')
+    .limit(1).maybeSingle();
+
+  const updData = {
+    ...(existing?.data || {}),
+    plan_total_sessions: totalSessions,
+    plan_time: planTime,
+    plan_days: planDays,
+    plan_price: planPrice,
+    plan_payment_method: planPayment,
+    plan_confirmed: true,
+  };
+  if (existing) {
+    await db.from('evaluations').update({ data: updData, updated_at: new Date().toISOString() }).eq('id', existing.id);
+  } else {
+    await db.from('evaluations').insert({ patient_id: currentPatientId, type:'general', status:'completed', data: updData });
+  }
+
+  const diasNomes = planDays.map(d => dayNames[d]).join(' e ');
+  alert(`✅ Plano confirmado!\n${totalSessions} sessões de 1h criadas na agenda.\nDias: ${diasNomes} às ${planTime}.\nPacote financeiro de R$ ${planPrice.toFixed(2)} criado.`);
+  loadAssessment();
+  loadSessionCounter(currentPatientId);
+}
+
+async function resetPlanConfirmed() {
+  if (!confirm('Alterar o plano vai remover os agendamentos futuros criados anteriormente. Confirma?')) return;
+  // Remove appointments futuros deste paciente (status scheduled)
+  await db.from('appointments')
+    .delete()
+    .eq('patient_id', currentPatientId)
+    .eq('status', 'scheduled')
+    .eq('source', 'manual')
+    .gte('date', new Date().toISOString().slice(0,10));
+  // Desmarca plan_confirmed
+  const { data: existing } = await db.from('evaluations')
+    .select('id,data').eq('patient_id', currentPatientId).eq('type','general')
+    .limit(1).maybeSingle();
+  if (existing) {
+    const updData = { ...(existing.data||{}), plan_confirmed: false };
+    await db.from('evaluations').update({ data: updData }).eq('id', existing.id);
+  }
+  loadAssessment();
 }
 
 async function saveAssessment() {
@@ -2522,6 +2629,11 @@ async function saveAssessment() {
     session_frequency:      g('session_frequency'),
     estimated_duration:     g('estimated_duration'),
     additional_notes:       g('additional_notes'),
+    plan_total_sessions:    parseInt(g('plan_total_sessions')) || null,
+    plan_time:              g('plan_time'),
+    plan_days:              [1,2,3,4,5,6].filter(d => document.getElementById('av-plan_day_'+d)?.checked),
+    plan_price:             parseFloat(g('plan_price')) || null,
+    plan_payment_method:    g('plan_payment_method'),
   };
 
   // Verifica se já existe avaliação 'general' para este paciente
