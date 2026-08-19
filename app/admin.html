@@ -2460,9 +2460,74 @@ async function loadAssessment() {
     </div>
   </div>
 
-  <!-- 6. Observações -->
+  <!-- 6. Plano de Tratamento Estruturado -->
+  <div class="assess-section" style="background:linear-gradient(135deg,#FFFBEB,#FFF7ED);border:1.5px solid #FDE68A">
+    <div class="assess-title" style="color:var(--w800)">📅 6. Plano de Tratamento — Agenda e Financeiro</div>
+
+    ${a?.plan_confirmed ? `
+    <div style="padding:12px 16px;background:#D1FAE5;border:1.5px solid #6EE7B7;border-radius:10px;font-size:13px;color:#065F46;margin-bottom:16px">
+      ✅ Plano confirmado — <strong>${a.plan_total_sessions} sessões</strong> de 1h,
+      ${['Seg','Ter','Qua','Qui','Sex','Sáb'].filter((_,i) => (a.plan_days||[]).includes(i+1)).join(' e ')} às ${a.plan_time}
+      · R$ ${parseFloat(a.plan_price||0).toFixed(2).replace('.',',')}
+      <button class="btn btn-outline btn-sm" style="margin-left:12px;font-size:11px" onclick="resetPlanConfirmed()">✏️ Alterar</button>
+    </div>` : ''}
+
+    <div class="assess-row" style="margin-bottom:14px">
+      <div class="fg">
+        <label>Total de sessões</label>
+        <input id="av-plan_total_sessions" type="number" min="1" max="200" placeholder="Ex: 20"
+          value="${v('plan_total_sessions') || ''}"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+      </div>
+      <div class="fg">
+        <label>Horário fixo das sessões</label>
+        <input id="av-plan_time" type="time" value="${v('plan_time') || '08:00'}"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:8px">Dias da semana</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${[['Seg',1],['Ter',2],['Qua',3],['Qui',4],['Sex',5],['Sáb',6]].map(([lbl,d]) => `
+          <label style="display:flex;align-items:center;gap:5px;padding:7px 14px;border:1.5px solid var(--g200);border-radius:20px;cursor:pointer;font-size:13px;background:#fff;user-select:none">
+            <input type="checkbox" id="av-plan_day_${d}" value="${d}"
+              ${(a?.plan_days||[]).includes(d) ? 'checked' : ''}
+              style="accent-color:var(--w600)"/>
+            ${lbl}
+          </label>`).join('')}
+      </div>
+    </div>
+
+    <div class="assess-row" style="margin-bottom:14px">
+      <div class="fg">
+        <label>Valor do pacote (R$)</label>
+        <input id="av-plan_price" type="number" min="0" step="0.01" placeholder="Ex: 2000.00"
+          value="${v('plan_price') || ''}"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+      </div>
+      <div class="fg">
+        <label>Forma de pagamento</label>
+        <select id="av-plan_payment_method"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:#fff">
+          <option value="">— Selecione —</option>
+          <option value="dinheiro" ${v('plan_payment_method')==='dinheiro'?'selected':''}>Dinheiro</option>
+          <option value="pix" ${v('plan_payment_method')==='pix'?'selected':''}>Pix</option>
+          <option value="transferencia" ${v('plan_payment_method')==='transferencia'?'selected':''}>Transferência</option>
+          <option value="parcelado" ${v('plan_payment_method')==='parcelado'?'selected':''}>Parcelado</option>
+        </select>
+      </div>
+    </div>
+
+    ${!a?.plan_confirmed ? `<button class="btn" onclick="confirmTreatmentPlan()"
+      style="background:var(--w600);color:#fff;width:100%;justify-content:center;font-size:14px;padding:13px">
+      ✅ Confirmar plano — criar pacote e bloquear agenda
+    </button>` : ''}
+  </div>
+
+  <!-- 7. Observações -->
   <div class="assess-section">
-    <div class="assess-title">📝 6. Observações Adicionais</div>
+    <div class="assess-title">📝 7. Observações Adicionais</div>
     ${assessTA('Observações gerais','additional_notes','Qualquer informação relevante não contemplada acima...',true)}
   </div>
 
@@ -2676,6 +2741,14 @@ async function saveAssessment() {
   }
 
   if (error) { alert('Erro ao salvar: ' + error.message); return; }
+  // Auto-preenche data de início do tratamento se ainda não tiver
+  const evalDateVal = g('assessment_date') || new Date().toISOString().slice(0,10);
+  const { data: pat } = await db.from('patients').select('treatment_start_date').eq('id', currentPatientId).single();
+  if (!pat?.treatment_start_date) {
+    await db.from('patients').update({ treatment_start_date: evalDateVal }).eq('id', currentPatientId);
+    document.getElementById('detail-start-date').value = evalDateVal;
+  }
+  showToast('✅ Avaliação salva com sucesso!');
   loadAssessment();
 }
 
