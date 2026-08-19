@@ -2514,6 +2514,7 @@ async function loadAssessment() {
           <option value="avista" ${v('plan_payment_method')==='avista'?'selected':''}>À vista</option>
           <option value="entrada_final" ${v('plan_payment_method')==='entrada_final'?'selected':''}>Entrada + valor final</option>
           <option value="parcelado" ${v('plan_payment_method')==='parcelado'?'selected':''}>Parcelado</option>
+          <option value="por_sessao" ${v('plan_payment_method')==='por_sessao'?'selected':''}>Por sessão (paga após cada atendimento)</option>
         </select>
       </div>
     </div>
@@ -2705,7 +2706,7 @@ async function confirmTreatmentPlan() {
     total_sessions: totalSessions,
     total_value:   planPrice,
     payment_model: planPayment,
-    notes:         `Plano criado via avaliação — ${dayNames.filter((_,i)=>planDays.includes(i+1)&&i>0).join('/')} às ${planTime}`,
+    notes:         `Plano criado via avaliação — ${dayNames.filter((_,i)=>planDays.includes(i)&&i>0).join('/')} às ${planTime}`,
   });
   if (pkgErr) { alert('Erro ao criar pacote: ' + pkgErr.message); return; }
 
@@ -2777,6 +2778,11 @@ async function saveAssessment() {
 
   if (!g('main_complaint')) { alert('Queixa principal é obrigatória'); return; }
 
+  // Busca registro existente primeiro (para preservar plan_confirmed)
+  const { data: existing } = await db.from('evaluations')
+    .select('id,data').eq('patient_id', currentPatientId).eq('type', 'general')
+    .limit(1).maybeSingle();
+
   const evalDate = g('assessment_date') || new Date().toISOString().split('T')[0];
   const data = {
     main_complaint:         g('main_complaint'),
@@ -2811,12 +2817,8 @@ async function saveAssessment() {
     plan_payment_method:    g('plan_payment_method'),
     plan_parcelas:          parseInt(g('plan_parcelas')) || null,
     plan_freq_pagamento:    parseInt(g('plan_freq_pagamento')) || null,
+    plan_confirmed:         existing?.data?.plan_confirmed || false,
   };
-
-  // Verifica se já existe avaliação 'general' para este paciente
-  const { data: existing } = await db.from('evaluations')
-    .select('id').eq('patient_id', currentPatientId).eq('type', 'general')
-    .limit(1).maybeSingle();
 
   let error;
   if (existing) {
