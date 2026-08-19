@@ -2004,7 +2004,7 @@ async function savePatient() {
 // ── PATIENT STATUS / DELETE ──
 async function changePatientStatus(newStatus) {
   const { error } = await db.from('patients')
-    .update({ treatment_status: newStatus })
+    .update({ patient_status: newStatus })
     .eq('id', currentPatientId);
   if (error) { alert('Erro ao atualizar status: ' + error.message); return; }
   // Atualiza badge
@@ -2013,7 +2013,7 @@ async function changePatientStatus(newStatus) {
   badge.textContent = statusLabel(newStatus);
   // Atualiza lista local
   const p = allPatients.find(x => x.id === currentPatientId);
-  if (p) p.treatment_status = newStatus;
+  if (p) p.patient_status = newStatus;
   renderPatientsTable();
 }
 
@@ -2035,7 +2035,7 @@ async function reactivatePatient(id) {
   const nome = p?.name || 'este paciente';
   if (!confirm(`Reativar ${nome}?\n\nVoltará para a lista como Ativo.`)) return;
   const { error } = await db.from('patients')
-    .update({ deleted_at: null, treatment_status: 'ativo' })
+    .update({ deleted_at: null, patient_status: 'ativo' })
     .eq('id', id);
   if (error) { alert('Erro ao reativar: ' + error.message); return; }
   loadPatients();
@@ -2051,7 +2051,7 @@ async function openPatient(id) {
   document.getElementById('detail-name').textContent = p.name;
   document.getElementById('detail-diag').textContent = (p.diagnosis || '—') + (p.phone ? ' · ' + p.phone : '');
   document.getElementById('detail-start-date').value = p.treatment_start_date || '';
-  const st = p.treatment_status || 'ativo';
+  const st = p.patient_status || 'ativo';
   const badge = document.getElementById('detail-status-badge');
   badge.className = 'badge badge-' + st;
   badge.textContent = statusLabel(st);
@@ -2099,7 +2099,7 @@ async function loadSessionCounter(patientId) {
       alert.style.display = 'none';
     }
   } else {
-    label.textContent = `${sessoesFeit} sessão${sessoesFeit !== 1 ? 'ões' : ''} registrada${sessoesFeit !== 1 ? 's' : ''} (sem pacote ativo)`;
+    label.textContent = `${sessoesFeit} sess${sessoesFeit !== 1 ? 'ões' : 'ão'} registrada${sessoesFeit !== 1 ? 's' : ''} (sem pacote ativo)`;
     fill.style.width = '0%';
     alert.style.display = 'none';
   }
