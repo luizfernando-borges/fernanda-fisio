@@ -994,7 +994,10 @@ function renderFinRecebido(periodo) {
     <div class="fg"><label>Telefone de emergência</label><input id="np-emerg-phone" type="tel" placeholder="(11) 99999-9999"/></div>
 
     <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--w600);margin:16px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--w100)">Dados clínicos</div>
-    <div class="fg"><label>Diagnóstico / condição</label><input id="np-diagnosis" type="text" placeholder="Ex: Pós-AVC, LCA, Fratura de fêmur..."/></div>
+    <div class="fg"><label>Diagnóstico / condição *<span style="font-size:11px;color:var(--g400);font-weight:400;margin-left:6px">(aparece no perfil do paciente)</span></label>
+      <input id="np-diagnosis" type="text" placeholder="Ex: Pós-AVC, LCA, Fratura de fêmur, Lombalgia crônica..." required
+        style="border-color:var(--w300)"/>
+    </div>
     <div class="fg"><label>Observações iniciais</label><textarea id="np-notes" placeholder="Informações relevantes sobre o caso..."></textarea></div>
 
     <div class="modal-actions">
@@ -1952,6 +1955,7 @@ async function savePatient() {
   const g = id => (document.getElementById(id)?.value || '').trim() || null;
   const name = g('np-name');
   if (!name) return alert('Nome é obrigatório');
+  if (!g('np-diagnosis')) return alert('Diagnóstico / condição é obrigatório — é o que aparece no perfil do paciente');
   const payload = {
     name,
     email:          g('np-email'),
