@@ -828,7 +828,7 @@ function renderFinRecebido(periodo) {
         </button>
       </div>
       <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
-        <input id="patient-search" type="text" autocomplete="off" name="patient-search-x" placeholder="🔍 Buscar por nome, CPF ou e-mail…"
+        <input id="patient-search" type="text" autocomplete="new-password" placeholder="🔍 Buscar por nome, CPF ou e-mail…"
           oninput="renderPatientsTable()"
           style="flex:1;min-width:200px;padding:9px 14px;border:1.5px solid var(--g200);border-radius:10px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
       </div>
@@ -1794,6 +1794,9 @@ async function loadDashboard() {
 
 // ── PATIENTS ──
 async function loadPatients() {
+  // Garante que o browser não contamina o filtro com autocomplete
+  const searchEl = document.getElementById('patient-search');
+  if (searchEl) searchEl.value = '';
   const { data: ativos }    = await db.from('patients').select('*').is('deleted_at', null).order('name');
   const { data: arquivados }= await db.from('patients').select('*').not('deleted_at','is',null).order('name');
   allPatients = ativos    || [];
