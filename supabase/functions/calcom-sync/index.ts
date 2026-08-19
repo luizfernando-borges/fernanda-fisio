@@ -12,21 +12,30 @@ serve(async (req) => {
     const { calApiKey } = await req.json();
     if (!calApiKey) throw new Error("calApiKey obrigatório");
 
-    // Busca upcoming + accepted bookings
+    // Cal.com v2 API — chaves cal_live_ / cal_test_
     const res = await fetch(
-      `https://api.cal.com/v1/bookings?apiKey=${calApiKey}&status=upcoming&take=100`
+      "https://api.cal.com/v2/bookings?status=upcoming&take=100",
+      {
+        headers: {
+          "Authorization": `Bearer ${calApiKey}`,
+          "cal-api-version": "2024-08-13",
+          "Content-Type": "application/json",
+        },
+      }
     );
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Cal.com ${res.status}: ${err}`);
-    }
-    const data = await res.json();
 
-    return new Response(JSON.stringify(data), {
+    const raw = await res.text();
+    if (!res.ok) throw new Error(`Cal.com ${res.status}: ${raw}`);
+
+    const data = JSON.parse(raw);
+    // v2 retorna { status: "success", data: { bookings: [...] } }
+    const bookings = data?.data?.bookings || data?.data || [];
+
+    return new Response(JSON.stringify({ bookings }), {
       headers: { ...CORS, "Content-Type": "application/json" },
     });
   } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), {
+    return new Response(JSON.stringify({ error: String(e) }), {
       status: 500,
       headers: { ...CORS, "Content-Type": "application/json" },
     });
