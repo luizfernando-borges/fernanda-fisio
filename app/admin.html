@@ -3120,7 +3120,11 @@ async function loadDisponibilidade() {
   });
   renderDispDays();
   const savedKey = localStorage.getItem('cal_api_key');
-  if (savedKey) document.getElementById('btn-sync-cal').style.display = 'inline-flex';
+  if (savedKey) {
+    const inp = document.getElementById('cal-api-key');
+    if (inp) inp.value = savedKey;
+    document.getElementById('btn-sync-cal').style.display = 'inline-flex';
+  }
 }
 
 function renderDispDays() {
@@ -3213,7 +3217,61 @@ async function saveDisponibilidade() {
 }
 
 async function syncToCalCom() {
-  alert('Função de sincronização com Cal.com em breve — aguardando chave de API configurada.');
+  const key = localStorage.getItem('cal_api_key');
+  if (!key) { alert('Configure a chave do Cal.com primeiro.'); return; }
+  const btn = document.getElementById('btn-sync-cal');
+  const orig = btn.textContent;
+  btn.textContent = '⏳ Buscando…';
+  btn.disabled = true;
+  try {
+    // Cal.com v1 — busca upcoming bookings
+    const res = await fetch(`https://api.cal.com/v1/bookings?apiKey=${key}&status=upcoming&take=100`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+    const json = await res.json();
+    const bookings = json.bookings || [];
+    let synced = 0;
+    for (const b of bookings) {
+      const startDt  = new Date(b.startTime);
+      const endDt    = new Date(b.endTime);
+      const dateStr  = startDt.toISOString().slice(0,10);
+      const startStr = startDt.toTimeString().slice(0,5);
+      const endStr   = endDt.toTimeString().slice(0,5);
+      const att      = b.attendees?.[0] || {};
+      await db.from('appointments').upsert({
+        cal_booking_id:  String(b.id),
+        title:           b.title || 'Agendamento online',
+        date:            dateStr,
+        start_time:      startStr,
+        end_time:        endStr,
+        attendee_name:   att.name  || '',
+        attendee_email:  att.email || '',
+        status:          b.status  || 'upcoming',
+        source:          'calcom',
+      }, { onConflict: 'cal_booking_id' });
+      synced++;
+    }
+    showToast(`✅ ${synced} agendamento${synced!==1?'s':''} sincronizado${synced!==1?'s':''} do Cal.com!`);
+    loadAgenda();
+  } catch(e) {
+    alert('Erro ao sincronizar com Cal.com: ' + e.message);
+  } finally {
+    btn.textContent = orig;
+    btn.disabled = false;
+  }
+}
+
+// toast helper (se não existir)
+function showToast(msg, type='ok') {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = `position:fixed;bottom:24px;right:24px;background:${type==='ok'?'#10B981':'#EF4444'};color:#fff;
+    padding:12px 20px;border-radius:10px;font-size:13px;z-index:9999;
+    box-shadow:0 4px 16px rgba(0,0,0,.15);animation:fadeInUp .25s ease`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
 }
 
 
