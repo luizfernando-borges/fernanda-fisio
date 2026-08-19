@@ -2446,18 +2446,6 @@ async function loadAssessment() {
       ${assessTA('Objetivos a longo prazo','long_term_goals','Metas para o tratamento completo...')}
     </div>
     <div style="margin-bottom:14px">${assessTA('Conduta terapêutica proposta','treatment_plan','Técnicas, recursos e abordagens planejadas...',true)}</div>
-    <div class="assess-row">
-      <div class="fg"><label>Frequência das sessões</label>
-        <input id="av-session_frequency" type="text" placeholder="Ex: 3x por semana"
-          value="${v('session_frequency')}"
-          style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
-      </div>
-      <div class="fg"><label>Duração estimada do tratamento</label>
-        <input id="av-estimated_duration" type="text" placeholder="Ex: 3 meses / 24 sessões"
-          value="${v('estimated_duration')}"
-          style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
-      </div>
-    </div>
   </div>
 
   <!-- 6. Plano de Tratamento Estruturado -->
@@ -2511,9 +2499,8 @@ async function loadAssessment() {
         <select id="av-plan_payment_method"
           style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:#fff">
           <option value="">— Selecione —</option>
-          <option value="dinheiro" ${v('plan_payment_method')==='dinheiro'?'selected':''}>Dinheiro</option>
-          <option value="pix" ${v('plan_payment_method')==='pix'?'selected':''}>Pix</option>
-          <option value="transferencia" ${v('plan_payment_method')==='transferencia'?'selected':''}>Transferência</option>
+          <option value="avista" ${v('plan_payment_method')==='avista'?'selected':''}>À vista</option>
+          <option value="entrada_final" ${v('plan_payment_method')==='entrada_final'?'selected':''}>Entrada + Final</option>
           <option value="parcelado" ${v('plan_payment_method')==='parcelado'?'selected':''}>Parcelado</option>
         </select>
       </div>
@@ -2610,15 +2597,13 @@ async function confirmTreatmentPlan() {
 
   const sessionDates = candidateDates; // sem conflitos estruturais, usa todas as datas
 
-  // Cria o pacote financeiro
+  // Cria o pacote financeiro (mesmo schema do aba Financeiro)
   const { error: pkgErr } = await db.from('treatment_packages').insert({
-    patient_id:       currentPatientId,
-    package_type:     'pacote',
-    total_sessions:   totalSessions,
-    total_value:      planPrice,
-    payment_method:   planPayment,
-    sessions_used:    0,
-    status:           'active',
+    patient_id:    currentPatientId,
+    total_sessions: totalSessions,
+    total_value:   planPrice,
+    payment_model: planPayment,
+    notes:         `Plano criado via avaliação — ${dayNames.filter((_,i)=>planDays.includes(i+1)&&i>0).join('/')} às ${planTime}`,
   });
   if (pkgErr) { alert('Erro ao criar pacote: ' + pkgErr.message); return; }
 
