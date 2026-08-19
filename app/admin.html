@@ -2367,9 +2367,12 @@ function assessSLIDER(label, id) {
 
 async function loadAssessment() {
   const c = document.getElementById('detail-avaliacao');
-  const { data: row } = await db.from('evaluations')
-    .select('*').eq('patient_id', currentPatientId).eq('type', 'general')
-    .order('updated_at', { ascending: false }).limit(1).maybeSingle();
+  const [{ data: row }, { data: schedBlocks }] = await Promise.all([
+    db.from('evaluations').select('*').eq('patient_id', currentPatientId).eq('type','general')
+      .order('updated_at', { ascending: false }).limit(1).maybeSingle(),
+    db.from('schedule_blocks').select('day_of_week,start_time,end_time').eq('active', true),
+  ]);
+  window._assessScheduleBlocks = schedBlocks || [];
   const a = row?.data || null;
   const evalDate = row?.evaluation_date || null;
 
@@ -2464,30 +2467,35 @@ async function loadAssessment() {
       <button class="btn btn-outline btn-sm" style="margin-left:12px;font-size:11px" onclick="resetPlanConfirmed()">✏️ Alterar</button>
     </div>` : ''}
 
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:8px">1. Selecione os dias da semana</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${[['Seg',1],['Ter',2],['Qua',3],['Qui',4],['Sex',5],['Sáb',6]].map(([lbl,d]) => `
+          <label style="display:flex;align-items:center;gap:5px;padding:7px 14px;border:1.5px solid var(--g200);border-radius:20px;cursor:pointer;font-size:13px;background:#fff;user-select:none">
+            <input type="checkbox" id="av-plan_day_${d}" value="${d}"
+              ${(a?.plan_days||[]).includes(d) ? 'checked' : ''}
+              onchange="updatePlanTimeSlots()"
+              style="accent-color:var(--w600)"/>
+            ${lbl}
+          </label>`).join('')}
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:6px">2. Horário disponível</label>
+      <select id="av-plan_time"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:#fff">
+        <option value="">— Selecione os dias primeiro —</option>
+      </select>
+      <p id="av-plan_time_hint" style="font-size:11px;color:var(--g400);margin-top:4px"></p>
+    </div>
+
     <div class="assess-row" style="margin-bottom:14px">
       <div class="fg">
         <label>Total de sessões</label>
         <input id="av-plan_total_sessions" type="number" min="1" max="200" placeholder="Ex: 20"
           value="${v('plan_total_sessions') || ''}"
           style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
-      </div>
-      <div class="fg">
-        <label>Horário fixo das sessões</label>
-        <input id="av-plan_time" type="time" value="${v('plan_time') || '08:00'}"
-          style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
-      </div>
-    </div>
-
-    <div style="margin-bottom:14px">
-      <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:8px">Dias da semana</label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        ${[['Seg',1],['Ter',2],['Qua',3],['Qui',4],['Sex',5],['Sáb',6]].map(([lbl,d]) => `
-          <label style="display:flex;align-items:center;gap:5px;padding:7px 14px;border:1.5px solid var(--g200);border-radius:20px;cursor:pointer;font-size:13px;background:#fff;user-select:none">
-            <input type="checkbox" id="av-plan_day_${d}" value="${d}"
-              ${(a?.plan_days||[]).includes(d) ? 'checked' : ''}
-              style="accent-color:var(--w600)"/>
-            ${lbl}
-          </label>`).join('')}
       </div>
     </div>
 
@@ -2544,6 +2552,15 @@ async function loadAssessment() {
   </div>`;
 
   // Preenche valores salvos (a = data JSONB; evalDate = evaluation_date do row)
+  // Inicializa o dropdown de horários após renderizar
+  setTimeout(() => {
+    updatePlanTimeSlots();
+    // Restaura horário salvo se existir
+    if (a?.plan_time) {
+      const sel = document.getElementById('av-plan_time');
+      if (sel) sel.value = a.plan_time;
+    }
+  }, 50);
   if (a) {
     const fields = ['main_complaint','disease_history','medical_history','previous_surgeries',
       'medications','allergies','functional_level','mobility_aids','adl_notes','inspection_notes','rom_notes',
@@ -2563,6 +2580,64 @@ async function loadAssessment() {
 }
 
 
+
+
+function updatePlanTimeSlots() {
+  const sel    = document.getElementById('av-plan_time');
+  const hint   = document.getElementById('av-plan_time_hint');
+  if (!sel) return;
+
+  const selectedDays = [1,2,3,4,5,6].filter(d => document.getElementById('av-plan_day_'+d)?.checked);
+  if (selectedDays.length === 0) {
+    sel.innerHTML = '<option value="">— Selecione os dias primeiro —</option>';
+    if (hint) hint.textContent = '';
+    return;
+  }
+
+  const blocks = window._assessScheduleBlocks || [];
+  const toMin  = t => { const [h,m] = t.split(':'); return +h*60+ +m; };
+
+  // Horários de trabalho: Seg-Sex 8h-20h, Sáb 9h-17h
+  const workHours = { 1:[8,20],2:[8,20],3:[8,20],4:[8,20],5:[8,20],6:[9,17] };
+
+  // Para cada slot de 1h, verificar se está livre em TODOS os dias selecionados
+  const currentVal = sel.value;
+  sel.innerHTML = '';
+  let count = 0;
+
+  for (let h = 7; h < 20; h++) {
+    const slotStart = h * 60;
+    const slotEnd   = slotStart + 60;
+    const timeStr   = String(h).padStart(2,'0') + ':00';
+
+    const freeInAllDays = selectedDays.every(dow => {
+      const [wStart, wEnd] = workHours[dow] || [8,20];
+      if (slotStart < wStart*60 || slotEnd > wEnd*60) return false; // fora do horário
+      // Verificar se não conflita com nenhum bloco naquele dia
+      return !blocks.some(b =>
+        b.day_of_week === dow &&
+        toMin(b.start_time) < slotEnd &&
+        toMin(b.end_time) > slotStart
+      );
+    });
+
+    if (freeInAllDays) {
+      const opt = document.createElement('option');
+      opt.value = timeStr;
+      opt.textContent = `${timeStr} – ${String(h+1).padStart(2,'0')}:00`;
+      if (timeStr === currentVal) opt.selected = true;
+      sel.appendChild(opt);
+      count++;
+    }
+  }
+
+  if (count === 0) {
+    sel.innerHTML = '<option value="">Nenhum horário livre nesses dias</option>';
+    if (hint) hint.textContent = '⚠️ Todos os horários estão ocupados nos dias selecionados.';
+  } else {
+    if (hint) hint.textContent = `${count} horário${count!==1?'s':''} disponível${count!==1?'s':''} nos dias selecionados.`;
+  }
+}
 
 function togglePlanPaymentFields(val) {
   const el = document.getElementById('av-plan-parcelado-fields');
