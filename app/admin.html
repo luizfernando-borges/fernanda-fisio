@@ -3224,13 +3224,12 @@ async function syncToCalCom() {
   btn.textContent = '⏳ Buscando…';
   btn.disabled = true;
   try {
-    // Cal.com v1 — busca upcoming bookings
-    const res = await fetch(`https://api.cal.com/v1/bookings?apiKey=${key}&status=upcoming&take=100`);
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || `HTTP ${res.status}`);
-    }
-    const json = await res.json();
+    // Proxy via Supabase Edge Function (evita CORS)
+    const { data: edgeData, error: edgeErr } = await db.functions.invoke('calcom-sync', {
+      body: { calApiKey: key }
+    });
+    if (edgeErr) throw new Error(edgeErr.message || String(edgeErr));
+    const json = edgeData;
     const bookings = json.bookings || [];
     let synced = 0;
     for (const b of bookings) {
