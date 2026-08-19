@@ -2517,52 +2517,33 @@ async function confirmTreatmentPlan() {
     if (cursor - startDate > 365 * 24 * 3600 * 1000 * 3) break;
   }
 
-  // Verifica conflitos
+  // Verifica conflito estrutural: o horário selecionado bate com algum bloco fixo nos dias escolhidos?
   const [planH, planM] = planTime.split(':').map(Number);
   const planMinutes = planH * 60 + planM;
-  const endMinutes  = planMinutes + 60; // sessão de 1h
-
-  // Busca blocos fixos e appointments existentes
-  const dateStrings = candidateDates.map(d => d.toISOString().slice(0,10));
-  const [{ data: blocks }, { data: existingAppts }] = await Promise.all([
-    db.from('schedule_blocks').select('day_of_week,start_time,end_time,label').eq('active', true),
-    db.from('appointments').select('date,start_time,title,patient_id')
-      .in('date', dateStrings).neq('status','cancelled'),
-  ]);
-
+  const endMinutes  = planMinutes + 60;
   const toMin = t => { const [h,m] = t.split(':'); return +h*60+ +m; };
-  const conflicts = [];
-  const sessionDates = [];
+  const dayNames = ['','Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
 
-  for (const d of candidateDates) {
-    const dow = d.getDay() === 0 ? 7 : d.getDay();
-    const dateStr = d.toISOString().slice(0,10);
-    // Conflito com blocos fixos
-    const blockConflict = (blocks||[]).find(b =>
+  const { data: blocks } = await db.from('schedule_blocks')
+    .select('day_of_week,start_time,end_time,label').eq('active', true);
+
+  const blockWarnings = [];
+  for (const dow of planDays) {
+    const hit = (blocks||[]).find(b =>
       b.day_of_week === dow &&
       toMin(b.start_time) < endMinutes &&
       toMin(b.end_time) > planMinutes
     );
-    // Conflito com appointments existentes
-    const apptConflict = (existingAppts||[]).find(a =>
-      a.date === dateStr &&
-      toMin(a.start_time) >= planMinutes &&
-      toMin(a.start_time) < endMinutes
-    );
-    if (blockConflict || apptConflict) {
-      const fmtDate = d.toLocaleDateString('pt-BR', { weekday:'short', day:'2-digit', month:'2-digit' });
-      conflicts.push({ date: fmtDate, reason: blockConflict?.label || apptConflict?.title || 'Conflito' });
-    } else {
-      sessionDates.push(d);
-    }
+    if (hit) blockWarnings.push(`• ${dayNames[dow]} às ${planTime} conflita com "${hit.label}" (${hit.start_time.slice(0,5)}–${hit.end_time.slice(0,5)})`);
   }
 
-  if (conflicts.length > 0) {
-    const lista = conflicts.map(c => `• ${c.date} — ${c.reason}`).join('\n');
-    const msg = `⚠️ ${conflicts.length} conflito(s) encontrado(s):\n\n${lista}\n\nDeseja criar as ${sessionDates.length} sessões restantes e pular os dias conflitantes?`;
-    if (!confirm(msg)) return;
-    if (sessionDates.length === 0) { alert('Nenhuma data disponível. Escolha outro horário ou dias.'); return; }
+  if (blockWarnings.length > 0) {
+    const msg = `⚠️ Atenção — conflito de horário fixo:\n\n${blockWarnings.join('\n')}\n\nEsse horário já está bloqueado na agenda. Deseja escolher outro horário ou dia?`;
+    alert(msg);
+    return; // força ela a corrigir antes de continuar
   }
+
+  const sessionDates = candidateDates; // sem conflitos estruturais, usa todas as datas
 
   // Cria o pacote financeiro
   const { error: pkgErr } = await db.from('treatment_packages').insert({
