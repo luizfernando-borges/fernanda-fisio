@@ -827,13 +827,19 @@ function renderFinRecebido(periodo) {
           Novo paciente
         </button>
       </div>
+      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+        <input id="patient-search" type="text" placeholder="🔍 Buscar por nome, CPF ou e-mail…"
+          oninput="renderPatientsTable()"
+          style="flex:1;min-width:200px;padding:9px 14px;border:1.5px solid var(--g200);border-radius:10px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+      </div>
       <div class="filter-bar">
-        <button class="filter-btn active" onclick="setStatusFilter('todos', this)">Todos</button>
+        <button class="filter-btn active" id="filter-btn-todos" onclick="setStatusFilter('todos', this)">Todos</button>
         <button class="filter-btn" onclick="setStatusFilter('ativo', this)">Ativos</button>
         <button class="filter-btn" onclick="setStatusFilter('pausado', this)">Pausados</button>
         <button class="filter-btn" onclick="setStatusFilter('finalizado', this)">Finalizados</button>
         <button class="filter-btn" onclick="setStatusFilter('arquivados', this)" style="margin-left:auto;color:#92400E;border-color:#FDE68A">📦 Arquivados</button>
       </div>
+      <div id="pagination-bar" style="display:flex;gap:6px;align-items:center;margin-bottom:8px;font-size:12px;color:var(--g500)"></div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Nome</th><th>Diagnóstico</th><th>Início</th><th>Status</th><th></th></tr></thead>
@@ -1788,19 +1794,22 @@ async function loadDashboard() {
 
 // ── PATIENTS ──
 async function loadPatients() {
-  const { data: ativos } = await db.from('patients').select('*').is('deleted_at', null).order('name');
-  const { data: arquivados } = await db.from('patients').select('*').not('deleted_at', 'is', null).order('name');
-  allPatients = ativos || [];
-  allArchived = arquivados || [];
-  allPatients = data || [];
+  const { data: ativos }    = await db.from('patients').select('*').is('deleted_at', null).order('name');
+  const { data: arquivados }= await db.from('patients').select('*').not('deleted_at','is',null).order('name');
+  allPatients = ativos    || [];
+  allArchived = arquivados|| [];
+  currentPage = 1;
   renderPatientsTable();
   renderSidebarPatients();
 }
 
 let currentStatusFilter = 'todos';
+let currentPage = 1;
+const PAGE_SIZE = 25;
 
 function setStatusFilter(status, btn) {
   currentStatusFilter = status;
+  currentPage = 1;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderPatientsTable();
@@ -1810,34 +1819,75 @@ function statusLabel(s) {
   return {ativo:'Ativo', pausado:'Pausado', finalizado:'Finalizado'}[s] || s || 'Ativo';
 }
 
+const STATUS_ORDER = {ativo:0, pausado:1, finalizado:2};
+
 function renderPatientsTable() {
+  const q = (document.getElementById('patient-search')?.value || '').toLowerCase().trim();
   let list, rows;
+
   if (currentStatusFilter === 'arquivados') {
-    rows = (allArchived.length ? allArchived : []).map(p => `
+    let filtered = allArchived;
+    if (q) filtered = filtered.filter(p =>
+      (p.name||'').toLowerCase().includes(q) ||
+      (p.cpf||'').includes(q) ||
+      (p.email||'').toLowerCase().includes(q)
+    );
+    const total = filtered.length;
+    const paged = filtered.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+    rows = paged.map(p => `
       <tr>
         <td><strong>${p.name}</strong></td>
-        <td>${p.diagnosis || '—'}</td>
+        <td>${p.diagnosis||'—'}</td>
         <td>${p.deleted_at ? new Date(p.deleted_at).toLocaleDateString('pt-BR') : '—'}</td>
         <td><span class="badge badge-finalizado">Arquivado</span></td>
-        <td><button class="btn btn-sm btn-outline btn-sm" onclick="reactivatePatient('${p.id}')">↩ Reativar</button></td>
+        <td><button class="btn btn-sm btn-outline" onclick="reactivatePatient('${p.id}')">↩ Reativar</button></td>
       </tr>`).join('') || '<tr><td colspan="5" class="empty">Nenhum paciente arquivado</td></tr>';
+    renderPagination(total);
   } else {
     list = currentStatusFilter === 'todos'
-      ? allPatients
-      : allPatients.filter(p => (p.treatment_status || 'ativo') === currentStatusFilter);
-    rows = list.map(p => {
-      const st = p.treatment_status || 'ativo';
+      ? [...allPatients].sort((a,b) =>
+          (STATUS_ORDER[a.patient_status||'ativo']||0) - (STATUS_ORDER[b.patient_status||'ativo']||0)
+          || a.name.localeCompare(b.name))
+      : allPatients.filter(p => (p.patient_status||'ativo') === currentStatusFilter);
+    if (q) list = list.filter(p =>
+      (p.name||'').toLowerCase().includes(q) ||
+      (p.cpf||'').includes(q) ||
+      (p.email||'').toLowerCase().includes(q)
+    );
+    const total = list.length;
+    const paged = list.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+    rows = paged.map(p => {
+      const st = p.patient_status || 'ativo';
+      const inicio = p.treatment_start_date
+        ? new Date(p.treatment_start_date+'T12:00').toLocaleDateString('pt-BR') : '—';
       return `<tr style="cursor:pointer" onclick="openPatient('${p.id}')">
         <td><strong>${p.name}</strong></td>
-        <td>${p.diagnosis || '—'}</td>
-        <td>${p.start_date ? new Date(p.start_date).toLocaleDateString('pt-BR') : '—'}</td>
+        <td>${p.diagnosis||'—'}</td>
+        <td>${inicio}</td>
         <td><span class="badge badge-${st}">${statusLabel(st)}</span></td>
         <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openPatient('${p.id}')">Ver</button></td>
       </tr>`;
     }).join('') || '<tr><td colspan="5" class="empty">Nenhum paciente encontrado</td></tr>';
+    renderPagination(total);
   }
   document.getElementById('patients-tbody').innerHTML = rows;
 }
+
+function renderPagination(total) {
+  const bar = document.getElementById('pagination-bar');
+  if (!bar) return;
+  const pages = Math.ceil(total / PAGE_SIZE);
+  if (pages <= 1) { bar.innerHTML = total > 0 ? `<span>${total} paciente${total!==1?'s':''}</span>` : ''; return; }
+  let btns = `<span>${total} pacientes &nbsp;·&nbsp; Página ${currentPage} de ${pages}</span>
+    <button class="filter-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''} style="padding:4px 10px">‹</button>`;
+  const start = Math.max(1, currentPage-2), end = Math.min(pages, currentPage+2);
+  for (let i=start;i<=end;i++)
+    btns += `<button class="filter-btn${i===currentPage?' active':''}" onclick="goPage(${i})" style="padding:4px 10px">${i}</button>`;
+  btns += `<button class="filter-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''} style="padding:4px 10px">›</button>`;
+  bar.innerHTML = btns;
+}
+
+function goPage(p) { currentPage = p; renderPatientsTable(); }
 
 function renderSidebarPatients() {
   document.getElementById('sidebar-patients').innerHTML = allPatients.slice(0,8).map(p => `
