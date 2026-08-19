@@ -2068,7 +2068,7 @@ async function loadSessionCounter(patientId) {
     db.from('evolutions').select('*', { count: 'exact', head: true })
       .eq('patient_id', patientId).eq('presence', true),
     db.from('treatment_packages').select('total_sessions,status')
-      .eq('patient_id', patientId).eq('status', 'active')
+      .eq('patient_id', patientId).eq('status', 'ativo')
       .order('created_at', { ascending: false }).limit(1),
   ]);
   const sessoesFeit = done || 0;
@@ -2706,6 +2706,7 @@ async function confirmTreatmentPlan() {
     total_sessions: totalSessions,
     total_value:   planPrice,
     payment_model: planPayment,
+    status:        'ativo',
     notes:         `Plano criado via avaliação — ${dayNames.filter((_,i)=>planDays.includes(i)&&i>0).join('/')} às ${planTime}`,
   });
   if (pkgErr) { alert('Erro ao criar pacote: ' + pkgErr.message); return; }
