@@ -679,6 +679,10 @@ function renderFinRecebido(periodo) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         Disponibilidade
       </button>
+      <button class="sidebar-btn" onclick="showPage('configuracoes')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Configurações
+      </button>
     </div>
     <div class="sidebar-section" style="margin-top:8px">
       <div class="sidebar-label">Pacientes recentes</div>
@@ -896,6 +900,7 @@ function renderFinRecebido(periodo) {
 
       <div class="tabs">
         <button class="tab active" onclick="setDetailTab('avaliacao')">Avaliação</button>
+        <button class="tab" onclick="setDetailTab('plano')">📋 Plano</button>
         <button class="tab" onclick="setDetailTab('evolucoes')">Evoluções</button>
         <button class="tab" onclick="setDetailTab('exercicios')">Exercícios</button>
         <button class="tab" onclick="setDetailTab('grafico')">Gráfico</button>
@@ -905,6 +910,7 @@ function renderFinRecebido(periodo) {
       </div>
 
       <div id="detail-avaliacao"></div>
+      <div id="detail-plano" style="display:none"></div>
       <div id="detail-evolucoes" style="display:none"></div>
       <div id="detail-exercicios" style="display:none"></div>
       <div id="detail-grafico" style="display:none"><div class="chart-box"><h4>Evolução clínica ao longo do tempo</h4><canvas id="evo-chart" height="120"></canvas></div></div>
@@ -913,6 +919,104 @@ function renderFinRecebido(periodo) {
       <div id="detail-financeiro" style="display:none"></div>
     </div>
 
+
+    <div id="page-configuracoes" class="page">
+      <div class="page-header">
+        <h2>Configurações da Clínica</h2>
+        <p style="font-size:13px;color:var(--g500);margin-top:4px">Dados usados no contrato de prestação de serviços enviado ao paciente.</p>
+      </div>
+
+      <div style="max-width:720px">
+        <!-- Dados da clínica/profissional -->
+        <div class="card" style="margin-bottom:20px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--w600);margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--w100)">👩‍⚕️ Dados Profissionais</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="fg">
+              <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Nome completo / Razão Social</label>
+              <input id="cfg-razao-social" type="text" placeholder="Ex: Fernanda Rodrigues Fisioterapia" style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+            </div>
+            <div class="fg">
+              <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">CNPJ (ou CPF se PF)</label>
+              <input id="cfg-cnpj" type="text" placeholder="00.000.000/0001-00" style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+            </div>
+            <div class="fg">
+              <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Número CREFITO</label>
+              <input id="cfg-crefito" type="text" placeholder="Ex: CREFITO-3/123456-F" style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+            </div>
+            <div class="fg">
+              <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Telefone da Clínica</label>
+              <input id="cfg-phone" type="tel" placeholder="(11) 99999-9999" style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+            </div>
+            <div class="fg" style="grid-column:1/-1">
+              <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">E-mail profissional</label>
+              <input id="cfg-email" type="email" placeholder="contato@suaclinica.com.br" style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Endereço da clínica -->
+        <div class="card" style="margin-bottom:20px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--w600);margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--w100)">📍 Endereço do Atendimento</div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px">
+            <div class="fg">
+              <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Rua / Logradouro</label>
+              <input id="cfg-street" type="text" placeholder="Ex: Rua das Flores" style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+            </div>
+            <div class="fg">
+              <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Número</label>
+              <input id="cfg-number" type="text" placeholder="123" style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+            </div>
+            <div class="fg">
+              <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Bairro</label>
+              <input id="cfg-hood" type="text" placeholder="Centro" style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+            </div>
+            <div class="fg">
+              <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">CEP</label>
+              <input id="cfg-zip" type="text" placeholder="00000-000" style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+            </div>
+            <div class="fg">
+              <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Cidade</label>
+              <input id="cfg-city" type="text" placeholder="São Paulo" style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+            </div>
+            <div class="fg">
+              <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Estado</label>
+              <input id="cfg-state" type="text" placeholder="SP" style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Política padrão do contrato -->
+        <div class="card" style="margin-bottom:20px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--w600);margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--w100)">📋 Política de Cancelamento Padrão</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="fg">
+              <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Antecedência mínima para cancelar (horas)</label>
+              <input id="cfg-cancel-hours" type="number" min="1" max="72" placeholder="24" value="24" style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+            </div>
+            <div class="fg">
+              <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Foro (cidade para resolução de conflitos)</label>
+              <input id="cfg-forum" type="text" placeholder="Ex: São Paulo/SP" style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Email / Resend -->
+        <div class="card" style="margin-bottom:20px;background:#F0FDF4;border:1.5px solid #86EFAC">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#166534;margin-bottom:12px">📧 Envio de E-mail (Resend)</div>
+          <p style="font-size:12px;color:#15803D;margin-bottom:12px">Para enviar contratos por e-mail é necessário configurar uma chave da Resend (gratuita até 3.000 e-mails/mês).</p>
+          <div class="fg">
+            <label style="font-size:12px;font-weight:600;color:#166534;display:block;margin-bottom:4px">Chave API Resend</label>
+            <input id="cfg-resend-key" type="password" placeholder="re_xxxxxxxx..." style="width:100%;padding:10px 12px;border:1.5px solid #86EFAC;border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:#fff"/>
+          </div>
+          <p style="font-size:11px;color:#15803D;margin-top:8px">Crie sua conta gratuita em <a href="https://resend.com" target="_blank" style="color:#15803D">resend.com</a> → API Keys → Create API Key.</p>
+        </div>
+
+        <button class="btn" onclick="saveConfiguracoes()" style="background:var(--w600);color:#fff;padding:12px 32px;font-size:14px">
+          💾 Salvar Configurações
+        </button>
+        <span id="cfg-saved-msg" style="display:none;margin-left:12px;color:#15803D;font-size:13px;font-weight:600">✅ Salvo com sucesso!</span>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -1765,6 +1869,7 @@ function showPage(id) {
   if (id === 'agenda') loadAgenda();
   if (id === 'financeiro') loadGlobalFinanceiro();
   if (id === 'disponibilidade') loadDisponibilidade();
+  if (id === 'configuracoes') loadConfiguracoes();
 }
 
 function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); }
@@ -2106,11 +2211,12 @@ async function loadSessionCounter(patientId) {
 }
 
 function setDetailTab(tab) {
-  ['avaliacao','evolucoes','exercicios','grafico','documentos','familia','financeiro'].forEach(t => {
+  ['avaliacao','plano','evolucoes','exercicios','grafico','documentos','familia','financeiro'].forEach(t => {
     document.getElementById('detail-' + t).style.display = t === tab ? 'block' : 'none';
   });
-  document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('active', ['avaliacao','evolucoes','exercicios','grafico','documentos','familia','financeiro'][i] === tab));
+  document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('active', ['avaliacao','plano','evolucoes','exercicios','grafico','documentos','familia','financeiro'][i] === tab));
   if (tab === 'avaliacao')  loadAssessment();
+  if (tab === 'plano')      loadPlanTab();
   if (tab === 'evolucoes')  loadEvolutions();
   if (tab === 'exercicios') loadExercises();
   if (tab === 'grafico')    loadChart();
@@ -2455,7 +2561,17 @@ async function loadAssessment() {
     <div style="margin-bottom:14px">${assessTA('Conduta terapêutica proposta','treatment_plan','Técnicas, recursos e abordagens planejadas...',true)}</div>
   </div>
 
-  <!-- 6. Plano de Tratamento Estruturado -->
+  <!-- 6. Callout: Plano movido para aba Plano -->
+  <div style="background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:4px">
+    <span style="font-size:22px">📋</span>
+    <div>
+      <div style="font-weight:600;font-size:13px;color:var(--w800)">Plano de Tratamento e Contrato</div>
+      <div style="font-size:12px;color:var(--g500);margin-top:2px">O plano, agenda e contrato estão na aba <strong>📋 Plano</strong> ao lado.</div>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="setDetailTab('plano')" style="margin-left:auto;font-size:12px">Ir para Plano →</button>
+  </div>
+  <!-- (bloco 6 está na aba Plano) -->
+  <div style="display:none">
   <div class="assess-section" style="background:linear-gradient(135deg,#FFFBEB,#FFF7ED);border:1.5px solid #FDE68A">
     <div class="assess-title" style="color:var(--w800)">📅 6. Plano de Tratamento — Agenda e Financeiro</div>
 
@@ -2542,6 +2658,7 @@ async function loadAssessment() {
     </button>` : ''}
   </div>
 
+  </div><!-- end assess-bloco6-hidden -->
   <!-- 7. Observações -->
   <div class="assess-section">
     <div class="assess-title">📝 7. Observações Adicionais</div>
@@ -2552,22 +2669,13 @@ async function loadAssessment() {
     <button class="btn" onclick="saveAssessment()">💾 Salvar avaliação</button>
   </div>`;
 
-  // Preenche valores salvos (a = data JSONB; evalDate = evaluation_date do row)
-  // Inicializa o dropdown de horários após renderizar
-  setTimeout(() => {
-    updatePlanTimeSlots();
-    // Restaura horário salvo se existir
-    if (a?.plan_time) {
-      const sel = document.getElementById('av-plan_time');
-      if (sel) sel.value = a.plan_time;
-    }
-  }, 50);
+  // Preenche valores salvos
   if (a) {
     const fields = ['main_complaint','disease_history','medical_history','previous_surgeries',
       'medications','allergies','functional_level','mobility_aids','adl_notes','inspection_notes','rom_notes',
       'muscle_strength_notes','sensitivity','balance_level','coordination_notes','diagnostic_hypothesis',
       'short_term_goals','long_term_goals','treatment_plan','session_frequency','estimated_duration',
-      'additional_notes','plan_total_sessions','plan_time','plan_price','plan_payment_method'];
+      'additional_notes'];
     fields.forEach(f => {
       const el = document.getElementById('av-' + f);
       if (el && a[f] != null) el.value = a[f];
@@ -3635,6 +3743,485 @@ function showToast(msg, type='ok') {
 
 async function toggleEvoFamily(id, shared) {
   await db.from('evolutions').update({ shared_with_family: shared }).eq('id', id);
+}
+
+
+// ═══════════════════════════════════════════════════════
+// ── CONFIGURAÇÕES DA CLÍNICA ──
+// ═══════════════════════════════════════════════════════
+function getClinicSettings() {
+  try { return JSON.parse(localStorage.getItem('clinicSettings') || '{}'); } catch { return {}; }
+}
+function loadConfiguracoes() {
+  const s = getClinicSettings();
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+  set('cfg-razao-social', s.razao_social);
+  set('cfg-cnpj', s.cnpj);
+  set('cfg-crefito', s.crefito);
+  set('cfg-phone', s.phone);
+  set('cfg-email', s.email);
+  set('cfg-street', s.street);
+  set('cfg-number', s.number);
+  set('cfg-hood', s.hood);
+  set('cfg-zip', s.zip);
+  set('cfg-city', s.city);
+  set('cfg-state', s.state);
+  set('cfg-cancel-hours', s.cancel_hours || '24');
+  set('cfg-forum', s.forum);
+  set('cfg-resend-key', s.resend_key);
+}
+function saveConfiguracoes() {
+  const g = id => (document.getElementById(id)?.value || '').trim();
+  const s = {
+    razao_social: g('cfg-razao-social'),
+    cnpj:         g('cfg-cnpj'),
+    crefito:      g('cfg-crefito'),
+    phone:        g('cfg-phone'),
+    email:        g('cfg-email'),
+    street:       g('cfg-street'),
+    number:       g('cfg-number'),
+    hood:         g('cfg-hood'),
+    zip:          g('cfg-zip'),
+    city:         g('cfg-city'),
+    state:        g('cfg-state'),
+    cancel_hours: g('cfg-cancel-hours') || '24',
+    forum:        g('cfg-forum'),
+    resend_key:   g('cfg-resend-key'),
+  };
+  localStorage.setItem('clinicSettings', JSON.stringify(s));
+  const msg = document.getElementById('cfg-saved-msg');
+  msg.style.display = 'inline';
+  setTimeout(() => { msg.style.display = 'none'; }, 3000);
+}
+
+// ═══════════════════════════════════════════════════════
+// ── ABA PLANO ──
+// ═══════════════════════════════════════════════════════
+async function loadPlanTab() {
+  const c = document.getElementById('detail-plano');
+  c.innerHTML = '<p style="color:var(--g400);padding:20px">Carregando...</p>';
+
+  const [{ data: row }, { data: schedBlocks }, { data: patient }] = await Promise.all([
+    db.from('evaluations').select('*').eq('patient_id', currentPatientId).eq('type','general').limit(1).maybeSingle(),
+    db.from('schedule_blocks').select('day_of_week,start_time,end_time').eq('active', true),
+    db.from('patients').select('*').eq('id', currentPatientId).single(),
+  ]);
+
+  window._assessScheduleBlocks = schedBlocks || [];
+  const a = row?.data || {};
+  const v = k => a[k] ?? '';
+  const cfg = getClinicSettings();
+
+  const dayLabels = ['Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+  c.innerHTML = `
+  <div style="padding:0 0 24px">
+
+    <!-- PLANO DE TRATAMENTO -->
+    <div class="card" style="margin-bottom:20px;background:linear-gradient(135deg,#FFFBEB,#FFF7ED);border:1.5px solid #FDE68A">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--w700);margin-bottom:16px">📅 Plano de Tratamento</div>
+
+      ${a?.plan_confirmed ? `
+      <div style="padding:12px 16px;background:#D1FAE5;border:1.5px solid #6EE7B7;border-radius:10px;font-size:13px;color:#065F46;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+        <span>✅ <strong>${a.plan_total_sessions} sessões</strong> de 1h · ${['Seg','Ter','Qua','Qui','Sex','Sáb'].filter((_,i) => (a.plan_days||[]).includes(i+1)).join(' e ')} às ${a.plan_time} · R$ ${parseFloat(a.plan_price||0).toFixed(2).replace('.',',')}</span>
+        <button class="btn btn-outline btn-sm" style="margin-left:auto;font-size:11px" onclick="resetPlanConfirmed()">✏️ Alterar</button>
+      </div>` : ''}
+
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:8px">1. Dias da semana</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${[['Seg',1],['Ter',2],['Qua',3],['Qui',4],['Sex',5],['Sáb',6]].map(([lbl,d]) => `
+            <label style="display:flex;align-items:center;gap:5px;padding:7px 14px;border:1.5px solid var(--g200);border-radius:20px;cursor:pointer;font-size:13px;background:#fff;user-select:none">
+              <input type="checkbox" id="av-plan_day_${d}" value="${d}"
+                ${(a?.plan_days||[]).includes(d) ? 'checked' : ''}
+                onchange="updatePlanTimeSlots()"
+                style="accent-color:var(--w600)"/>
+              ${lbl}
+            </label>`).join('')}
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:6px">2. Horário disponível</label>
+        <select id="av-plan_time"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:#fff">
+          <option value="">— Selecione os dias primeiro —</option>
+        </select>
+        <p id="av-plan_time_hint" style="font-size:11px;color:var(--g400);margin-top:4px"></p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Total de sessões</label>
+          <input id="av-plan_total_sessions" type="number" min="1" max="200" placeholder="Ex: 20"
+            value="${v('plan_total_sessions') || ''}"
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Valor total (R$)</label>
+          <input id="av-plan_price" type="number" min="0" step="0.01" placeholder="Ex: 2000.00"
+            value="${v('plan_price') || ''}"
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Forma de pagamento</label>
+        <select id="av-plan_payment_method" onchange="togglePlanPaymentFields(this.value)"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none;background:#fff">
+          <option value="">— Selecione —</option>
+          <option value="avista" ${v('plan_payment_method')==='avista'?'selected':''}>À vista</option>
+          <option value="entrada_final" ${v('plan_payment_method')==='entrada_final'?'selected':''}>Entrada + valor final</option>
+          <option value="parcelado" ${v('plan_payment_method')==='parcelado'?'selected':''}>Parcelado</option>
+          <option value="por_sessao" ${v('plan_payment_method')==='por_sessao'?'selected':''}>Por sessão (paga após cada atendimento)</option>
+        </select>
+      </div>
+
+      <div id="av-plan-parcelado-fields" style="display:${v('plan_payment_method')==='parcelado'?'block':'none'};margin-bottom:14px;padding:12px;background:#fff;border:1px solid #FDE68A;border-radius:10px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Número de parcelas</label>
+            <input id="av-plan_parcelas" type="number" min="2" max="48" placeholder="Ex: 10"
+              value="${v('plan_parcelas') || ''}"
+              style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Cobrar a cada X sessões</label>
+            <input id="av-plan_freq_pagamento" type="number" min="1" max="20" placeholder="Ex: 2"
+              value="${v('plan_freq_pagamento') || ''}"
+              style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+          </div>
+        </div>
+      </div>
+
+      ${!a?.plan_confirmed ? `<button class="btn" onclick="confirmTreatmentPlan()"
+        style="background:var(--w600);color:#fff;width:100%;justify-content:center;font-size:14px;padding:13px;margin-bottom:0">
+        ✅ Confirmar plano — criar pacote e bloquear agenda
+      </button>` : ''}
+    </div>
+
+    ${a?.plan_confirmed ? `
+    <!-- CONTRATO -->
+    <div class="card" style="margin-bottom:20px;border:1.5px solid var(--g200)">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g600);margin-bottom:16px">📄 Contrato de Prestação de Serviços</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Antecedência mínima p/ cancelar (h)</label>
+          <input id="plan-cancel-hours" type="number" min="1" max="72"
+            value="${v('plan_cancel_hours') || cfg.cancel_hours || '24'}"
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--g600);display:block;margin-bottom:4px">Foro (cidade)</label>
+          <input id="plan-forum" type="text" placeholder="${cfg.forum || 'Ex: São Paulo/SP'}"
+            value="${v('plan_forum') || cfg.forum || ''}"
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-family:Inter,sans-serif;outline:none"/>
+        </div>
+      </div>
+
+      ${!cfg.razao_social ? `
+      <div style="padding:10px 14px;background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;font-size:12px;color:#92400E;margin-bottom:14px">
+        ⚠️ Dados da clínica não configurados ainda. <a onclick="showPage('configuracoes')" style="cursor:pointer;font-weight:600;color:var(--w700)">Configure aqui →</a>
+      </div>` : `
+      <div style="padding:10px 14px;background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;font-size:12px;color:#166534;margin-bottom:14px">
+        ✅ Clínica: <strong>${cfg.razao_social}</strong> · CNPJ: ${cfg.cnpj || '—'} · CREFITO: ${cfg.crefito || '—'}
+      </div>`}
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" onclick="generateContractPDF()" style="background:var(--g700);color:#fff;gap:6px">
+          📄 Baixar Contrato PDF
+        </button>
+        <button class="btn btn-outline" onclick="sendContractEmail('paciente')" style="gap:6px">
+          📧 Enviar ao Paciente
+        </button>
+        ${patient?.email || '' ? `
+        <button class="btn btn-outline" onclick="sendContractEmail('familiar')" style="gap:6px">
+          👨‍👩‍👧 Enviar ao Familiar
+        </button>` : ''}
+      </div>
+    </div>` : ''}
+
+  </div>`;
+
+  setTimeout(() => {
+    updatePlanTimeSlots();
+    if (a?.plan_time) {
+      const sel = document.getElementById('av-plan_time');
+      if (sel) sel.value = a.plan_time;
+    }
+    togglePlanPaymentFields(a?.plan_payment_method || '');
+  }, 50);
+}
+
+// ═══════════════════════════════════════════════════════
+// ── GERAR CONTRATO PDF ──
+// ═══════════════════════════════════════════════════════
+async function loadJsPDF() {
+  if (window.jspdf?.jsPDF) return window.jspdf.jsPDF;
+  return new Promise((resolve, reject) => {
+    if (document.getElementById('jspdf-script')) {
+      const t = setInterval(() => { if (window.jspdf?.jsPDF) { clearInterval(t); resolve(window.jspdf.jsPDF); } }, 50);
+      return;
+    }
+    const s = document.createElement('script');
+    s.id = 'jspdf-script';
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload = () => resolve(window.jspdf?.jsPDF);
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function generateContractPDF() {
+  const { data: row } = await db.from('evaluations').select('data').eq('patient_id', currentPatientId).eq('type','general').limit(1).maybeSingle();
+  const { data: patient } = await db.from('patients').select('*').eq('id', currentPatientId).single();
+  const a = row?.data || {};
+  const cfg = getClinicSettings();
+
+  const JsPDF = await loadJsPDF();
+  if (!JsPDF) { alert('Erro ao carregar gerador de PDF.'); return; }
+
+  const doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = 210, ml = 20, mr = 20, tw = W - ml - mr;
+  let y = 20;
+
+  const addLine = (h = 6) => { y += h; };
+  const checkPage = (need = 10) => {
+    if (y + need > 280) { doc.addPage(); y = 20; }
+  };
+
+  const txt = (text, x, yy, opts = {}) => {
+    doc.text(String(text || ''), x, yy, opts);
+  };
+
+  const wrap = (text, x, yy, maxWidth, lineH = 6) => {
+    const lines = doc.splitTextToSize(String(text || '—'), maxWidth);
+    lines.forEach(l => { checkPage(lineH + 2); doc.text(l, x, yy); yy += lineH; });
+    return yy;
+  };
+
+  // ── HEADER ──
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text('CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE FISIOTERAPIA', W/2, y, { align: 'center' });
+  y += 8;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text(`Emitido em: ${new Date().toLocaleDateString('pt-BR')}`, ml, y);
+  y += 10;
+
+  doc.setDrawColor(200,200,200);
+  doc.line(ml, y, W - mr, y);
+  y += 8;
+
+  // ── PARTES ──
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text('1. DAS PARTES', ml, y);
+  y += 7;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+
+  const dayNames2 = ['','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  const planDays = (a.plan_days || []).map(d => dayNames2[d]).join(', ');
+  const payMap = { avista: 'À vista', entrada_final: 'Entrada + valor final', parcelado: 'Parcelado', por_sessao: 'Por sessão' };
+  const cancelH = document.getElementById('plan-cancel-hours')?.value || cfg.cancel_hours || '24';
+  const forum = document.getElementById('plan-forum')?.value || cfg.forum || '—';
+
+  const clinicAddr = [cfg.street, cfg.number, cfg.hood, cfg.city, cfg.state, cfg.zip].filter(Boolean).join(', ');
+  const patAddr = [patient.address_street, patient.address_number, patient.address_hood, patient.address_city, patient.address_zip].filter(Boolean).join(', ');
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('CONTRATANTE (Paciente):', ml, y);
+  doc.setFont('helvetica', 'normal');
+  y += 6;
+  txt(`Nome: ${patient.name || '—'}`, ml + 4, y); y += 6;
+  txt(`CPF: ${patient.cpf || '—'}   Telefone: ${patient.phone || '—'}`, ml + 4, y); y += 6;
+  txt(`E-mail: ${patient.email || '—'}`, ml + 4, y); y += 6;
+  y = wrap(`Endereço: ${patAddr || '—'}`, ml + 4, y, tw - 4); y += 4;
+
+  checkPage(28);
+  doc.setFont('helvetica', 'bold');
+  doc.text('CONTRATADA (Fisioterapeuta):', ml, y);
+  doc.setFont('helvetica', 'normal');
+  y += 6;
+  txt(`Nome/Razão Social: ${cfg.razao_social || '—'}`, ml + 4, y); y += 6;
+  txt(`CNPJ/CPF: ${cfg.cnpj || '—'}`, ml + 4, y); y += 6;
+  txt(`CREFITO: ${cfg.crefito || '—'}`, ml + 4, y); y += 6;
+  txt(`Telefone: ${cfg.phone || '—'}   E-mail: ${cfg.email || '—'}`, ml + 4, y); y += 6;
+  y = wrap(`Endereço: ${clinicAddr || '—'}`, ml + 4, y, tw - 4); y += 6;
+
+  doc.line(ml, y, W - mr, y); y += 8;
+
+  // ── OBJETO ──
+  checkPage(20);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text('2. DO OBJETO', ml, y); y += 7;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  y = wrap(`É objeto do presente contrato a prestação de serviços de fisioterapia pela CONTRATADA ao CONTRATANTE, com diagnóstico/condição: ${patient.diagnosis || '—'}.`, ml, y, tw); y += 4;
+
+  // ── PLANO ──
+  checkPage(40);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text('3. DO PLANO DE TRATAMENTO', ml, y); y += 7;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  txt(`• Número de sessões: ${a.plan_total_sessions || '—'}`, ml + 4, y); y += 6;
+  txt(`• Duração de cada sessão: 1 hora`, ml + 4, y); y += 6;
+  txt(`• Dias: ${planDays || '—'}`, ml + 4, y); y += 6;
+  txt(`• Horário: ${a.plan_time || '—'}`, ml + 4, y); y += 6;
+  txt(`• Local: ${clinicAddr || '—'}`, ml + 4, y); y += 6;
+  if (a.plan_total_sessions && a.plan_days?.length) {
+    const sessPerWeek = a.plan_days.length;
+    const weeks = Math.ceil(a.plan_total_sessions / sessPerWeek);
+    txt(`• Duração estimada do tratamento: ${weeks} semanas`, ml + 4, y); y += 6;
+  }
+  y += 2;
+
+  // ── FINANCEIRO ──
+  checkPage(30);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text('4. DO VALOR E CONDIÇÕES DE PAGAMENTO', ml, y); y += 7;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  txt(`• Valor total: R$ ${parseFloat(a.plan_price||0).toFixed(2).replace('.',',')}`, ml + 4, y); y += 6;
+  txt(`• Forma de pagamento: ${payMap[a.plan_payment_method] || a.plan_payment_method || '—'}`, ml + 4, y); y += 6;
+  if (a.plan_payment_method === 'parcelado') {
+    txt(`• Parcelas: ${a.plan_parcelas || '—'} × cobrado a cada ${a.plan_freq_pagamento || '—'} sessões`, ml + 4, y); y += 6;
+  }
+  y = wrap('Em caso de inadimplência incidirão multa de 2%, juros de mora de 1% ao mês e correção monetária.', ml + 4, y, tw - 4); y += 4;
+
+  // ── CANCELAMENTO ──
+  checkPage(30);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text('5. POLÍTICA DE CANCELAMENTO', ml, y); y += 7;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  y = wrap(`O CONTRATANTE deverá cancelar ou reagendar a sessão com antecedência mínima de ${cancelH} horas. Em caso de falta não avisada dentro do prazo, a sessão será contabilizada como realizada e cobrada integralmente.`, ml, y, tw); y += 6;
+  y = wrap('A CONTRATADA se compromete a reagendar sessões canceladas com antecedência dentro do pacote vigente, sem custo adicional.', ml, y, tw); y += 6;
+
+  // ── OBRIGAÇÕES ──
+  checkPage(40);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text('6. OBRIGAÇÕES DAS PARTES', ml, y); y += 7;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Do CONTRATANTE:', ml, y); y += 6;
+  doc.setFont('helvetica', 'normal');
+  txt('• Comparecer às sessões nos dias e horários acordados;', ml + 4, y); y += 6;
+  txt('• Informar à CONTRATADA qualquer alteração em seu estado de saúde;', ml + 4, y); y += 6;
+  txt('• Realizar os exercícios e orientações prescritas;', ml + 4, y); y += 6;
+  y += 2;
+  checkPage(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Da CONTRATADA:', ml, y); y += 6;
+  doc.setFont('helvetica', 'normal');
+  txt('• Prestar os serviços com qualidade, ética e autonomia técnica garantida pelo COFFITO;', ml + 4, y); y += 6;
+  txt('• Manter sigilo profissional sobre todas as informações do CONTRATANTE;', ml + 4, y); y += 6;
+  txt('• Manter prontuário atualizado conforme normas do CREFITO.', ml + 4, y); y += 6;
+  y += 2;
+
+  // ── RESCISÃO ──
+  checkPage(20);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text('7. DA RESCISÃO', ml, y); y += 7;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  y = wrap('O presente contrato poderá ser rescindido unilateralmente por qualquer das partes mediante comunicação formal com antecedência mínima de 15 dias. Em caso de rescisão pelo CONTRATANTE, o valor das sessões já realizadas será descontado do total pago, devolvendo-se o saldo proporcional.', ml, y, tw); y += 6;
+
+  // ── FORO ──
+  checkPage(16);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text('8. DO FORO', ml, y); y += 7;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  y = wrap(`Para dirimir quaisquer controvérsias oriundas do presente contrato, as partes elegem o foro da comarca de ${forum}.`, ml, y, tw); y += 10;
+
+  // ── ASSINATURAS ──
+  checkPage(50);
+  doc.line(ml, y, W - mr, y); y += 8;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  txt(`${cfg.city || '___________'}, ${new Date().toLocaleDateString('pt-BR')}.`, ml, y); y += 16;
+
+  // Linha assinatura contratante
+  doc.line(ml, y, ml + tw/2 - 10, y);
+  doc.line(ml + tw/2 + 10, y, W - mr, y);
+  y += 5;
+  txt(patient.name || 'CONTRATANTE', ml + (tw/2 - 10)/2, y, { align: 'center' });
+  txt(cfg.razao_social || 'CONTRATADA (Fisioterapeuta)', ml + tw/2 + 10 + (tw/2 - 10)/2, y, { align: 'center' });
+  y += 4;
+  txt('CPF: ' + (patient.cpf || '___________'), ml + (tw/2 - 10)/2, y, { align: 'center' });
+  txt('CREFITO: ' + (cfg.crefito || '___________'), ml + tw/2 + 10 + (tw/2 - 10)/2, y, { align: 'center' });
+
+  const fname = (patient.name || 'Paciente').replace(/\s+/g, '_');
+  doc.save(`Contrato_${fname}.pdf`);
+  showToast('✅ Contrato gerado com sucesso!');
+}
+
+// ═══════════════════════════════════════════════════════
+// ── ENVIAR CONTRATO POR EMAIL ──
+// ═══════════════════════════════════════════════════════
+async function sendContractEmail(recipient) {
+  const cfg = getClinicSettings();
+  if (!cfg.resend_key) {
+    const go = confirm('Para enviar por e-mail é necessário configurar a chave Resend nas Configurações.\n\nIr para Configurações agora?');
+    if (go) showPage('configuracoes');
+    return;
+  }
+
+  const { data: patient } = await db.from('patients').select('*,family_members(*)').eq('id', currentPatientId).single();
+  let toEmail, toName;
+
+  if (recipient === 'paciente') {
+    toEmail = patient?.email;
+    toName  = patient?.name;
+    if (!toEmail) { alert('Este paciente não tem e-mail cadastrado. Adicione no cadastro do paciente.'); return; }
+  } else {
+    const fam = patient?.family_members?.[0];
+    toEmail = fam?.email;
+    toName  = fam?.name;
+    if (!toEmail) { alert('Nenhum familiar com e-mail cadastrado.'); return; }
+  }
+
+  if (!confirm(`Enviar contrato para ${toName} (${toEmail})?`)) return;
+
+  showToast('📧 Enviando contrato...');
+  try {
+    const { error } = await db.functions.invoke('send-email', {
+      body: {
+        to: toEmail,
+        toName,
+        subject: `Seu Contrato de Fisioterapia — ${cfg.razao_social || 'Dra. Fernanda'}`,
+        html: `
+          <h2>Olá, ${toName}!</h2>
+          <p>Seu contrato de prestação de serviços de fisioterapia foi gerado.</p>
+          <p>Por favor, faça o download do PDF em anexo, assine e devolva uma cópia assinada.</p>
+          <p>Em caso de dúvidas, entre em contato: ${cfg.phone || ''}</p>
+          <br><p><strong>${cfg.razao_social || ''}</strong><br>${cfg.crefito || ''}</p>
+        `,
+        resend_key: cfg.resend_key,
+        from_email: cfg.email || 'contrato@drafernandafisio.com.br',
+        from_name: cfg.razao_social || 'Dra. Fernanda',
+      }
+    });
+    if (error) throw error;
+    showToast(`✅ E-mail enviado para ${toEmail}!`);
+  } catch (e) {
+    alert('Erro ao enviar e-mail: ' + (e.message || JSON.stringify(e)));
+  }
 }
 
 </script>
