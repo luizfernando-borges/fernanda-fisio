@@ -3932,13 +3932,12 @@ async function loadPlanTab() {
         <button class="btn" onclick="generateContractPDF()" style="background:var(--g700);color:#fff;gap:6px">
           📄 Baixar Contrato PDF
         </button>
-        <button class="btn btn-outline" onclick="sendContractEmail('paciente')" style="gap:6px">
-          📧 Enviar ao Paciente
+        <button class="btn btn-outline" onclick="sendContractWhatsApp('paciente')" style="gap:6px;color:#25D366;border-color:#25D366">
+          📱 WhatsApp Paciente
         </button>
-        ${patient?.email || '' ? `
-        <button class="btn btn-outline" onclick="sendContractEmail('familiar')" style="gap:6px">
-          👨‍👩‍👧 Enviar ao Familiar
-        </button>` : ''}
+        <button class="btn btn-outline" onclick="sendContractWhatsApp('familiar')" style="gap:6px;color:#25D366;border-color:#25D366">
+          📱 WhatsApp Familiar
+        </button>
       </div>
     </div>` : ''}
 
@@ -4174,54 +4173,35 @@ async function generateContractPDF() {
 // ═══════════════════════════════════════════════════════
 // ── ENVIAR CONTRATO POR EMAIL ──
 // ═══════════════════════════════════════════════════════
-async function sendContractEmail(recipient) {
+async function sendContractWhatsApp(recipient) {
   const cfg = getClinicSettings();
-  if (!cfg.resend_key) {
-    const go = confirm('Para enviar por e-mail é necessário configurar a chave Resend nas Configurações.\n\nIr para Configurações agora?');
-    if (go) showPage('configuracoes');
-    return;
-  }
-
   const { data: patient } = await db.from('patients').select('*,family_members(*)').eq('id', currentPatientId).single();
-  let toEmail, toName;
 
+  let phone, name;
   if (recipient === 'paciente') {
-    toEmail = patient?.email;
-    toName  = patient?.name;
-    if (!toEmail) { alert('Este paciente não tem e-mail cadastrado. Adicione no cadastro do paciente.'); return; }
+    phone = patient?.phone;
+    name  = patient?.name;
+    if (!phone) { alert('Este paciente não tem telefone cadastrado. Adicione no cadastro.'); return; }
   } else {
     const fam = patient?.family_members?.[0];
-    toEmail = fam?.email;
-    toName  = fam?.name;
-    if (!toEmail) { alert('Nenhum familiar com e-mail cadastrado.'); return; }
+    phone = fam?.phone;
+    name  = fam?.name;
+    if (!phone) { alert('Nenhum familiar com telefone cadastrado na aba Família.'); return; }
   }
 
-  if (!confirm(`Enviar contrato para ${toName} (${toEmail})?`)) return;
+  // Normaliza: remove não-dígitos, garante DDI 55
+  const digits = phone.replace(/\D/g, '');
+  const intl = digits.startsWith('55') ? digits : '55' + digits;
 
-  showToast('📧 Enviando contrato...');
-  try {
-    const { error } = await db.functions.invoke('send-email', {
-      body: {
-        to: toEmail,
-        toName,
-        subject: `Seu Contrato de Fisioterapia — ${cfg.razao_social || 'Dra. Fernanda'}`,
-        html: `
-          <h2>Olá, ${toName}!</h2>
-          <p>Seu contrato de prestação de serviços de fisioterapia foi gerado.</p>
-          <p>Por favor, faça o download do PDF em anexo, assine e devolva uma cópia assinada.</p>
-          <p>Em caso de dúvidas, entre em contato: ${cfg.phone || ''}</p>
-          <br><p><strong>${cfg.razao_social || ''}</strong><br>${cfg.crefito || ''}</p>
-        `,
-        resend_key: cfg.resend_key,
-        from_email: cfg.email || 'contrato@drafernandafisio.com.br',
-        from_name: cfg.razao_social || 'Dra. Fernanda',
-      }
-    });
-    if (error) throw error;
-    showToast(`✅ E-mail enviado para ${toEmail}!`);
-  } catch (e) {
-    alert('Erro ao enviar e-mail: ' + (e.message || JSON.stringify(e)));
-  }
+  const clinic = cfg.razao_social || 'Dra. Fernanda';
+  const msg = `Olá ${name}! 👋\n\nSegue o contrato de prestação de serviços de fisioterapia referente ao seu tratamento.\n\nO arquivo PDF foi gerado — basta abrir o arquivo enviado junto com esta mensagem.\n\nQualquer dúvida, estou à disposição! 😊\n\n${clinic}${cfg.phone ? ' · ' + cfg.phone : ''}`;
+
+  // Primeiro gera o PDF (download automático), depois abre WhatsApp
+  await generateContractPDF();
+  setTimeout(() => {
+    window.open('https://wa.me/' + intl + '?text=' + encodeURIComponent(msg), '_blank');
+  }, 800);
+  showToast('📱 PDF baixado — WhatsApp abrindo para envio!');
 }
 
 </script>
