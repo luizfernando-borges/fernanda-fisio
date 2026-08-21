@@ -1133,13 +1133,13 @@
       height: 100%;
       object-fit: cover;
       object-position: center 30%;
-      filter: blur(1px) brightness(0.60);
+      filter: blur(1px) brightness(0.75);
       transform: scale(1.02);
     }
     .clinica-bg-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(61,46,26,0.55) 0%, rgba(155,113,70,0.30) 100%);
+      background: linear-gradient(135deg, rgba(61,46,26,0.38) 0%, rgba(155,113,70,0.18) 100%);
     }
     .clinica-bg-content {
       position: relative;
@@ -1385,15 +1385,7 @@
       overflow: hidden;
       position: relative;
     }
-    .trat-illustration-band::after {
-      content: '';
-      position: absolute;
-      right: -40px; top: -40px;
-      width: 200px; height: 200px;
-      border-radius: 50%;
-      background: var(--warm-100);
-      opacity: 0.6;
-    }
+    /* trat-illustration-band::after removed */
     .trat-illus-text { flex: 1; z-index: 1; }
     .trat-illus-text h3 { font-size: 18px; margin-bottom: 8px; color: var(--warm-800); }
     .trat-illus-text p { font-size: 14px; color: var(--gray-600); line-height: 1.65; }
@@ -1538,11 +1530,14 @@
     }
     .familia-visual-center svg { width: 44px; height: 44px; color: var(--warm-400); }
     .familia-visual-center span {
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 9px;
+      font-weight: 700;
       color: var(--warm-600);
-      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
+      text-align: center;
+      line-height: 1.4;
+      padding: 0 8px;
     }
     .familia-mini-cards {
       position: absolute;
@@ -1713,7 +1708,7 @@
 
   <!-- CLÍNICA BG -->
   <section class="clinica-bg-section">
-    <img src="foto-clinica.png" alt="Consultório da Dra. Fernanda Rodrigues" class="clinica-bg-img">
+    <img src="foto-fernanda-tratamento.png" alt="Dra. Fernanda Rodrigues em atendimento" class="clinica-bg-img">
     <div class="clinica-bg-overlay"></div>
     <div style="position:absolute;top:-80px;left:-80px;width:320px;height:320px;border-radius:50%;border:3px solid rgba(255,255,255,0.15);pointer-events:none;z-index:1;"></div>
     <div style="position:absolute;bottom:-60px;right:-60px;width:220px;height:220px;border-radius:50%;border:2px solid rgba(255,255,255,0.10);pointer-events:none;z-index:1;"></div>
