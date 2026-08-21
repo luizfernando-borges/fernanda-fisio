@@ -5,68 +5,93 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Portal da Família — Dra. Fernanda</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --w50:#FAF8F4;--w100:#F0E9DC;--w400:#C4A882;--w600:#92400E;--w800:#3B1F0A;
+      --w50:#FAF8F4;--w100:#F0E9DC;--w400:#C4A882;--w600:#92400E;--w700:#7C3410;--w800:#3B1F0A;
       --g50:#F9FAFB;--g100:#F3F4F6;--g200:#E5E7EB;--g400:#9CA3AF;--g500:#6B7280;--g700:#374151;
     }
-    body{font-family:Inter,sans-serif;background:#F7F4F0;color:var(--g700);min-height:100vh}
+    body{font-family:Inter,sans-serif;background:#F7F4F0;color:var(--g700);min-height:100vh;font-size:16px}
     .hidden{display:none!important}
 
-    /* LOGIN */
-    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-    .login-box{background:#fff;border-radius:20px;padding:40px;max-width:420px;width:100%;box-shadow:0 4px 32px rgba(0,0,0,.08)}
-    .login-logo{text-align:center;margin-bottom:28px}
-    .login-logo h1{font-size:22px;font-weight:600;color:var(--w800)}
-    .login-logo p{font-size:13px;color:var(--g400);margin-top:4px}
-    .login-box h2{font-size:16px;font-weight:600;margin-bottom:6px}
-    .login-box p{font-size:13px;color:var(--g500);margin-bottom:20px}
-    .login-box input{width:100%;padding:11px 14px;border:1.5px solid var(--g200);border-radius:10px;font-size:14px;font-family:Inter,sans-serif;outline:none;margin-bottom:12px}
+    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#FAF8F4,#F0E9DC)}
+    .login-box{background:#fff;border-radius:24px;padding:44px 36px;max-width:440px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.10)}
+    .login-logo{text-align:center;margin-bottom:32px}
+    .login-logo .avatar{width:72px;height:72px;background:var(--w100);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px}
+    .login-logo h1{font-size:20px;font-weight:700;color:var(--w800)}
+    .login-logo p{font-size:14px;color:var(--g400);margin-top:4px}
+    .login-box h2{font-size:18px;font-weight:600;margin-bottom:8px}
+    .login-box .subtitle{font-size:14px;color:var(--g500);margin-bottom:24px;line-height:1.6}
+    .login-box input{width:100%;padding:14px 16px;border:1.5px solid var(--g200);border-radius:12px;font-size:16px;font-family:Inter,sans-serif;outline:none;margin-bottom:14px}
     .login-box input:focus{border-color:var(--w400)}
-    .btn-primary{width:100%;padding:12px;background:var(--w600);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif}
+    .btn-primary{width:100%;padding:14px;background:var(--w600);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif}
     .btn-primary:hover{background:var(--w800)}
-    .msg{font-size:13px;text-align:center;margin-top:12px;padding:10px;border-radius:8px}
+    .msg{font-size:14px;text-align:center;margin-top:14px;padding:12px;border-radius:10px;line-height:1.5}
     .msg.success{background:#DCFCE7;color:#15803D}
     .msg.error{background:#FEE2E2;color:#B91C1C}
 
-    /* PORTAL */
-    .portal-header{background:var(--w800);color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
-    .portal-header h1{font-size:17px;font-weight:600}
-    .portal-header p{font-size:12px;opacity:.7;margin-top:2px}
-    .signout-btn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-family:Inter,sans-serif}
-    .portal-body{max-width:800px;margin:0 auto;padding:24px 16px}
-    .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
-    .sum-card{background:#fff;border-radius:14px;padding:18px;border:1px solid var(--g200)}
-    .sum-card .val{font-size:26px;font-weight:700;color:var(--w600)}
-    .sum-card .lbl{font-size:12px;color:var(--g400);margin-top:4px}
-    .section{background:#fff;border-radius:16px;padding:24px;margin-bottom:20px;border:1px solid var(--g200)}
-    .section-title{font-size:14px;font-weight:600;color:var(--g700);margin-bottom:16px;display:flex;align-items:center;gap:8px}
-    .section-title::before{content:"";display:block;width:4px;height:16px;background:var(--w400);border-radius:2px}
-    .evo-card{border:1px solid var(--g200);border-radius:12px;padding:16px;margin-bottom:12px}
-    .evo-date{font-size:11px;color:var(--g400);margin-bottom:6px}
-    .evo-text{font-size:13px;line-height:1.7;color:var(--g700)}
-    .evo-obs-area{margin-top:12px;padding-top:12px;border-top:1px solid var(--g100)}
-    .obs-item{background:var(--g50);border-radius:8px;padding:10px 12px;font-size:12px;margin-bottom:6px;line-height:1.5}
-    .obs-reply{background:#EFF6FF;border-radius:8px;padding:10px 12px;font-size:12px;margin-top:6px;border-left:3px solid #3B82F6}
-    .obs-reply strong{color:#1D4ED8}
-    .obs-input-row{display:flex;gap:8px;margin-top:10px}
-    .obs-input{flex:1;padding:8px 12px;border:1.5px solid var(--g200);border-radius:8px;font-size:12px;font-family:Inter,sans-serif;outline:none}
+    .portal-header{background:var(--w800);color:#fff;padding:18px 20px}
+    .portal-header-inner{max-width:700px;margin:0 auto;display:flex;align-items:center;gap:14px}
+    .portal-header-avatar{width:46px;height:46px;background:var(--w600);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0}
+    .portal-header-info{flex:1}
+    .portal-header-info h1{font-size:18px;font-weight:700}
+    .portal-header-info p{font-size:13px;opacity:.65;margin-top:2px}
+    .signout-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 16px;border-radius:10px;cursor:pointer;font-size:13px;font-family:Inter,sans-serif}
+
+    .portal-body{max-width:700px;margin:0 auto;padding:20px 16px 48px}
+
+    .next-card{background:linear-gradient(135deg,var(--w800),var(--w600));border-radius:18px;padding:22px;margin-bottom:16px;color:#fff}
+    .next-card .lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.65;margin-bottom:10px}
+    .next-card .day{font-size:26px;font-weight:700}
+    .next-card .time{font-size:18px;opacity:.85;margin-top:4px}
+    .next-card .no{font-size:15px;opacity:.65;margin-top:6px}
+
+    .card{background:#fff;border-radius:18px;padding:22px;margin-bottom:16px;border:1px solid var(--g200)}
+    .card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g400);margin-bottom:16px}
+
+    .prog-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+    .prog-num{font-size:36px;font-weight:700;color:var(--w600)}
+    .prog-of{font-size:15px;color:var(--g400)}
+    .prog-bar-bg{height:12px;background:var(--g100);border-radius:99px;overflow:hidden;margin-bottom:10px}
+    .prog-bar-fill{height:100%;background:linear-gradient(90deg,var(--w400),var(--w600));border-radius:99px}
+    .prog-meta{display:flex;justify-content:space-between;font-size:13px;color:var(--g400)}
+    .badge{display:inline-flex;padding:5px 12px;border-radius:99px;font-size:13px;font-weight:600}
+    .badge-ativo{background:#DCFCE7;color:#15803D}
+    .badge-pausado{background:#FEF9C3;color:#854D0E}
+    .badge-finalizado{background:var(--g100);color:var(--g500)}
+
+    .contact-row{display:flex;align-items:center;gap:14px;background:var(--g50);border:1px solid var(--g200);border-radius:18px;padding:18px;margin-bottom:16px}
+    .contact-av{width:48px;height:48px;background:var(--w100);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+    .contact-info{flex:1}
+    .contact-info strong{font-size:15px;display:block}
+    .contact-info span{font-size:13px;color:var(--g400)}
+    .wa-btn{background:#25D366;color:#fff;border:none;border-radius:12px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif}
+
+    .evo-card{border:1px solid var(--g200);border-radius:14px;padding:18px;margin-bottom:12px}
+    .evo-date{font-size:12px;color:var(--g400);margin-bottom:8px;font-weight:500}
+    .evo-text{font-size:15px;line-height:1.7}
+    .obs-bubble{border-radius:12px;padding:12px 14px;font-size:14px;margin-bottom:8px;line-height:1.6}
+    .obs-fam{background:var(--g50);border:1px solid var(--g200)}
+    .obs-rep{background:#EFF6FF;border-left:3px solid #3B82F6}
+    .obs-who{font-size:12px;font-weight:600;margin-bottom:4px;color:var(--g500)}
+    .obs-who-dr{color:#1D4ED8}
+    .obs-input-row{display:flex;gap:8px;margin-top:12px}
+    .obs-input{flex:1;padding:11px 14px;border:1.5px solid var(--g200);border-radius:10px;font-size:15px;font-family:Inter,sans-serif;outline:none}
     .obs-input:focus{border-color:var(--w400)}
-    .obs-send-btn{padding:8px 16px;background:var(--w600);color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap}
-    .doc-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--g100)}
+    .obs-btn{padding:11px 18px;background:var(--w600);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif}
+
+    .doc-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--g100)}
     .doc-row:last-child{border-bottom:none}
-    .doc-icon{width:34px;height:34px;background:var(--w100);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    .doc-icon{width:40px;height:40px;background:var(--w100);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
     .doc-info{flex:1}
-    .doc-info strong{font-size:13px;display:block}
-    .doc-info span{font-size:11px;color:var(--g400)}
-    .doc-link{font-size:12px;color:var(--w600);text-decoration:none;font-weight:500}
-    .doc-link:hover{text-decoration:underline}
-    .empty{font-size:13px;color:var(--g400);text-align:center;padding:20px 0}
+    .doc-info strong{font-size:14px;display:block}
+    .doc-info span{font-size:12px;color:var(--g400)}
+    .doc-link{font-size:13px;color:var(--w600);text-decoration:none;font-weight:600}
+
+    .empty{font-size:14px;color:var(--g400);text-align:center;padding:24px 0;line-height:1.7}
   </style>
 </head>
 <body>
@@ -74,11 +99,12 @@
 <div id="screen-login" class="login-wrap">
   <div class="login-box">
     <div class="login-logo">
+      <div class="avatar">👩‍⚕️</div>
       <h1>Dra. Fernanda Rodrigues</h1>
       <p>Fisioterapeuta · Portal da Família</p>
     </div>
     <h2>Acompanhe o tratamento</h2>
-    <p>Digite seu e-mail cadastrado para receber o link de acesso.</p>
+    <p class="subtitle">Digite o e-mail cadastrado pela Dra. Fernanda para receber seu link de acesso.</p>
     <input type="email" id="login-email" placeholder="seu@email.com"
       onkeydown="if(event.key==='Enter') sendMagicLink()"/>
     <button class="btn-primary" onclick="sendMagicLink()">Enviar link de acesso</button>
@@ -88,34 +114,65 @@
 
 <div id="screen-portal" class="hidden">
   <div class="portal-header">
-    <div>
-      <h1 id="portal-patient-name">—</h1>
-      <p id="portal-user-email">—</p>
+    <div class="portal-header-inner">
+      <div class="portal-header-avatar" id="portal-avatar">—</div>
+      <div class="portal-header-info">
+        <h1 id="portal-patient-name">—</h1>
+        <p>Acompanhamento do tratamento</p>
+      </div>
+      <button class="signout-btn" onclick="signOut()">Sair</button>
     </div>
-    <button class="signout-btn" onclick="signOut()">Sair</button>
   </div>
+
   <div class="portal-body">
-    <div class="summary-grid" id="portal-summary"></div>
-    <div class="section">
-      <div class="section-title">Evolução clínica</div>
-      <canvas id="family-chart" height="120"></canvas>
-      <div id="chart-empty" class="empty hidden">Ainda sem dados de gráfico.</div>
+
+    <div class="next-card">
+      <div class="lbl">📅 Próxima sessão</div>
+      <div id="next-content"><div class="no">Carregando...</div></div>
     </div>
-    <div class="section">
-      <div class="section-title">Registros de evolução</div>
+
+    <div class="card">
+      <div class="card-title">📈 Progresso do tratamento</div>
+      <div class="prog-row">
+        <div><span class="prog-num" id="prog-done">—</span><span class="prog-of" id="prog-of"> de — sessões</span></div>
+        <div id="prog-badge"></div>
+      </div>
+      <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-bar" style="width:0%"></div></div>
+      <div class="prog-meta">
+        <span id="prog-start">Início: —</span>
+        <span id="prog-pct">0% concluído</span>
+      </div>
+    </div>
+
+    <div class="contact-row" id="contact-row" style="display:none">
+      <div class="contact-av">👩‍⚕️</div>
+      <div class="contact-info">
+        <strong>Dra. Fernanda Rodrigues</strong>
+        <span>Dúvidas? Entre em contato</span>
+      </div>
+      <button class="wa-btn" id="wa-btn">📱 WhatsApp</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💬 Atualizações do tratamento</div>
       <div id="portal-evos"></div>
     </div>
-    <div class="section">
-      <div class="section-title">Documentos</div>
+
+    <div class="card">
+      <div class="card-title">📄 Documentos</div>
       <div id="portal-docs"></div>
     </div>
+
   </div>
 </div>
 
 <script>
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
-let familyMemberId = null, familyPatientId = null, familyChart = null;
+let familyMemberId = null, familyPatientId = null;
+
+const WEEKDAYS = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const MONTHS   = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 
 async function init() {
   const { data: { session } } = await db.auth.getSession();
@@ -141,12 +198,12 @@ async function sendMagicLink() {
     email, options: { emailRedirectTo: window.location.href.split('?')[0] }
   });
   if (error) return showMsg('Erro: ' + error.message, 'error');
-  showMsg('Link enviado! Verifique seu e-mail e clique no link para entrar.', 'success');
+  showMsg('✅ Link enviado! Verifique seu e-mail e clique no link para entrar.', 'success');
 }
 
-function showMsg(text, type) {
+function showMsg(t, type) {
   const el = document.getElementById('login-msg');
-  el.textContent = text; el.className = 'msg ' + type; el.classList.remove('hidden');
+  el.textContent = t; el.className = 'msg ' + type; el.classList.remove('hidden');
 }
 
 async function signOut() {
@@ -158,100 +215,119 @@ async function signOut() {
 async function loadPortal(email) {
   document.getElementById('screen-login').classList.add('hidden');
   document.getElementById('screen-portal').classList.remove('hidden');
-  document.getElementById('portal-user-email').textContent = email;
 
   const { data: member } = await db.from('family_members')
     .select('*, patients(*)').eq('email', email).eq('status','active').maybeSingle();
   if (!member) { document.getElementById('portal-patient-name').textContent = 'Acesso não autorizado'; return; }
 
-  familyMemberId = member.id;
+  familyMemberId  = member.id;
   familyPatientId = member.patient_id;
   const p = member.patients;
-  document.getElementById('portal-patient-name').textContent = p.name;
 
-  const [{ data: evos }, { data: docs }, { data: pkgs }] = await Promise.all([
-    db.from('evolutions').select('*').eq('patient_id', familyPatientId).eq('shared_with_family', true).order('created_at', {ascending:false}),
-    db.from('documents').select('*').eq('patient_id', familyPatientId).eq('shared_with_family', true).order('created_at', {ascending:false}),
-    db.from('treatment_packages').select('*').eq('patient_id', familyPatientId).eq('status','ativo'),
+  document.getElementById('portal-patient-name').textContent = p.name;
+  document.getElementById('portal-avatar').textContent = p.name.charAt(0).toUpperCase();
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const [
+    { data: evos },
+    { data: docs },
+    { data: pkgs },
+    { count: doneCount },
+    { data: nextAppts },
+    { data: pat },
+  ] = await Promise.all([
+    db.from('evolutions').select('*').eq('patient_id', familyPatientId).eq('shared_with_family', true).order('created_at',{ascending:false}),
+    db.from('documents').select('*').eq('patient_id', familyPatientId).eq('shared_with_family', true).order('created_at',{ascending:false}),
+    db.from('treatment_packages').select('total_sessions').eq('patient_id', familyPatientId).eq('status','ativo'),
+    db.from('evolutions').select('*',{count:'exact',head:true}).eq('patient_id', familyPatientId).eq('presence', true),
+    db.from('appointments').select('date,start_time').eq('patient_id', familyPatientId).eq('type','paciente').gte('date', today).order('date').order('start_time').limit(1),
+    db.from('patients').select('treatment_start_date,patient_status,phone').eq('id', familyPatientId).single(),
   ]);
 
-  const totalSess = (pkgs||[]).reduce((s,pkg) => s + (pkg.sessions_used||0), 0);
-  const totalPlan = (pkgs||[]).reduce((s,pkg) => s + pkg.total_sessions, 0);
-  const startDate = p.treatment_start_date ? new Date(p.treatment_start_date+'T12:00').toLocaleDateString('pt-BR') : '—';
+  const done  = doneCount || 0;
+  const total = (pkgs||[]).reduce((s,pkg) => s + (pkg.total_sessions||0), 0);
+  const pct   = total > 0 ? Math.min(100, Math.round(done/total*100)) : 0;
+  const status = pat?.patient_status || 'ativo';
 
-  document.getElementById('portal-summary').innerHTML =
-    `<div class="sum-card"><div class="val">${totalSess}</div><div class="lbl">Sessões realizadas</div></div>
-     <div class="sum-card"><div class="val">${totalPlan||'—'}</div><div class="lbl">Total planejado</div></div>
-     <div class="sum-card"><div class="val">${startDate}</div><div class="lbl">Início do tratamento</div></div>
-     <div class="sum-card"><div class="val" style="font-size:16px;text-transform:capitalize">${p.patient_status||'—'}</div><div class="lbl">Status</div></div>`;
+  // Próxima sessão
+  const next = nextAppts?.[0];
+  const nc = document.getElementById('next-content');
+  if (next) {
+    const d = new Date(next.date + 'T12:00');
+    nc.innerHTML = `<div style="font-size:26px;font-weight:700">${WEEKDAYS[d.getDay()]}</div>
+      <div style="font-size:18px;opacity:.85;margin-top:4px">⏰ ${d.getDate()} de ${MONTHS[d.getMonth()]} às ${(next.start_time||'').slice(0,5)}</div>`;
+  } else {
+    nc.innerHTML = `<div style="font-size:15px;opacity:.65">Nenhuma sessão agendada no momento.</div>`;
+  }
 
-  renderFamilyChart(evos||[]);
+  // Progresso
+  document.getElementById('prog-done').textContent = done;
+  document.getElementById('prog-of').textContent   = ` de ${total||'—'} sessões`;
+  document.getElementById('prog-bar').style.width  = pct + '%';
+  document.getElementById('prog-pct').textContent  = pct + '% concluído';
+  document.getElementById('prog-start').textContent = pat?.treatment_start_date
+    ? 'Início: ' + new Date(pat.treatment_start_date+'T12:00').toLocaleDateString('pt-BR') : 'Início: —';
+
+  const badgeClass = {ativo:'badge-ativo',pausado:'badge-pausado',finalizado:'badge-finalizado'}[status]||'';
+  const badgeText  = {ativo:'Em tratamento',pausado:'Pausado',finalizado:'Finalizado'}[status]||status;
+  document.getElementById('prog-badge').innerHTML = `<span class="badge ${badgeClass}">${badgeText}</span>`;
+
+  // Contato Fernanda
+  if (pat?.phone) {
+    const digits = pat.phone.replace(/\D/g,'');
+    const intl   = digits.startsWith('55') ? digits : '55'+digits;
+    const msg    = encodeURIComponent('Olá Dra. Fernanda! Sou familiar de ' + p.name + ' e tenho uma dúvida sobre o tratamento.');
+    document.getElementById('wa-btn').onclick = () => window.open('https://wa.me/'+intl+'?text='+msg,'_blank');
+    document.getElementById('contact-row').style.display = 'flex';
+  }
+
   await renderEvos(evos||[]);
   renderDocs(docs||[]);
-}
-
-function renderFamilyChart(evos) {
-  const scored = evos.filter(e => e.pain_score != null).reverse();
-  if (!scored.length) {
-    document.getElementById('family-chart').classList.add('hidden');
-    document.getElementById('chart-empty').classList.remove('hidden');
-    return;
-  }
-  const ctx = document.getElementById('family-chart').getContext('2d');
-  if (familyChart) familyChart.destroy();
-  familyChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: scored.map(e => new Date(e.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})),
-      datasets: [{ label: 'Nível de dor', data: scored.map(e => e.pain_score),
-        borderColor: '#92400E', backgroundColor: 'rgba(146,64,14,.08)',
-        tension:.4, fill:true, pointRadius:4, pointBackgroundColor:'#92400E' }]
-    },
-    options: { plugins:{legend:{display:false}}, scales:{y:{min:0,max:10,ticks:{stepSize:2}}} }
-  });
 }
 
 async function renderEvos(evos) {
   const { data: obs } = await db.from('family_observations')
     .select('*').eq('patient_id', familyPatientId).order('created_at');
-  const obsByEvo = {};
-  (obs||[]).forEach(o => (obsByEvo[o.evolution_id] = obsByEvo[o.evolution_id] || []).push(o));
+  const byEvo = {};
+  (obs||[]).forEach(o => (byEvo[o.evolution_id] = byEvo[o.evolution_id]||[]).push(o));
 
   document.getElementById('portal-evos').innerHTML = evos.length
     ? evos.map(e => {
-        const obsHtml = (obsByEvo[e.id]||[]).map(o =>
-          `<div class="obs-item">
-            <strong>Você:</strong> ${o.message}
-            <span style="color:var(--g400);font-size:11px;margin-left:6px">${new Date(o.created_at).toLocaleDateString('pt-BR')}</span>
-            ${o.fernanda_reply ? `<div class="obs-reply"><strong>Dra. Fernanda:</strong> ${o.fernanda_reply}</div>` : ''}
+        const obsHtml = (byEvo[e.id]||[]).map(o => `
+          <div class="obs-bubble obs-fam">
+            <div class="obs-who">Você:</div>
+            ${o.message}
+            <div style="font-size:11px;color:var(--g400);margin-top:4px">${new Date(o.created_at).toLocaleDateString('pt-BR')}</div>
+            ${o.fernanda_reply ? `<div class="obs-bubble obs-rep" style="margin-top:8px;margin-bottom:0">
+              <div class="obs-who obs-who-dr">Dra. Fernanda:</div>${o.fernanda_reply}
+            </div>` : ''}
           </div>`).join('');
         return `<div class="evo-card">
-          <div class="evo-date">${new Date(e.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</div>
-          <div class="evo-text">${(e.notes||'').replace(/
-/g,'<br>')}</div>
-          <div class="evo-obs-area">
+          <div class="evo-date">📅 ${new Date(e.created_at).toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})}</div>
+          <div class="evo-text">${(e.notes||'').replace(/\n/g,'<br>')}</div>
+          <div style="margin-top:14px">
             ${obsHtml}
             <div class="obs-input-row">
-              <input class="obs-input" id="obs-${e.id}" placeholder="Deixe uma observação ou pergunta..."/>
-              <button class="obs-send-btn" onclick="sendObs('${e.id}')">Enviar</button>
+              <input class="obs-input" id="obs-${e.id}" placeholder="Deixe uma pergunta ou observação..."/>
+              <button class="obs-btn" onclick="sendObs('${e.id}')">Enviar</button>
             </div>
           </div>
         </div>`;
       }).join('')
-    : '<div class="empty">Nenhuma evolução compartilhada ainda.</div>';
+    : '<div class="empty">Nenhuma atualização compartilhada ainda.<br>A Dra. Fernanda compartilhará informações após as sessões.</div>';
 }
 
 function renderDocs(docs) {
   document.getElementById('portal-docs').innerHTML = docs.length
-    ? docs.map(d =>
-        `<div class="doc-row">
-          <div class="doc-icon">📄</div>
-          <div class="doc-info">
-            <strong>${d.title||d.file_name||'Documento'}</strong>
-            <span>${new Date(d.created_at).toLocaleDateString('pt-BR')}</span>
-          </div>
-          ${d.file_url ? `<a class="doc-link" href="${d.file_url}" target="_blank">Abrir →</a>` : ''}
-        </div>`).join('')
+    ? docs.map(d => `<div class="doc-row">
+        <div class="doc-icon">📄</div>
+        <div class="doc-info">
+          <strong>${d.title||d.file_name||'Documento'}</strong>
+          <span>${new Date(d.created_at).toLocaleDateString('pt-BR')}</span>
+        </div>
+        ${d.file_url ? `<a class="doc-link" href="${d.file_url}" target="_blank">Abrir →</a>` : ''}
+      </div>`).join('')
     : '<div class="empty">Nenhum documento compartilhado ainda.</div>';
 }
 
@@ -259,14 +335,14 @@ async function sendObs(evoId) {
   const input = document.getElementById('obs-'+evoId);
   const msg = input.value.trim();
   if (!msg) return;
+  input.disabled = true;
   await db.from('family_observations').insert({
     patient_id: familyPatientId, evolution_id: evoId,
     family_member_id: familyMemberId, message: msg,
   });
-  input.value = '';
-  const { data: evos } = await db.from('evolutions')
-    .select('*').eq('patient_id', familyPatientId)
-    .eq('shared_with_family', true).order('created_at', {ascending:false});
+  input.value = ''; input.disabled = false;
+  const { data: evos } = await db.from('evolutions').select('*')
+    .eq('patient_id', familyPatientId).eq('shared_with_family', true).order('created_at',{ascending:false});
   await renderEvos(evos||[]);
 }
 
