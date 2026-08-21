@@ -1421,6 +1421,19 @@
     .trat-domiciliar-grid > img { width:100%; height:284px; object-fit:cover; border-radius:var(--radius-lg); }
     .trat-domiciliar-sub { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
     .trat-domiciliar-sub img { width:100%; height:134px; object-fit:cover; border-radius:var(--radius-lg); }
+    /* CAROUSEL */
+    .foto-carousel { position:relative; border-radius:var(--radius-lg); overflow:hidden; margin-top:40px; }
+    .foto-carousel-track { display:flex; transition:transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .foto-carousel-slide { min-width:100%; height:480px; flex-shrink:0; }
+    .foto-carousel-slide img { width:100%; height:100%; object-fit:cover; display:block; }
+    .foto-carousel-btn { position:absolute; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.92); border:none; border-radius:50%; width:48px; height:48px; font-size:22px; cursor:pointer; z-index:2; box-shadow:0 2px 12px rgba(0,0,0,0.15); color:var(--warm-700); display:flex; align-items:center; justify-content:center; transition:background 0.2s; }
+    .foto-carousel-btn:hover { background:#fff; }
+    .foto-carousel-btn.prev { left:16px; }
+    .foto-carousel-btn.next { right:16px; }
+    .foto-carousel-dots { display:flex; justify-content:center; gap:8px; margin-top:16px; }
+    .foto-carousel-dot { width:8px; height:8px; border-radius:50%; background:var(--warm-200); cursor:pointer; transition:background 0.3s,transform 0.3s; border:none; padding:0; }
+    .foto-carousel-dot.active { background:var(--warm-500); transform:scale(1.3); }
+    @media(max-width:768px){ .foto-carousel-slide { height:260px; } }
     @media (max-width: 768px) {
       .trat-photo-strip { grid-template-columns:1fr; }
       .trat-domiciliar-grid { grid-template-columns:1fr; }
@@ -2472,14 +2485,19 @@
         <h2>A clínica vai até você</h2>
         <p>Fernanda chega com todo equipamento necessário. Você se recupera no conforto da sua casa, com a mesma qualidade de uma clínica especializada.</p>
       </div>
-      <div class="trat-domiciliar-grid">
-        <img src="fisio-domiciliar-joelho.png" alt="Atendimento domiciliar — joelho">
-        <div class="trat-domiciliar-sub">
-          <img src="fisio-domiciliar-tornozelo.png" alt="Atendimento domiciliar — tornozelo">
-          <img src="fisio-domiciliar-bola.png" alt="Exercício com bola terapêutica">
-          <img src="fisio-clinic-ultrassom.png" alt="Ultrassom terapêutico">
-          <img src="fisio-domiciliar-braco.png" alt="Reabilitação membro superior">
+      <div class="foto-carousel" id="carousel-clinica">
+        <div class="foto-carousel-track">
+          <div class="foto-carousel-slide"><img src="fisio-domiciliar-joelho.png" alt="Atendimento domiciliar — joelho"></div>
+          <div class="foto-carousel-slide"><img src="fisio-clinic-barra.png" alt="Reabilitação de marcha"></div>
+          <div class="foto-carousel-slide"><img src="fisio-domiciliar-tornozelo.png" alt="Atendimento tornozelo"></div>
+          <div class="foto-carousel-slide"><img src="fisio-clinic-ultrassom.png" alt="Ultrassom terapêutico"></div>
+          <div class="foto-carousel-slide"><img src="fisio-domiciliar-braco.png" alt="Reabilitação braço"></div>
+          <div class="foto-carousel-slide"><img src="fisio-clinic-peso.png" alt="Exercício de fortalecimento"></div>
+          <div class="foto-carousel-slide"><img src="fisio-domiciliar-bola.png" alt="Exercício com bola terapêutica"></div>
         </div>
+        <button class="foto-carousel-btn prev" onclick="carouselGoTo('carousel-clinica',-1)">&#8249;</button>
+        <button class="foto-carousel-btn next" onclick="carouselGoTo('carousel-clinica',+1)">&#8250;</button>
+        <div class="foto-carousel-dots" id="carousel-clinica-dots"></div>
       </div>
     </div>
   </section>
@@ -2831,6 +2849,36 @@
      JAVASCRIPT
 ────────────────────────────────── -->
 <script>
+  // ── Carousel ──
+  const _carousels = {};
+  function initCarousel(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const track = el.querySelector('.foto-carousel-track');
+    const slides = el.querySelectorAll('.foto-carousel-slide');
+    const dotsEl = document.getElementById(id + '-dots');
+    let cur = 0;
+    slides.forEach((_, i) => {
+      const d = document.createElement('button');
+      d.className = 'foto-carousel-dot' + (i === 0 ? ' active' : '');
+      d.setAttribute('aria-label', 'Foto ' + (i+1));
+      d.onclick = () => go(i);
+      dotsEl.appendChild(d);
+    });
+    function go(n) {
+      cur = (n + slides.length) % slides.length;
+      track.style.transform = 'translateX(-' + (cur * 100) + '%)';
+      dotsEl.querySelectorAll('.foto-carousel-dot').forEach((d,i) => d.classList.toggle('active', i === cur));
+    }
+    _carousels[id] = { go, getCur: () => cur };
+    setInterval(() => go(cur + 1), 5000);
+  }
+  function carouselGoTo(id, delta) {
+    const c = _carousels[id];
+    if (c) c.go(c.getCur() + delta);
+  }
+  document.addEventListener('DOMContentLoaded', () => initCarousel('carousel-clinica'));
+
   // ── Navegação entre páginas ──
   const pages = ['home','servicos','tratamentos','curriculo','agenda'];
 
