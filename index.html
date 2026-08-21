@@ -1396,6 +1396,22 @@
       .trat-illus-svg { display: none; }
       .trat-illus-photo { display: none; }
     }
+    /* TRATAMENTOS FOTOS */
+    .trat-hero-img { width:100%; height:420px; object-fit:cover; border-radius:var(--radius-lg); }
+    .trat-specs-strip { display:flex; gap:40px; flex-wrap:wrap; padding:24px 0; border-bottom:1px solid var(--warm-100); margin-top:0; }
+    .trat-specs-strip .spec-item span:first-child { display:block; font-size:10px; font-weight:700; color:var(--warm-600); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px; }
+    .trat-specs-strip .spec-item span:last-child { font-size:13px; color:var(--gray-700); }
+    .trat-photo-strip { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; padding:40px 0 0; }
+    .trat-photo-strip img { width:100%; height:240px; object-fit:cover; border-radius:var(--radius-lg); }
+    .trat-domiciliar-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:40px; }
+    .trat-domiciliar-grid > img { width:100%; height:284px; object-fit:cover; border-radius:var(--radius-lg); }
+    .trat-domiciliar-sub { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .trat-domiciliar-sub img { width:100%; height:134px; object-fit:cover; border-radius:var(--radius-lg); }
+    @media (max-width: 768px) {
+      .trat-photo-strip { grid-template-columns:1fr; }
+      .trat-domiciliar-grid { grid-template-columns:1fr; }
+      .trat-hero-img { height:240px; }
+    }
 
     /* ── CURRÍCULO TIMELINE ── */
     .exp-timeline { position: relative; padding-left: 0; }
@@ -2299,11 +2315,23 @@
         <h1>Tratamentos disponíveis</h1>
         <p>Técnicas validadas cientificamente aplicadas na sua casa. A Dra. Fernanda chega com faixas elásticas, bolas terapêuticas, cones e equipamentos de liberação miofascial e muscular. Tudo pronto para cada sessão, no conforto da sua casa.</p>
       </div>
-      <div style="border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 4/3; background: #FAF8F4;">
-        <img src="foto-fernanda-reabilitacao.png"
-             alt="Dra. Fernanda Rodrigues auxiliando paciente na reabilitação"
-             style="width:100%;height:100%;object-fit:cover;object-position:center;display:block;">
+      <div>
+        <img src="fisio-portrait-fernanda.png" alt="Dra. Fernanda Rodrigues" class="trat-hero-img">
       </div>
+    </div>
+    <div class="container trat-specs-strip">
+      <div class="spec-item"><span>Especialidades</span><span>Neurologia, Geriatria e Pediatria</span></div>
+      <div class="spec-item"><span>Pós-graduações</span><span>3 especializações completas</span></div>
+      <div class="spec-item"><span>Atendimento</span><span>Domiciliar em [Cidade] e região</span></div>
+      <div class="spec-item"><span>Equipamentos</span><span>Faixas elásticas, bolas, cones, liberação miofascial</span></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="trat-photo-strip">
+      <img src="fisio-clinic-ultrassom.png" alt="Ultrassom terapêutico em sessão">
+      <img src="fisio-clinic-modern.png" alt="Espaço clínico especializado">
+      <img src="fisio-clinic-barra.png" alt="Reabilitação de marcha">
     </div>
   </div>
 
@@ -2320,8 +2348,8 @@
           <p>A Dra. Fernanda chega na sua casa com tudo: faixas elásticas, bolas terapêuticas, cones, maca dobrável e equipamentos de liberação miofascial. Cada sessão acontece com a mesma estrutura de uma clínica especializada.</p>
         </div>
         <div class="trat-illus-photo">
-          <img src="foto-fernanda-reabilitacao.png"
-               alt="Dra. Fernanda com equipamentos de fisioterapia"
+          <img src="fisio-clinic-peso.png"
+               alt="Dra. Fernanda em atendimento"
                style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;">
         </div>
       </div>
@@ -2403,6 +2431,25 @@
             <li>Lesões esportivas e ocupacionais</li>
             <li>Exercício terapêutico</li>
           </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:#FAF8F4;">
+    <div class="container">
+      <div class="section-header">
+        <div class="tag">Atendimento domiciliar</div>
+        <h2>A clínica vai até você</h2>
+        <p>Fernanda chega com todo equipamento necessário. Você se recupera no conforto da sua casa, com a mesma qualidade de uma clínica especializada.</p>
+      </div>
+      <div class="trat-domiciliar-grid">
+        <img src="fisio-domiciliar-joelho.png" alt="Atendimento domiciliar — joelho">
+        <div class="trat-domiciliar-sub">
+          <img src="fisio-domiciliar-tornozelo.png" alt="Atendimento domiciliar — tornozelo">
+          <img src="fisio-domiciliar-bola.png" alt="Exercício com bola terapêutica">
+          <img src="fisio-clinic-ultrassom.png" alt="Ultrassom terapêutico">
+          <img src="fisio-domiciliar-braco.png" alt="Reabilitação membro superior">
         </div>
       </div>
     </div>
