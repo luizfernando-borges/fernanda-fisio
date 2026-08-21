@@ -138,7 +138,6 @@
     /* ───── PAGES ───── */
     .page { display: none; padding-top: var(--nav-h); }
     .page.active { display: block; }
-    #page-cliente.active { display: flex; }
 
     /* ───── CONTAINER ───── */
     .container {
@@ -1657,7 +1656,7 @@
     <div class="container">
       <div class="hero-inner">
         <div class="hero-text">
-          <div class="hero-badge">Atendimento domiciliar · CREFITO</div>
+          <div class="hero-badge">Atendimento domiciliar · CREFITO 367313</div>
           <h1>Reabilitação neurológica <em>no conforto da sua casa</em></h1>
           <p class="hero-sub">
             A Dra. Fernanda vai até você. Atendimento domiciliar especializado em neurologia, geriatria e reabilitação pós-AVC, com o mesmo nível técnico do consultório, sem você sair de casa.
@@ -1686,7 +1685,7 @@
         </div>
         <div class="hero-photo-wrap">
           <div class="hero-photo">
-            <img src="foto-hero.jpg.png" alt="Dra. Fernanda Rodrigues, fisioterapeuta domiciliar em Ribeirão Pires"
+            <img src="foto-fernanda-equipamento.png" alt="Dra. Fernanda Rodrigues, fisioterapeuta domiciliar em Ribeirão Pires"
               style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;"
               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
             <div class="hero-photo-placeholder" style="display:none;">
@@ -1715,7 +1714,7 @@
 
   <!-- CLÍNICA BG -->
   <section class="clinica-bg-section">
-    <img src="clinica-fisio-jpg.png" alt="Consultório da Dra. Fernanda Rodrigues" class="clinica-bg-img">
+    <img src="foto-fernanda-tratamento.png" alt="Consultório da Dra. Fernanda Rodrigues" class="clinica-bg-img">
     <div class="clinica-bg-overlay"></div>
     <div style="position:absolute;top:-80px;left:-80px;width:320px;height:320px;border-radius:50%;border:3px solid rgba(255,255,255,0.15);pointer-events:none;z-index:1;"></div>
     <div style="position:absolute;bottom:-60px;right:-60px;width:220px;height:220px;border-radius:50%;border:2px solid rgba(255,255,255,0.10);pointer-events:none;z-index:1;"></div>
@@ -1923,7 +1922,14 @@
 
         <!-- Ilustração -->
         <div class="familia-visual">
-          <div class="familia-visual-ring">
+          <div class="familia-visual-photo-bg"
+               style="position:absolute;inset:0;border-radius:var(--radius-lg);overflow:hidden;z-index:0;">
+            <img src="foto-fernanda-reabilitacao.png"
+                 alt=""
+                 style="width:100%;height:100%;object-fit:cover;object-position:center;
+                        opacity:0.18;filter:blur(3px);transform:scale(1.05);">
+          </div>
+          <div class="familia-visual-ring" style="position:relative;z-index:1;">
             <div class="familia-visual-center">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -2052,6 +2058,7 @@
           <a href="#" onclick="showPage('home'); return false;">Home</a>
           <a href="#" onclick="showPage('servicos'); return false;">Serviços</a>
           <a href="#" onclick="showPage('agenda'); return false;">Agenda</a>
+          <a href="/app/familia.html">Área da Família</a>
         </div>
       </div>
     </div>
@@ -2278,6 +2285,7 @@
           <a href="#" onclick="showPage('home'); return false;">Home</a>
           <a href="#" onclick="showPage('tratamentos'); return false;">Tratamentos</a>
           <a href="#" onclick="showPage('agenda'); return false;">Agenda</a>
+          <a href="/app/familia.html">Área da Família</a>
         </div>
       </div>
     </div>
@@ -2436,6 +2444,7 @@
           <a href="#" onclick="showPage('home'); return false;">Home</a>
           <a href="#" onclick="showPage('servicos'); return false;">Serviços</a>
           <a href="#" onclick="showPage('agenda'); return false;">Agenda</a>
+          <a href="/app/familia.html">Área da Família</a>
         </div>
       </div>
     </div>
@@ -2684,6 +2693,7 @@
           <a href="#" onclick="showPage('home'); return false;">Home</a>
           <a href="#" onclick="showPage('servicos'); return false;">Serviços</a>
           <a href="#" onclick="showPage('agenda'); return false;">Agenda</a>
+          <a href="/app/familia.html">Área da Família</a>
         </div>
       </div>
     </div>
@@ -2748,53 +2758,6 @@
 
 </main>
 
-<!-- ══════════════════════════════════
-     PAGE: ÁREA DO CLIENTE
-══════════════════════════════════ -->
-<main id="page-cliente" class="page cliente-page">
-  <div class="cliente-box">
-    <div class="cliente-lock">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-      </svg>
-    </div>
-    <h2>Área do paciente</h2>
-    <p>Acompanhe sua evolução, acesse documentos e gráficos de progresso. Esta funcionalidade estará disponível em breve.</p>
-    <div class="cliente-features">
-      <div class="cliente-feat">
-        <div class="feat-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        </div>
-        <div class="feat-text">
-          <strong>Gráficos de evolução</strong>
-          <span>Visualize seu progresso ao longo do tratamento</span>
-        </div>
-      </div>
-      <div class="cliente-feat">
-        <div class="feat-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        </div>
-        <div class="feat-text">
-          <strong>Documentos e laudos</strong>
-          <span>Acesse relatórios, prescrições e registros de sessão</span>
-        </div>
-      </div>
-      <div class="cliente-feat">
-        <div class="feat-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        </div>
-        <div class="feat-text">
-          <strong>Acesso para familiares</strong>
-          <span>Compartilhe sua evolução com quem cuida de você</span>
-        </div>
-      </div>
-    </div>
-    <span class="cliente-badge">Em desenvolvimento · Em breve disponível</span>
-    <div style="margin-top: 20px;">
-      <a href="#" class="btn btn-outline btn-sm" onclick="showPage('home'); return false;">Voltar para o início</a>
-    </div>
-  </div>
-</main>
 
 <!-- ──────────────────────────────────
      JAVASCRIPT
