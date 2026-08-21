@@ -103,12 +103,14 @@
 
     .empty{font-size:14px;color:var(--g400);text-align:center;padding:24px 0;line-height:1.7}
 
-    /* ── Login decorative layer (fixed, z-index -1, nunca afeta layout) ── */
-    .login-deco-layer{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+
+    /* ── Login background decorativo ── */
+    .login-wrap{position:relative!important;overflow:hidden!important}
+    .login-deco-layer{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+    .login-box{position:relative!important;z-index:2!important}
     .login-bg-photo{position:absolute;bottom:0;left:0;right:0;height:45%}
-    .login-bg-photo img{width:100%;height:100%;object-fit:cover;object-position:center 20%;opacity:.25;filter:saturate(.7)}
-    .login-bg-photo::before{content:'';position:absolute;top:0;left:0;right:0;height:70%;background:linear-gradient(to bottom,#FAF8F4,transparent);z-index:1}
-    .login-bg-photo::after{content:'';position:absolute;bottom:0;left:0;right:0;height:30%;background:linear-gradient(to top,#F0E9DC,transparent);z-index:1}
+    .login-bg-photo img{width:100%;height:100%;object-fit:cover;object-position:center 20%;opacity:.28;filter:saturate(.7)}
+    .login-bg-photo::before{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,#FAF8F4 0%,transparent 60%);z-index:1}
     .ldeco{position:absolute;pointer-events:none}
     .ldeco-cl{border-radius:50%}
   </style>
@@ -116,6 +118,18 @@
 <body>
 
 <div id="screen-login" class="login-wrap">
+  <div class="login-deco-layer">
+    <div class="login-bg-photo"><img src="../foto-clinica.png" alt=""></div>
+    <div class="ldeco ldeco-cl" style="width:360px;height:360px;border:3px solid rgba(180,120,50,.22);top:-130px;right:-110px"></div>
+    <div class="ldeco ldeco-cl" style="width:190px;height:190px;border:2px solid rgba(130,60,10,.14);top:20px;left:-65px"></div>
+    <div class="ldeco ldeco-cl" style="width:44px;height:44px;background:rgba(196,140,70,.32);top:90px;right:95px"></div>
+    <div class="ldeco ldeco-cl" style="width:18px;height:18px;background:rgba(130,60,10,.24);bottom:28%;right:14%"></div>
+    <div class="ldeco ldeco-cl" style="width:10px;height:10px;background:rgba(196,140,70,.40);top:50%;left:8%"></div>
+    <div class="ldeco" style="width:108px;height:108px;border:2px solid rgba(196,140,70,.20);border-radius:6px;transform:rotate(22deg);bottom:26%;left:6%"></div>
+    <div class="ldeco" style="width:22px;height:22px;background:rgba(196,140,70,.28);border-radius:3px;transform:rotate(14deg);top:20%;left:12%"></div>
+    <div class="ldeco" style="width:148px;height:148px;border:2px solid rgba(130,60,10,.10);border-radius:6px;transform:rotate(-13deg);bottom:-40px;right:-25px"></div>
+    <div class="ldeco" style="width:12px;height:12px;background:rgba(130,60,10,.22);border-radius:2px;transform:rotate(30deg);top:7%;right:20%"></div>
+  </div>
   <div class="login-box">
     <div class="login-logo">
       <div class="avatar"><img src="../foto-fernanda-equipamento.png" alt="Dra. Fernanda" style="width:100%;height:100%;object-fit:cover;object-position:center top;"></div>
@@ -368,27 +382,5 @@ async function sendObs(evoId) {
 init();
 </script>
 
-<!-- Decorative background layer (fixed, nunca afeta layout) -->
-<div class="login-deco-layer">
-  <div class="login-bg-photo"><img src="../foto-clinica.png" alt=""></div>
-  <!-- círculo grande vazado: canto superior direito -->
-  <div class="ldeco ldeco-cl" style="width:360px;height:360px;border:3px solid rgba(196,140,70,.20);top:-120px;right:-100px"></div>
-  <!-- círculo médio vazado: canto superior esquerdo -->
-  <div class="ldeco ldeco-cl" style="width:180px;height:180px;border:2px solid rgba(146,64,14,.12);top:30px;left:-60px"></div>
-  <!-- bolinha caramelo cheia: canto superior direito interior -->
-  <div class="ldeco ldeco-cl" style="width:42px;height:42px;background:rgba(196,140,70,.30);top:100px;right:100px"></div>
-  <!-- bolinha café cheia pequena: inferior direito -->
-  <div class="ldeco ldeco-cl" style="width:16px;height:16px;background:rgba(146,64,14,.22);bottom:30%;right:15%"></div>
-  <!-- bolinha minúscula: esquerda meio -->
-  <div class="ldeco ldeco-cl" style="width:10px;height:10px;background:rgba(196,140,70,.38);top:52%;left:8%"></div>
-  <!-- quadrado vazado rotacionado: inferior esquerdo -->
-  <div class="ldeco" style="width:100px;height:100px;border:2px solid rgba(196,140,70,.18);border-radius:6px;transform:rotate(22deg);bottom:28%;left:7%"></div>
-  <!-- quadrado cheio pequeno: superior esquerdo -->
-  <div class="ldeco" style="width:20px;height:20px;background:rgba(196,140,70,.26);border-radius:3px;transform:rotate(14deg);top:22%;left:13%"></div>
-  <!-- quadrado vazado grande: inferior direito -->
-  <div class="ldeco" style="width:140px;height:140px;border:2px solid rgba(146,64,14,.09);border-radius:6px;transform:rotate(-14deg);bottom:-30px;right:-20px"></div>
-  <!-- quadrado minúsculo cheio: superior direito área -->
-  <div class="ldeco" style="width:12px;height:12px;background:rgba(146,64,14,.20);border-radius:2px;transform:rotate(30deg);top:8%;right:22%"></div>
-</div>
 </body>
 </html>
