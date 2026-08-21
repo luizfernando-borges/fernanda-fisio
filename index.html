@@ -1482,6 +1482,134 @@
       margin-left: 8px;
       vertical-align: middle;
     }
+
+    /* ───── ÁREA DA FAMÍLIA ───── */
+    .familia-section {
+      background: linear-gradient(160deg, var(--warm-50) 0%, #F5EEE4 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .familia-section::before {
+      content: '';
+      position: absolute;
+      top: -140px; right: -140px;
+      width: 520px; height: 520px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--warm-100) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .familia-inner {
+      display: grid;
+      grid-template-columns: 1fr 1.35fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .familia-visual {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 320px;
+    }
+    .familia-visual-ring {
+      position: relative;
+      width: 270px;
+      height: 270px;
+      flex-shrink: 0;
+    }
+    .familia-visual-ring::before,
+    .familia-visual-ring::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid var(--warm-200);
+    }
+    .familia-visual-ring::before { inset: 0; }
+    .familia-visual-ring::after  { inset: 22px; border-color: var(--warm-100); }
+    .familia-visual-center {
+      position: absolute;
+      inset: 42px;
+      border-radius: 50%;
+      background: var(--white);
+      box-shadow: 0 8px 32px rgba(155,113,70,0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .familia-visual-center svg { width: 44px; height: 44px; color: var(--warm-400); }
+    .familia-visual-center span {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--warm-600);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .familia-mini-cards {
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .familia-mini-card {
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+    }
+    .fmc-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--warm-400);
+      flex-shrink: 0;
+    }
+    .familia-mini-card strong { font-size: 13px; font-weight: 600; display: block; color: var(--gray-900); }
+    .familia-mini-card span  { font-size: 11px; color: var(--gray-400); }
+    .familia-content { max-width: 520px; }
+    .familia-content .tag { margin-bottom: 16px; }
+    .familia-content h2 { margin-bottom: 18px; font-size: clamp(22px, 2.8vw, 30px); }
+    .familia-content > p { color: var(--gray-600); line-height: 1.8; margin-bottom: 36px; font-size: 16px; }
+    .familia-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      margin-bottom: 40px;
+    }
+    .familia-features li { display: flex; align-items: flex-start; gap: 16px; }
+    .fam-feat-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: var(--warm-100);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .fam-feat-icon svg { width: 20px; height: 20px; color: var(--warm-600); }
+    .familia-features li div strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 3px;
+    }
+    .familia-features li div span { font-size: 14px; color: var(--gray-600); line-height: 1.5; }
+    .familia-cta { display: flex; flex-direction: column; gap: 12px; }
+    .familia-cta .btn { align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; }
+    .familia-hint { font-size: 13px; color: var(--gray-400); }
+    @media (max-width: 860px) {
+      .familia-inner { grid-template-columns: 1fr; gap: 40px; }
+      .familia-visual { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -1500,7 +1628,7 @@
       <li><a href="#" onclick="showPage('tratamentos'); return false;" id="nav-tratamentos">Tratamentos</a></li>
       <li><a href="#" onclick="showPage('curriculo'); return false;" id="nav-curriculo">Currículo</a></li>
       <li><a href="#" onclick="showPage('agenda'); return false;" id="nav-agenda">Agenda</a></li>
-      <li><a href="/app/login" id="nav-cliente" class="nav-cta">Área do cliente</a></li>
+      <li><a href="/app/familia.html" id="nav-cliente" class="nav-cta">Área da Família</a></li>
     </ul>
     <button class="nav-menu-btn" id="menu-btn" onclick="toggleMenu()" aria-label="Menu">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -1783,6 +1911,97 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ÁREA DA FAMÍLIA -->
+  <section class="familia-section">
+    <div class="container">
+      <div class="familia-inner">
+
+        <!-- Ilustração -->
+        <div class="familia-visual">
+          <div class="familia-visual-ring">
+            <div class="familia-visual-center">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              <span>Área da Família</span>
+            </div>
+          </div>
+          <div class="familia-mini-cards">
+            <div class="familia-mini-card">
+              <div class="fmc-dot"></div>
+              <div>
+                <strong>8 sessões realizadas</strong>
+                <span>de 20 no plano</span>
+              </div>
+            </div>
+            <div class="familia-mini-card">
+              <div class="fmc-dot" style="background:#22c55e"></div>
+              <div>
+                <strong>Próxima sessão</strong>
+                <span>Segunda-feira, 09h00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="familia-content">
+          <div class="tag">Para familiares e cuidadores</div>
+          <h2>Acompanhe a recuperação do seu familiar</h2>
+          <p>Sabemos o quanto cada sessão importa. Por isso criamos um espaço tranquilo só para você — onde dá pra ver o progresso, a próxima visita e a evolução do tratamento, de onde estiver.</p>
+
+          <ul class="familia-features">
+            <li>
+              <div class="fam-feat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+              </div>
+              <div>
+                <strong>Progresso visível</strong>
+                <span>Sessões realizadas, plano de tratamento e evolução registrados pela Dra. Fernanda</span>
+              </div>
+            </li>
+            <li>
+              <div class="fam-feat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+              </div>
+              <div>
+                <strong>Próxima sessão</strong>
+                <span>Data e horário sempre visíveis para você se organizar sem incerteza</span>
+              </div>
+            </li>
+            <li>
+              <div class="fam-feat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+              </div>
+              <div>
+                <strong>Fale com a Dra. Fernanda</strong>
+                <span>Um toque e você abre o WhatsApp diretamente com ela</span>
+              </div>
+            </li>
+          </ul>
+
+          <div class="familia-cta">
+            <a href="/app/familia.html" class="btn btn-primary btn-lg">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              Acessar minha área
+            </a>
+            <p class="familia-hint">Você recebe o link de acesso por e-mail no início do tratamento</p>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
