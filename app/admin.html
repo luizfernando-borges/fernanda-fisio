@@ -826,7 +826,6 @@ function renderFinRecebido(periodo) {
       </div>
 
       <div class="ag-legend">
-        <div class="ag-legend-item"><div class="ag-legend-dot" style="background:#475569"></div> Clinica Elgra (emprego fixo)</div>
         <div class="ag-legend-item"><div class="ag-legend-dot" style="background:#1D4ED8"></div> CEPHO / Faculdade</div>
         <div class="ag-legend-item"><div class="ag-legend-dot" style="background:#B45309"></div> Paciente externo fixo</div>
         <div class="ag-legend-item"><div class="ag-legend-dot" style="background:#D97706"></div> Paciente agendado</div>
@@ -3576,13 +3575,14 @@ async function loadAgenda() {
 
   const [{ data: blocks, error: e1 }, { data: appts, error: e2 }] = await Promise.all([
     db.from('schedule_blocks').select('*').eq('active', true),
-    db.from('appointments').select('*, patients(name)')
+    db.from('appointments').select('*, patients(name, patient_status, deleted_at)')
       .gte('date', startStr).lte('date', endStr),
   ]);
   if (e1) { console.error('blocks error', e1); }
   if (e2) { console.error('appts error', e2); }
 
-  renderAgendaCal(weekStart, blocks || [], appts || []);
+  const activeAppts = (appts || []).filter(a => !a.patients?.deleted_at);
+  renderAgendaCal(weekStart, blocks || [], activeAppts);
 }
 
 function renderAgendaCal(weekStart, blocks, appts) {
