@@ -1,0 +1,15 @@
+{
+  "rewrites": [
+    { "source": "/app/login",    "destination": "/app/login.html" },
+    { "source": "/app/admin",    "destination": "/app/admin.html" },
+    { "source": "/app/paciente", "destination": "/app/paciente.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    }
+  ]
+}

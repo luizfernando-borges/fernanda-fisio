@@ -533,53 +533,69 @@ function renderFinRecebido(periodo) {
     }
     .ag-head.today-col { background: #FEF9EE; color: var(--w700,#B45309); }
     .ag-head:last-child { border-right: none; }
-    .ag-time {
-      padding: 0 6px;
-      text-align: right;
-      color: var(--g400);
-      font-size: 10px;
+    /* Google-Calendar-style: time column */
+    .ag-time-col {
+      position: relative;
+      height: 720px;
       border-right: 1px solid var(--g200);
-      border-bottom: 1px solid var(--g100);
-      height: 52px;
-      display: flex; align-items: flex-start; padding-top: 4px;
       background: var(--g50);
     }
-    .ag-cell {
-      height: 52px;
-      border-right: 1px solid var(--g100);
-      border-bottom: 1px solid var(--g100);
-      position: relative;
-      cursor: pointer;
-      transition: background .12s;
-    }
-    .ag-cell:last-child { border-right: none; }
-    .ag-cell:hover { background: #FAF8F4; }
-    .ag-cell.today-col { background: #FFFBF0; }
-    .ag-cell.today-col:hover { background: #FFF4D6; }
-    .ag-block {
-      position: absolute; inset: 2px;
-      border-radius: 6px;
-      padding: 3px 6px;
+    .ag-hour-label {
+      position: absolute;
+      right: 6px;
       font-size: 10px;
-      font-weight: 600;
-      color: #fff;
-      overflow: hidden;
-      cursor: default;
-      line-height: 1.3;
+      color: var(--g400);
+      transform: translateY(-50%);
+      line-height: 1;
+      user-select: none;
+    }
+    /* Day columns */
+    .ag-day-col {
+      position: relative;
+      height: 720px;
+      border-right: 1px solid var(--g100);
+    }
+    .ag-day-col:last-child { border-right: none; }
+    .ag-day-col.today-col { background: #FFFBF0; }
+    .ag-hour-line {
+      position: absolute; left: 0; right: 0;
+      height: 1px; background: var(--g100);
       pointer-events: none;
     }
-    .ag-appt {
-      position: absolute; inset: 2px;
-      border-radius: 6px;
-      padding: 3px 6px;
-      font-size: 10px;
-      font-weight: 600;
-      background: var(--w600,#D97706);
-      color: #fff;
-      overflow: hidden;
-      cursor: pointer;
-      line-height: 1.3;
+    .ag-half-line {
+      position: absolute; left: 0; right: 0;
+      height: 1px; border-top: 1px dashed var(--g200);
+      pointer-events: none;
     }
+    .ag-click-zone {
+      position: absolute; left: 0; right: 0;
+      cursor: pointer;
+      z-index: 1;
+    }
+    .ag-click-zone:hover { background: rgba(196,149,106,0.07); }
+    .ag-block {
+      position: absolute; left: 3px; right: 3px;
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-size: 10px; font-weight: 600;
+      color: #fff; overflow: hidden;
+      line-height: 1.3;
+      z-index: 2; pointer-events: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .ag-appt {
+      position: absolute; left: 3px; right: 3px;
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-size: 10px; font-weight: 600;
+      background: var(--w500,#C4956A);
+      color: #fff; overflow: hidden;
+      cursor: pointer; line-height: 1.3;
+      z-index: 3;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      transition: filter 0.15s;
+    }
+    .ag-appt:hover { filter: brightness(1.1); }
     .ag-nav {
       display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
     }
@@ -3586,28 +3602,47 @@ async function loadAgenda() {
 }
 
 function renderAgendaCal(weekStart, blocks, appts) {
+  const PX_PER_MIN = 1; // 1px = 1 minuto → 60px por hora
+  const FIRST_H = 8, LAST_H = 20;
+  const TOTAL_PX = (LAST_H - FIRST_H) * 60 * PX_PER_MIN; // 720px
+
   const todayStr = new Date().toISOString().split('T')[0];
   const cal = document.getElementById('ag-cal');
   if (!cal) return;
+
   const dayDates = DAY_NUMS.map((_, i) => {
     const d = new Date(weekStart); d.setDate(d.getDate() + i);
     return d;
   });
 
+  // Helpers
+  const timeToPx = t => {
+    const [h, m] = (t||'08:00').split(':').map(Number);
+    return Math.max(0, (h - FIRST_H) * 60 + m) * PX_PER_MIN;
+  };
+  const durationPx = (s, e) => {
+    const [sh, sm] = (s||'08:00').split(':').map(Number);
+    const [eh, em] = (e||'09:00').split(':').map(Number);
+    return Math.max(24, ((eh - sh) * 60 + (em - sm)) * PX_PER_MIN);
+  };
+  const endDefault = s => {
+    const [h, m] = (s||'08:00').split(':').map(Number);
+    const total = h * 60 + m + 60;
+    return String(Math.floor(total/60)).padStart(2,'0') + ':' + String(total%60).padStart(2,'0');
+  };
+
   const blockMap = {};
   (blocks||[]).forEach(b => {
     (blockMap[b.day_of_week] = blockMap[b.day_of_week] || []).push(b);
   });
-  const apptMap = {};
+  const apptsByDate = {};
   (appts||[]).forEach(a => {
-    const h = parseInt(a.start_time.slice(0,2));
-    const key = a.date + '_' + h;
-    (apptMap[key] = apptMap[key] || []).push(a);
+    (apptsByDate[a.date] = apptsByDate[a.date] || []).push(a);
   });
 
   let html = '';
 
-  // Cabeçalho
+  // ── Cabeçalho ──
   html += '<div class="ag-head" style="background:var(--g50);border-right:1px solid var(--g200)"></div>';
   dayDates.forEach((d, i) => {
     const ds = d.toISOString().split('T')[0];
@@ -3616,42 +3651,54 @@ function renderAgendaCal(weekStart, blocks, appts) {
     html += `<div class="ag-head${isToday?' today-col':''}">${label}</div>`;
   });
 
-  // Linhas de hora
+  // ── Coluna de horários ──
+  html += `<div class="ag-time-col" style="height:${TOTAL_PX}px">`;
   HOURS.forEach(h => {
-    html += `<div class="ag-time">${h}h</div>`;
-    dayDates.forEach((d, di) => {
-      const dow = DAY_NUMS[di];
-      const ds  = d.toISOString().split('T')[0];
-      const isToday = ds === todayStr;
+    const top = (h - FIRST_H) * 60 * PX_PER_MIN;
+    html += `<div class="ag-hour-label" style="top:${top}px">${h}h</div>`;
+  });
+  html += '</div>';
 
-      const fixedBlocks = (blockMap[dow]||[]).filter(b => {
-        const bh = parseInt(b.start_time.slice(0,2));
-        const eh = parseInt(b.end_time.slice(0,2));
-        return h >= bh && h < eh;
-      });
-      const dayAppts = (apptMap[ds+'_'+h]||[]);
+  // ── Colunas dos dias ──
+  dayDates.forEach((d, di) => {
+    const ds  = d.toISOString().split('T')[0];
+    const dow = DAY_NUMS[di];
+    const isToday = ds === todayStr;
 
-      let inner = '';
-      if (fixedBlocks.length) {
-        const b = fixedBlocks[0];
-        const isFirst = parseInt(b.start_time.slice(0,2)) === h;
-        inner = `<div class="ag-block" style="background:${b.color}">
-          ${isFirst ? `<div>${b.label}</div><div style="opacity:.8;font-weight:400">${b.start_time.slice(0,5)}–${b.end_time.slice(0,5)}</div>` : ''}
-        </div>`;
-      } else if (dayAppts.length) {
-        const a = dayAppts[0];
-        inner = `<div class="ag-appt" onclick="openPatient('${a.patient_id}')">
-          <div>${a.patients?.name||'Paciente'}</div>
-          <div style="opacity:.85;font-weight:400">${a.start_time.slice(0,5)}</div>
-        </div>`;
-      }
+    html += `<div class="ag-day-col${isToday?' today-col':''}" style="height:${TOTAL_PX}px">`;
 
-      const onclick = (!fixedBlocks.length && !dayAppts.length)
-        ? `openNewAppt('${ds}','${String(h).padStart(2,'0')}:00')`
-        : '';
-
-      html += `<div class="ag-cell${isToday?' today-col':''}" ${onclick?`onclick="${onclick}"`:''}>${inner}</div>`;
+    // Linhas de hora e zonas clicáveis
+    HOURS.forEach(h => {
+      const top = (h - FIRST_H) * 60 * PX_PER_MIN;
+      html += `<div class="ag-hour-line" style="top:${top}px"></div>`;
+      html += `<div class="ag-half-line" style="top:${top+30}px"></div>`;
+      const hStr = String(h).padStart(2,'0');
+      html += `<div class="ag-click-zone" style="top:${top}px;height:30px" onclick="openNewAppt('${ds}','${hStr}:00')"></div>`;
+      html += `<div class="ag-click-zone" style="top:${top+30}px;height:30px" onclick="openNewAppt('${ds}','${hStr}:30')"></div>`;
     });
+
+    // Blocos fixos (schedule_blocks)
+    (blockMap[dow]||[]).forEach(b => {
+      const top = timeToPx(b.start_time);
+      const h   = durationPx(b.start_time, b.end_time);
+      html += `<div class="ag-block" style="top:${top}px;height:${h}px;background:${b.color||'#475569'}">
+        <div style="font-weight:600">${b.label}</div>
+        <div style="opacity:.75;font-weight:400;font-size:9px">${(b.start_time||'').slice(0,5)}–${(b.end_time||'').slice(0,5)}</div>
+      </div>`;
+    });
+
+    // Atendimentos
+    (apptsByDate[ds]||[]).forEach(a => {
+      const top = timeToPx(a.start_time);
+      const end = a.end_time || endDefault(a.start_time);
+      const h   = durationPx(a.start_time, end);
+      html += `<div class="ag-appt" style="top:${top}px;height:${h}px" onclick="openPatient('${a.patient_id}')">
+        <div style="font-weight:600">${a.patients?.name||'Paciente'}</div>
+        <div style="opacity:.85;font-weight:400;font-size:9px">${(a.start_time||'').slice(0,5)}–${end.slice(0,5)}</div>
+      </div>`;
+    });
+
+    html += '</div>';
   });
 
   cal.innerHTML = html;

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Minha Evolução — Dra. Fernanda Rodrigues</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --w50:#FAF8F4;--w100:#F0E9DC;--w200:#DDD0BC;
+      --w400:#C4956A;--w600:#9B7146;--w800:#6B4F2E;
+      --g50:#F8F9FA;--g100:#F1F3F4;--g200:#E8EAED;
+      --g400:#9AA0A6;--g600:#5F6368;--g900:#202124;
+      --white:#fff;--r:10px;--sh:0 2px 12px rgba(0,0,0,0.08);
+    }
+    body{font-family:'Inter',sans-serif;background:var(--g50);color:var(--g900);min-height:100vh}
+
+    /* TOP BAR */
+    .topbar{background:var(--w800);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between}
+    .topbar-logo{font-size:14px;font-weight:600;color:var(--white)}
+    .topbar-logo span{font-weight:300;color:var(--w200)}
+    .btn-logout{padding:7px 14px;background:rgba(255,255,255,.12);border:none;border-radius:6px;font-size:12px;font-weight:500;color:var(--white);cursor:pointer;font-family:'Inter',sans-serif}
+    .btn-logout:hover{background:rgba(255,255,255,.2)}
+
+    /* NAV TABS */
+    .nav-tabs{background:var(--white);border-bottom:1px solid var(--g200);display:flex;padding:0 24px;overflow-x:auto}
+    .nav-tab{padding:14px 18px;font-size:13px;font-weight:500;color:var(--g400);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif;transition:all .15s}
+    .nav-tab.active{color:var(--w600);border-bottom-color:var(--w400)}
+    .nav-tab:hover:not(.active){color:var(--g900)}
+
+    /* LAYOUT */
+    .container{max-width:800px;margin:0 auto;padding:28px 20px}
+
+    /* WELCOME */
+    .welcome-card{background:var(--w800);border-radius:16px;padding:28px;color:var(--white);margin-bottom:24px;position:relative;overflow:hidden}
+    .welcome-card::after{content:'';position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.06)}
+    .welcome-card h2{font-size:20px;font-weight:600;margin-bottom:6px}
+    .welcome-card p{font-size:14px;color:var(--w200);line-height:1.6}
+    .welcome-card .diagnosis{display:inline-block;margin-top:14px;font-size:12px;font-weight:600;background:rgba(255,255,255,.12);padding:4px 12px;border-radius:20px;color:var(--w100)}
+
+    /* STAT CARDS */
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+    .stat-card{background:var(--white);border:1px solid var(--g200);border-radius:12px;padding:18px;text-align:center}
+    .stat-card .n{font-size:28px;font-weight:700;color:var(--w800);letter-spacing:-.03em}
+    .stat-card .l{font-size:12px;color:var(--g400);margin-top:4px}
+
+    /* SECTIONS */
+    .section{display:none}
+    .section.active{display:block}
+    .card{background:var(--white);border:1px solid var(--g200);border-radius:12px;overflow:hidden;margin-bottom:16px}
+    .card-header{padding:16px 20px;border-bottom:1px solid var(--g100);display:flex;align-items:center;justify-content:space-between}
+    .card-header h3{font-size:15px;font-weight:600}
+    .card-body{padding:20px}
+
+    /* EVOLUTION TIMELINE */
+    .evo-item{border-left:3px solid var(--w200);padding:0 0 24px 20px;position:relative}
+    .evo-item:last-child{padding-bottom:0;border-left-color:transparent}
+    .evo-dot{position:absolute;left:-7px;top:0;width:12px;height:12px;border-radius:50%;background:var(--w400);border:2px solid var(--white);box-shadow:0 0 0 2px var(--w400)}
+    .evo-date{font-size:12px;font-weight:600;color:var(--w600);margin-bottom:6px}
+    .evo-session{font-size:11px;color:var(--g400);margin-left:8px}
+    .scores-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+    .score-pill{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+    .score-mob{background:#EFF6FF;color:#1D4ED8}
+    .score-pain{background:#FFF7ED;color:#C2410C}
+    .score-func{background:#F0FDF4;color:#15803D}
+    .evo-text{font-size:13px;color:var(--g600);line-height:1.6;margin-top:6px}
+    .goal-met{font-size:12px;color:#15803D;margin-top:6px}
+    .goal-next{font-size:12px;color:var(--g400)}
+
+    /* CHART */
+    .chart-wrap{padding:20px}
+
+    /* DOCS */
+    .doc-item{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--g100)}
+    .doc-item:last-child{border-bottom:none}
+    .doc-icon{width:38px;height:38px;border-radius:8px;background:var(--w50);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .doc-info strong{font-size:13px;display:block;color:var(--g900)}
+    .doc-info span{font-size:11px;color:var(--g400)}
+    .btn-dl{padding:6px 12px;background:var(--w400);color:var(--white);border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;display:inline-block}
+    .btn-dl:hover{background:var(--w600)}
+
+    /* EMPTY */
+    .empty{text-align:center;padding:40px 20px;color:var(--g400);font-size:14px;line-height:1.7}
+    .empty-icon{font-size:36px;display:block;margin-bottom:10px}
+
+    @media(max-width:600px){
+      .stats-row{grid-template-columns:1fr 1fr}
+      .container{padding:20px 14px}
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">Dra. Fernanda <span>· Minha Evolução</span></div>
+  <button class="btn-logout" onclick="logout()">Sair</button>
+</div>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="showSection('resumo')">Resumo</button>
+  <button class="nav-tab" onclick="showSection('evolucoes')">Evoluções</button>
+  <button class="nav-tab" onclick="showSection('grafico')">Gráfico</button>
+  <button class="nav-tab" onclick="showSection('documentos')">Documentos</button>
+</div>
+
+<div class="container">
+
+  <!-- BOAS VINDAS -->
+  <div class="welcome-card">
+    <h2>Olá, <span id="patient-name">carregando...</span> 👋</h2>
+    <p>Aqui você acompanha sua evolução e acessa todos os documentos do seu tratamento.</p>
+    <span class="diagnosis" id="patient-diagnosis"></span>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card"><div class="n" id="stat-sessions">—</div><div class="l">Sessões realizadas</div></div>
+    <div class="stat-card"><div class="n" id="stat-days">—</div><div class="l">Dias em tratamento</div></div>
+    <div class="stat-card"><div class="n" id="stat-docs">—</div><div class="l">Documentos</div></div>
+  </div>
+
+  <!-- SEÇÃO: RESUMO -->
+  <div id="section-resumo" class="section active">
+    <div class="card">
+      <div class="card-header"><h3>Última sessão</h3></div>
+      <div class="card-body" id="last-session-content">
+        <div class="empty"><span class="empty-icon">📋</span>Nenhuma sessão registrada ainda.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Progresso geral</h3></div>
+      <div class="chart-wrap"><canvas id="mini-chart" height="100"></canvas></div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO: EVOLUÇÕES -->
+  <div id="section-evolucoes" class="section">
+    <div class="card">
+      <div class="card-header"><h3>Histórico de sessões</h3></div>
+      <div class="card-body" id="evolutions-list"></div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO: GRÁFICO -->
+  <div id="section-grafico" class="section">
+    <div class="card">
+      <div class="card-header"><h3>Evolução clínica</h3></div>
+      <div class="chart-wrap"><canvas id="main-chart" height="140"></canvas></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-body" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:center">
+        <div><div style="font-size:11px;color:var(--g400);margin-bottom:4px">Mobilidade atual</div><div style="font-size:24px;font-weight:700;color:#3B82F6" id="cur-mob">—</div></div>
+        <div><div style="font-size:11px;color:var(--g400);margin-bottom:4px">Dor (invertida)</div><div style="font-size:24px;font-weight:700;color:#F97316" id="cur-pain">—</div></div>
+        <div><div style="font-size:11px;color:var(--g400);margin-bottom:4px">Funcionalidade</div><div style="font-size:24px;font-weight:700;color:#22C55E" id="cur-func">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO: DOCUMENTOS -->
+  <div id="section-documentos" class="section">
+    <div class="card" id="docs-card">
+      <div class="empty"><span class="empty-icon">📄</span>Nenhum documento disponível ainda.</div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script>
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let patientData = null;
+let evolutions = [];
+let miniChart = null, mainChart = null;
+
+async function init() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
+  if (session.user.email === ADMIN_EMAIL) { window.location.href = 'admin.html'; return; }
+
+  // Carrega dados do paciente pelo user_id
+  const { data: patient } = await db.from('patients')
+    .select('*').eq('user_id', session.user.id).maybeSingle();
+
+  // Tenta por e-mail (acesso família)
+  const { data: famAccess } = !patient
+    ? await db.from('family_access').select('patient_id').eq('email', session.user.email).maybeSingle()
+    : { data: null };
+
+  if (!patient && !famAccess) {
+    document.querySelector('.welcome-card h2').textContent = 'Olá! 👋';
+    document.querySelector('.welcome-card p').textContent = 'Seu acesso está sendo configurado pela Dra. Fernanda. Em breve seus dados aparecerão aqui.';
+    return;
+  }
+
+  const pid = patient?.id || famAccess?.patient_id;
+  const { data: p } = patient ? { data: patient } : await db.from('patients').select('*').eq('id', pid).single();
+  patientData = p;
+
+  document.getElementById('patient-name').textContent = p.name.split(' ')[0];
+  if (p.diagnosis) document.getElementById('patient-diagnosis').textContent = p.diagnosis;
+
+  await loadEvolutions(pid);
+  await loadDocuments(pid);
+  renderStats();
+  renderLastSession();
+  renderMiniChart();
+}
+
+async function loadEvolutions(pid) {
+  const { data } = await db.from('evolutions').select('*')
+    .eq('patient_id', pid).order('session_date');
+  evolutions = data || [];
+}
+
+async function loadDocuments(pid) {
+  const { data } = await db.from('documents').select('*')
+    .eq('patient_id', pid).order('created_at', { ascending: false });
+  renderDocuments(data || []);
+}
+
+function renderStats() {
+  document.getElementById('stat-sessions').textContent = evolutions.length;
+  const start = patientData?.start_date ? new Date(patientData.start_date) : new Date();
+  const days = Math.floor((new Date() - start) / 86400000);
+  document.getElementById('stat-days').textContent = days;
+}
+
+function renderLastSession() {
+  const c = document.getElementById('last-session-content');
+  if (!evolutions.length) return;
+  const e = evolutions[evolutions.length - 1];
+  c.innerHTML = `
+    <div style="margin-bottom:12px">
+      <span style="font-size:12px;font-weight:600;color:var(--w600)">${new Date(e.session_date).toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}</span>
+      <span style="font-size:11px;color:var(--g400);margin-left:8px">Sessão ${e.session_number || '—'}</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <span class="score-pill score-mob">Mobilidade: ${e.mobility_score ?? '—'}/10</span>
+      <span class="score-pill score-pain">Dor: ${e.pain_score ?? '—'}/10</span>
+      <span class="score-pill score-func">Funcionalidade: ${e.function_score ?? '—'}/10</span>
+    </div>
+    ${e.notes ? `<p style="font-size:13px;color:var(--g600);line-height:1.6">${e.notes}</p>` : ''}
+    ${e.goals_met ? `<p style="font-size:12px;color:#15803D;margin-top:8px">✓ ${e.goals_met}</p>` : ''}
+    ${e.next_goals ? `<p style="font-size:12px;color:var(--g400)">→ Próximo: ${e.next_goals}</p>` : ''}
+  `;
+}
+
+function renderEvolutionsList() {
+  const c = document.getElementById('evolutions-list');
+  if (!evolutions.length) { c.innerHTML = '<div class="empty"><span class="empty-icon">📋</span>Nenhuma sessão registrada ainda.</div>'; return; }
+  const rev = [...evolutions].reverse();
+  c.innerHTML = '<div style="padding:4px 0">' + rev.map(e => `
+    <div class="evo-item">
+      <div class="evo-dot"></div>
+      <div class="evo-date">${new Date(e.session_date).toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}<span class="evo-session">Sessão ${e.session_number || '—'}</span></div>
+      <div class="scores-row">
+        <span class="score-pill score-mob">Mobilidade ${e.mobility_score ?? '?'}/10</span>
+        <span class="score-pill score-pain">Dor ${e.pain_score ?? '?'}/10</span>
+        <span class="score-pill score-func">Função ${e.function_score ?? '?'}/10</span>
+      </div>
+      ${e.notes ? `<div class="evo-text">${e.notes}</div>` : ''}
+      ${e.goals_met ? `<div class="goal-met">✓ ${e.goals_met}</div>` : ''}
+      ${e.next_goals ? `<div class="goal-next">→ Próxima meta: ${e.next_goals}</div>` : ''}
+    </div>`).join('') + '</div>';
+}
+
+function renderMiniChart() {
+  if (!evolutions.length) return;
+  const last8 = evolutions.slice(-8);
+  const ctx = document.getElementById('mini-chart');
+  if (miniChart) miniChart.destroy();
+  miniChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: last8.map(e => `S${e.session_number || '?'}`),
+      datasets: [
+        { label: 'Mobilidade', data: last8.map(e => e.mobility_score), borderColor: '#3B82F6', tension: .4, pointRadius: 3 },
+        { label: 'Dor', data: last8.map(e => e.pain_score), borderColor: '#F97316', tension: .4, pointRadius: 3 },
+        { label: 'Funcionalidade', data: last8.map(e => e.function_score), borderColor: '#22C55E', tension: .4, pointRadius: 3 },
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }, scales: { y: { min: 0, max: 10 } } }
+  });
+}
+
+function renderMainChart() {
+  if (!evolutions.length) return;
+  const ctx = document.getElementById('main-chart');
+  if (mainChart) mainChart.destroy();
+  mainChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: evolutions.map(e => new Date(e.session_date).toLocaleDateString('pt-BR', { day:'numeric', month:'short' })),
+      datasets: [
+        { label: 'Mobilidade', data: evolutions.map(e => e.mobility_score), borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,.06)', tension: .4, fill: true },
+        { label: 'Dor (invertida)', data: evolutions.map(e => e.pain_score), borderColor: '#F97316', backgroundColor: 'rgba(249,115,22,.06)', tension: .4, fill: true },
+        { label: 'Funcionalidade', data: evolutions.map(e => e.function_score), borderColor: '#22C55E', backgroundColor: 'rgba(34,197,94,.06)', tension: .4, fill: true },
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { min: 0, max: 10, ticks: { stepSize: 2 } } } }
+  });
+  // Valores atuais
+  const last = evolutions[evolutions.length - 1];
+  document.getElementById('cur-mob').textContent  = (last.mobility_score ?? '—') + '/10';
+  document.getElementById('cur-pain').textContent = (last.pain_score ?? '—') + '/10';
+  document.getElementById('cur-func').textContent = (last.function_score ?? '—') + '/10';
+}
+
+function renderDocuments(docs) {
+  const icons = { laudo:'📋', relatorio:'📊', receita:'💊', exame:'🔬', outro:'📄' };
+  document.getElementById('stat-docs').textContent = docs.length;
+  const c = document.getElementById('docs-card');
+  if (!docs.length) { c.innerHTML = '<div class="empty"><span class="empty-icon">📄</span>Nenhum documento disponível ainda.</div>'; return; }
+  c.innerHTML = docs.map(d => `
+    <div class="doc-item">
+      <div class="doc-icon">${icons[d.type] || '📄'}</div>
+      <div class="doc-info"><strong>${d.name}</strong><span>${d.type} · ${new Date(d.created_at).toLocaleDateString('pt-BR')}</span></div>
+      ${d.url ? `<a href="${d.url}" target="_blank" class="btn-dl">Baixar</a>` : ''}
+    </div>`).join('');
+}
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'evolucoes') renderEvolutionsList();
+  if (id === 'grafico') renderMainChart();
+}
+
+async function logout() {
+  await db.auth.signOut();
+  window.location.href = 'login.html';
+}
+
+init();
+</script>
+</body>
+</html>
