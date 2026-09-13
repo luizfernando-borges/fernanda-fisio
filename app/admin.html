@@ -877,6 +877,31 @@ function renderFinRecebido(periodo) {
       </div>
     </div>
 
+    <!-- MODAL VINCULAR PACIENTE -->
+    <div class="overlay hidden" id="modal-vincular-paciente">
+      <div class="modal" style="max-width:420px">
+        <h3>Paciente já na agenda?</h3>
+        <p style="color:var(--g500);font-size:14px;margin-bottom:16px">Encontramos paciente(s) com nome semelhante na agenda. É o mesmo?</p>
+        <div id="vincular-lista" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-outline" onclick="vincularConfirmar(null)">Não — criar novo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL REAGENDAMENTO -->
+    <div class="overlay hidden" id="modal-reagendamento">
+      <div class="modal" style="max-width:380px">
+        <h3>Reagendar atendimento</h3>
+        <p id="reagend-info" style="font-size:13px;color:var(--g600);margin:8px 0 20px"></p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="btn" onclick="confirmReagend('one')">Alterar só <strong id="reagend-date-label"></strong></button>
+          <button class="btn btn-outline" onclick="confirmReagend('all')">Alterar toda a agenda deste paciente</button>
+          <button class="btn btn-ghost" onclick="cancelReagend()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- PACIENTES -->
     <div id="page-pacientes" class="page">
       <div class="sh">
@@ -2203,13 +2228,13 @@ function openEditPatient() {
   openModal('novo-paciente');
 }
 
-async function savePatient() {
+// ── VINCULAÇÃO DE PACIENTE ────────────────────────────────
+let _pendingPatientPayload = null;
+
+function _buildPatientPayload() {
   const g = id => (document.getElementById(id)?.value || '').trim() || null;
-  const name = g('np-name');
-  if (!name) return alert('Nome é obrigatório');
-  if (!g('np-diagnosis')) return alert('Diagnóstico / condição é obrigatório — é o que aparece no perfil do paciente');
-  const payload = {
-    name,
+  return {
+    name:           g('np-name'),
     email:          g('np-email'),
     phone:          g('np-phone'),
     phone2:         g('np-phone2'),
@@ -2232,25 +2257,95 @@ async function savePatient() {
     diagnosis:      g('np-diagnosis'),
     notes:          g('np-notes'),
   };
+}
 
+async function vincularConfirmar(existingId) {
+  closeModal('vincular-paciente');
+  const payload = _pendingPatientPayload;
+  _pendingPatientPayload = null;
   let error;
-  if (editingPatientId) {
-    ({ error } = await db.from('patients').update(payload).eq('id', editingPatientId));
+  if (existingId) {
+    // Mescla dados no paciente existente e mantém todos os atendimentos dele
+    ({ error } = await db.from('patients').update(payload).eq('id', existingId));
+    if (!error) currentPatientId = existingId;
   } else {
     ({ error } = await db.from('patients').insert(payload));
   }
   if (error) { alert('Erro ao salvar: ' + error.message); return; }
+  _finishSavePatient();
+}
 
+function _finishSavePatient() {
   closeModal('novo-paciente');
   document.querySelectorAll('#modal-novo-paciente input, #modal-novo-paciente select, #modal-novo-paciente textarea')
     .forEach(el => el.value = '');
   document.getElementById('np-modal-title').textContent = 'Novo paciente';
   document.getElementById('np-save-btn').textContent = 'Salvar paciente';
   editingPatientId = null;
-
-  await loadPatients();
+  loadPatients();
   loadDashboard();
-  if (currentPatientId) openPatient(currentPatientId); // atualiza cabeçalho
+  loadAgenda();
+}
+
+async function savePatient() {
+  const g = id => (document.getElementById(id)?.value || '').trim() || null;
+  const name = g('np-name');
+  if (!name) return alert('Nome é obrigatório');
+  if (!g('np-diagnosis')) return alert('Diagnóstico / condição é obrigatório — é o que aparece no perfil do paciente');
+
+  const payload = _buildPatientPayload();
+
+  // Se estamos editando, salva direto
+  if (editingPatientId) {
+    const { error } = await db.from('patients').update(payload).eq('id', editingPatientId);
+    if (error) { alert('Erro ao salvar: ' + error.message); return; }
+    _finishSavePatient();
+    if (currentPatientId) openPatient(currentPatientId);
+    return;
+  }
+
+  // Novo paciente — verifica se já existe alguém com nome parecido na agenda
+  const nameWords = name.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+  const { data: existing } = await db.from('patients')
+    .select('id, name, patient_status')
+    .is('deleted_at', null)
+    .order('name');
+
+  const similar = (existing || []).filter(p => {
+    const pn = p.name.toLowerCase();
+    return nameWords.some(w => pn.includes(w)) || name.toLowerCase().includes(p.name.toLowerCase().split(' ')[0]);
+  });
+
+  if (similar.length > 0) {
+    // Verifica se algum deles tem atendimentos
+    const ids = similar.map(p => `'${p.id}'`).join(',');
+    const { data: appts } = await db.from('appointments')
+      .select('patient_id')
+      .in('patient_id', similar.map(p => p.id));
+
+    const withAppts = new Set((appts || []).map(a => a.patient_id));
+    const candidates = similar.filter(p => withAppts.has(p.id));
+
+    if (candidates.length > 0) {
+      _pendingPatientPayload = payload;
+      const lista = document.getElementById('vincular-lista');
+      lista.innerHTML = candidates.map(p => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--g50);border-radius:8px;border:1px solid var(--g200)">
+          <div>
+            <div style="font-weight:600;font-size:14px">${p.name}</div>
+            <div style="font-size:12px;color:var(--g400)">${statusLabel(p.patient_status)}</div>
+          </div>
+          <button class="btn btn-sm" onclick="vincularConfirmar('${p.id}')">Sim, é este</button>
+        </div>`).join('');
+      openModal('vincular-paciente');
+      return;
+    }
+  }
+
+  // Sem duplicatas — cria direto
+  const { error } = await db.from('patients').insert(payload);
+  if (error) { alert('Erro ao salvar: ' + error.message); return; }
+  _finishSavePatient();
 }
 
 // ── PATIENT STATUS / DELETE ──
@@ -3673,8 +3768,8 @@ function renderAgendaCal(weekStart, blocks, appts) {
       html += `<div class="ag-hour-line" style="top:${top}px"></div>`;
       html += `<div class="ag-half-line" style="top:${top+30}px"></div>`;
       const hStr = String(h).padStart(2,'0');
-      html += `<div class="ag-click-zone" style="top:${top}px;height:30px" onclick="openNewAppt('${ds}','${hStr}:00')"></div>`;
-      html += `<div class="ag-click-zone" style="top:${top+30}px;height:30px" onclick="openNewAppt('${ds}','${hStr}:30')"></div>`;
+      html += `<div class="ag-click-zone" data-date="${ds}" data-time="${hStr}:00" style="top:${top}px;height:30px" onclick="openNewAppt('${ds}','${hStr}:00')" ondragover="apptDragOver(event)" ondrop="apptDrop(event,this)"></div>`;
+      html += `<div class="ag-click-zone" data-date="${ds}" data-time="${hStr}:30" style="top:${top+30}px;height:30px" onclick="openNewAppt('${ds}','${hStr}:30')" ondragover="apptDragOver(event)" ondrop="apptDrop(event,this)"></div>`;
     });
 
     // Blocos fixos (schedule_blocks)
@@ -3692,7 +3787,19 @@ function renderAgendaCal(weekStart, blocks, appts) {
       const top = timeToPx(a.start_time);
       const end = a.end_time || endDefault(a.start_time);
       const h   = durationPx(a.start_time, end);
-      html += `<div class="ag-appt" style="top:${top}px;height:${h}px" onclick="openPatient('${a.patient_id}')">
+      const durMin = (() => { const [sh,sm]=(a.start_time||'08:00').split(':').map(Number); const [eh,em]=(end||'09:00').split(':').map(Number); return (eh-sh)*60+(em-sm); })();
+      html += `<div class="ag-appt"
+        draggable="true"
+        data-appt-id="${a.id}"
+        data-patient-id="${a.patient_id}"
+        data-patient-name="${a.patients?.name||'Paciente'}"
+        data-date="${ds}"
+        data-start="${a.start_time}"
+        data-end="${end}"
+        data-dur="${durMin}"
+        style="top:${top}px;height:${h}px"
+        ondragstart="apptDragStart(event,this)"
+        onclick="if(!_dragging)openPatient('${a.patient_id}')">
         <div style="font-weight:600">${a.patients?.name||'Paciente'}</div>
         <div style="opacity:.85;font-weight:400;font-size:9px">${(a.start_time||'').slice(0,5)}–${end.slice(0,5)}</div>
       </div>`;
@@ -3702,6 +3809,110 @@ function renderAgendaCal(weekStart, blocks, appts) {
   });
 
   cal.innerHTML = html;
+}
+
+// ══ DRAG & DROP REAGENDAMENTO ══════════════════════════════
+let _dragging = false;
+let _dragData = null;
+
+function apptDragStart(e, el) {
+  _dragging = true;
+  _dragData = {
+    id:          el.dataset.apptId,
+    patientId:   el.dataset.patientId,
+    patientName: el.dataset.patientName,
+    date:        el.dataset.date,
+    start:       el.dataset.start,
+    end:         el.dataset.end,
+    dur:         parseInt(el.dataset.dur),
+  };
+  e.dataTransfer.effectAllowed = 'move';
+  el.style.opacity = '0.45';
+  setTimeout(() => { _dragging = false; }, 200);
+}
+
+function apptDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.style.background = 'rgba(196,149,106,0.18)';
+}
+
+function apptDrop(e, zone) {
+  e.preventDefault();
+  zone.style.background = '';
+  if (!_dragData) return;
+
+  const newDate  = zone.dataset.date;
+  const newStart = zone.dataset.time;
+
+  // Calcula novo end baseado na duração original
+  const [nh, nm] = newStart.split(':').map(Number);
+  const newEndMin = nh * 60 + nm + _dragData.dur;
+  const newEnd = String(Math.floor(newEndMin/60)).padStart(2,'0') + ':' + String(newEndMin%60).padStart(2,'0');
+
+  // Sem mudança
+  if (newDate === _dragData.date && newStart.slice(0,5) === (_dragData.start||'').slice(0,5)) return;
+
+  // Armazena para o modal
+  _pendingReschedule = { ..._dragData, newDate, newStart, newEnd };
+
+  // Preenche modal
+  const oldLabel = new Date(_dragData.date + 'T12:00:00').toLocaleDateString('pt-BR', {weekday:'short',day:'2-digit',month:'2-digit'});
+  const newLabel = new Date(newDate + 'T12:00:00').toLocaleDateString('pt-BR', {weekday:'short',day:'2-digit',month:'2-digit'});
+  document.getElementById('reagend-info').textContent =
+    `${_dragData.patientName}: de ${oldLabel} ${(_dragData.start||'').slice(0,5)} → ${newLabel} ${newStart}`;
+  document.getElementById('reagend-date-label').textContent = `${newLabel} às ${newStart}`;
+  openModal('reagendamento');
+}
+
+let _pendingReschedule = null;
+
+async function confirmReagend(mode) {
+  closeModal('reagendamento');
+  if (!_pendingReschedule) return;
+  const { id, patientId, date, start, newDate, newStart, newEnd, dur } = _pendingReschedule;
+  _pendingReschedule = null;
+
+  if (mode === 'one') {
+    // Atualiza só este appointment
+    const { error } = await db.from('appointments')
+      .update({ date: newDate, start_time: newStart, end_time: newEnd })
+      .eq('id', id);
+    if (error) { alert('Erro: ' + error.message); return; }
+  } else {
+    // Atualiza todos os appointments futuros deste paciente com mesmo horário/dia
+    const oldDow = new Date(date + 'T12:00:00').getDay(); // 0=dom
+    const newDow = new Date(newDate + 'T12:00:00').getDay();
+    const today  = new Date().toISOString().split('T')[0];
+    const { data: futures } = await db.from('appointments')
+      .select('id,date,start_time')
+      .eq('patient_id', patientId)
+      .gte('date', today);
+
+    const toUpdate = (futures||[]).filter(a => {
+      const dow = new Date(a.date + 'T12:00:00').getDay();
+      return dow === oldDow && (a.start_time||'').slice(0,5) === (start||'').slice(0,5);
+    });
+
+    for (const a of toUpdate) {
+      // Calcula nova data mantendo a semana
+      const aDate = new Date(a.date + 'T12:00:00');
+      const diff  = newDow - oldDow;
+      aDate.setDate(aDate.getDate() + diff);
+      const aNewDate = aDate.toISOString().split('T')[0];
+      await db.from('appointments')
+        .update({ date: aNewDate, start_time: newStart, end_time: newEnd })
+        .eq('id', a.id);
+    }
+  }
+
+  loadAgenda();
+}
+
+function cancelReagend() {
+  _pendingReschedule = null;
+  closeModal('reagendamento');
+  loadAgenda(); // restore visual
 }
 
 function openNewAppt(date, time) {
