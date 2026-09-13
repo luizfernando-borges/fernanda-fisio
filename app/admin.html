@@ -1941,7 +1941,7 @@ async function loadDashboard() {
   ] = await Promise.all([
     db.from('patients').select('*',{count:'exact',head:true})
       .eq('patient_status','ativo').is('deleted_at',null),
-    db.from('appointments').select('id,date,start_time,patients(id,name)')
+    db.from('appointments').select('id,date,start_time,patients(id,name,deleted_at)')
       .gte('date',mondayStr).lte('date',saturdayStr)
       .order('date').order('start_time'),
     db.from('treatment_packages').select('patient_id,total_sessions,patients(name,patient_status,deleted_at)')
@@ -1994,7 +1994,7 @@ async function loadDashboard() {
     const d  = new Date(monday); d.setDate(monday.getDate()+i);
     const ds = d.toISOString().split('T')[0];
     const isToday = ds===todayStr;
-    const day_appts = (appointments||[]).filter(a=>a.date===ds);
+    const day_appts = (appointments||[]).filter(a=>a.date===ds && !a.patients?.deleted_at);
     agHtml += `<div class="agenda-day">
       <div class="agenda-day-label${isToday?' today':''}">
         <span>${DN[d.getDay()]}${isToday?' · Hoje':''}</span>
