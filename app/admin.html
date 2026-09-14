@@ -3760,7 +3760,7 @@ function renderAgendaCal(weekStart, blocks, appts) {
     const dow = DAY_NUMS[di];
     const isToday = ds === todayStr;
 
-    html += `<div class="ag-day-col${isToday?' today-col':''}" style="height:${TOTAL_PX}px">`;
+    html += `<div class="ag-day-col${isToday?' today-col':''}" style="height:${TOTAL_PX}px" data-date="${ds}" ondragover="apptDragOver(event)" ondrop="apptDropCol(event,this,${FIRST_H},${PX_PER_MIN})">`;
 
     // Linhas de hora e zonas clicáveis
     HOURS.forEach(h => {
@@ -3768,8 +3768,8 @@ function renderAgendaCal(weekStart, blocks, appts) {
       html += `<div class="ag-hour-line" style="top:${top}px"></div>`;
       html += `<div class="ag-half-line" style="top:${top+30}px"></div>`;
       const hStr = String(h).padStart(2,'0');
-      html += `<div class="ag-click-zone" data-date="${ds}" data-time="${hStr}:00" style="top:${top}px;height:30px" onclick="openNewAppt('${ds}','${hStr}:00')" ondragover="apptDragOver(event)" ondrop="apptDrop(event,this)"></div>`;
-      html += `<div class="ag-click-zone" data-date="${ds}" data-time="${hStr}:30" style="top:${top+30}px;height:30px" onclick="openNewAppt('${ds}','${hStr}:30')" ondragover="apptDragOver(event)" ondrop="apptDrop(event,this)"></div>`;
+      html += `<div class="ag-click-zone" data-date="${ds}" data-time="${hStr}:00" style="top:${top}px;height:30px" onclick="if(!_dragJustEnded)openNewAppt('${ds}','${hStr}:00')"></div>`;
+      html += `<div class="ag-click-zone" data-date="${ds}" data-time="${hStr}:30" style="top:${top+30}px;height:30px" onclick="if(!_dragJustEnded)openNewAppt('${ds}','${hStr}:30')"></div>`;
     });
 
     // Blocos fixos (schedule_blocks)
@@ -3799,7 +3799,8 @@ function renderAgendaCal(weekStart, blocks, appts) {
         data-dur="${durMin}"
         style="top:${top}px;height:${h}px"
         ondragstart="apptDragStart(event,this)"
-        onclick="if(!_dragging)openPatient('${a.patient_id}')">
+        ondragend="apptDragEnd(event,this)"
+        onclick="if(!_dragJustEnded)openPatient('${a.patient_id}')")
         <div style="font-weight:600">${a.patients?.name||'Paciente'}</div>
         <div style="opacity:.85;font-weight:400;font-size:9px">${(a.start_time||'').slice(0,5)}–${end.slice(0,5)}</div>
       </div>`;
@@ -3812,11 +3813,10 @@ function renderAgendaCal(weekStart, blocks, appts) {
 }
 
 // ══ DRAG & DROP REAGENDAMENTO ══════════════════════════════
-let _dragging = false;
+let _dragJustEnded = false;
 let _dragData = null;
 
 function apptDragStart(e, el) {
-  _dragging = true;
   _dragData = {
     id:          el.dataset.apptId,
     patientId:   el.dataset.patientId,
@@ -3827,36 +3827,44 @@ function apptDragStart(e, el) {
     dur:         parseInt(el.dataset.dur),
   };
   e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', el.dataset.apptId);
   el.style.opacity = '0.45';
-  setTimeout(() => { _dragging = false; }, 200);
+}
+
+function apptDragEnd(e, el) {
+  el.style.opacity = '';
+  _dragJustEnded = true;
+  setTimeout(() => { _dragJustEnded = false; }, 300);
 }
 
 function apptDragOver(e) {
   e.preventDefault();
   e.dataTransfer.dropEffect = 'move';
-  e.currentTarget.style.background = 'rgba(196,149,106,0.18)';
+  e.currentTarget.style.background = 'rgba(196,149,106,0.10)';
 }
 
-function apptDrop(e, zone) {
+// Drop no container da coluna — calcula horário pelo offsetY
+function apptDropCol(e, col, firstH, pxPerMin) {
   e.preventDefault();
-  zone.style.background = '';
+  col.style.background = '';
   if (!_dragData) return;
 
-  const newDate  = zone.dataset.date;
-  const newStart = zone.dataset.time;
+  const rect = col.getBoundingClientRect();
+  const offsetY = e.clientY - rect.top;
+  const totalMin = Math.round(offsetY / pxPerMin / 15) * 15; // snap a 15min
+  const absMin = firstH * 60 + totalMin;
+  const nh = Math.floor(absMin / 60);
+  const nm = absMin % 60;
+  const newStart = String(nh).padStart(2,'0') + ':' + String(nm).padStart(2,'0');
+  const newDate  = col.dataset.date;
 
-  // Calcula novo end baseado na duração original
-  const [nh, nm] = newStart.split(':').map(Number);
-  const newEndMin = nh * 60 + nm + _dragData.dur;
+  const newEndMin = absMin + _dragData.dur;
   const newEnd = String(Math.floor(newEndMin/60)).padStart(2,'0') + ':' + String(newEndMin%60).padStart(2,'0');
 
-  // Sem mudança
-  if (newDate === _dragData.date && newStart.slice(0,5) === (_dragData.start||'').slice(0,5)) return;
+  if (newDate === _dragData.date && newStart === (_dragData.start||'').slice(0,5)) return;
 
-  // Armazena para o modal
   _pendingReschedule = { ..._dragData, newDate, newStart, newEnd };
 
-  // Preenche modal
   const oldLabel = new Date(_dragData.date + 'T12:00:00').toLocaleDateString('pt-BR', {weekday:'short',day:'2-digit',month:'2-digit'});
   const newLabel = new Date(newDate + 'T12:00:00').toLocaleDateString('pt-BR', {weekday:'short',day:'2-digit',month:'2-digit'});
   document.getElementById('reagend-info').textContent =
